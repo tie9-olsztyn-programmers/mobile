@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkmobile=self.webpackChunkmobile||[]).push([[602],{3961:e=>{e.exports=JSON.parse('{"metadata":{"permalink":"/mobile/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);
