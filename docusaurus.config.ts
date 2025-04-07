@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'My Site',
-  tagline: 'Dinosaurs are cool',
+  title: 'Aplikacje mobilne',
+  tagline: 'Kotlin is cool',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -19,7 +19,7 @@ const config: Config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'tie9-olsztyn-programmers', // Usually your GitHub org/user name.
   projectName: 'mobile', // Usually your repo name.
-  deploymentBranch:'gh-pages'
+  deploymentBranch:'gh-pages',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
@@ -80,9 +80,9 @@ const config: Config = {
           position: 'left',
           label: 'Tutorial',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
+    /*    {to: '/blog', label: 'Blog', position: 'left'}, */
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/tie9-olsztyn-programmers/mobile',
           label: 'GitHub',
           position: 'right',
         },
