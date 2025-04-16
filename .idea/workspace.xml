@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add First Tutorial folders">
+      <change afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/03-expressions.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/04-pętle.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/mobile.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Wprowadzenie do języka Kotlin/intro.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/01-intro.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Wprowadzenie do języka Kotlin/typyProste.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/02-typyProste.mdx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;jstrzelecki&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:tie9-olsztyn-programmers/mobile.git&quot;,
+    &quot;accountId&quot;: &quot;753b96f1-344d-41e4-816b-f7fe067658a6&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2vPcxtnZ11h6lipULAHNqUYIsFM" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "/mnt/dane/_0_docusaurus/mobile/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-WS-243.26053.12" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="" />
+      <created>1744050400142</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1744050400142</updated>
+      <workItem from="1744050401743" duration="6388000" />
+      <workItem from="1744056797608" duration="1438000" />
+      <workItem from="1744628864394" duration="6302000" />
+      <workItem from="1744650860477" duration="256000" />
+      <workItem from="1744654695692" duration="6000" />
+      <workItem from="1744715624607" duration="27000" />
+      <workItem from="1744715661045" duration="1087000" />
+      <workItem from="1744716759741" duration="1218000" />
+      <workItem from="1744721752823" duration="2047000" />
+      <workItem from="1744740365072" duration="66000" />
+      <workItem from="1744740439432" duration="1878000" />
+      <workItem from="1744834972168" duration="444000" />
+    </task>
+    <task id="LOCAL-00001" summary="Add First Tutorial folders">
+      <option name="closed" value="true" />
+      <created>1744054573577</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1744054573577</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Add First Tutorial folders" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add First Tutorial folders" />
+  </component>
+</project>
