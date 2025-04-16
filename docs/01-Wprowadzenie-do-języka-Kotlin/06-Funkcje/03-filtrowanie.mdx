@@ -2,5 +2,18 @@
 title: Filtrowanie - *filter()*
 ---
 
+```kotlin
+fun main() {
+val liczby = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9)
 
+    // Filtrowanie liczb parzystych za pomocą lambdy
+    val parzyste = liczby.filter { it % 2 == 0 } // lambda jest jedynym parametrem, więc pomijamy nawiasy zwykłe ()
+    println("Parzyste liczby: $parzyste")  // Wypisze: Parzyste liczby: [2, 4, 6, 8]
+
+    // Filtrowanie liczb większych od 5 za pomocą lambdy
+    val wiekszeOd5 = liczby.filter { it > 5 }
+    println("Liczby większe od 5: $wiekszeOd5")  // Wypisze: Liczby większe od 5: [6, 7, 8, 9]
+}
+
+```
 

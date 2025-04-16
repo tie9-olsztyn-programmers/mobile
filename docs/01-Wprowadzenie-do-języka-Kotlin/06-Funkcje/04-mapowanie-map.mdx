@@ -1,0 +1,22 @@
+---
+title: Mapowanie - map()
+---
+
+Funkcja map jest funkcją wyższego rzędu, która pozwala przekształcać każdą wartość w kolekcji według podanej lambdy.
+
+```kotlin
+fun main() {
+val liczby = listOf(1, 2, 3, 4, 5)
+
+    // Mnożenie każdej liczby przez 2 za pomocą lambdy
+    val podwojone = liczby.map { it * 2 }
+    println("liczby $liczby")
+    println("Podwojone liczby: $podwojone")  // Wypisze: Podwojone liczby: [2, 4, 6, 8, 10]
+
+    // Zamiana liczb na napisy
+    val jakoStringi = liczby.map { "Liczba: $it" }
+    println("Liczby jako napisy: $jakoStringi")
+    // Wypisze: Liczby jako napisy: [Liczba: 1, Liczba: 2, Liczba: 3, Liczba: 4, Liczba: 5]
+}
+
+```

@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add First Tutorial folders">
-      <change afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-funkcje.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-Funkcje/04-mapowanie-map.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-Funkcje/05-redukcja-reduce.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-Funkcje/06-redukcja-fold.mdx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/05-tablitc-i-listy.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/05-tablitc-i-listy.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-Funkcje/03-filtrowanie.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-Funkcje/03-filtrowanie.mdx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,6 +58,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-Funkcje" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -82,7 +89,7 @@
       <workItem from="1744721752823" duration="2047000" />
       <workItem from="1744740365072" duration="66000" />
       <workItem from="1744740439432" duration="1878000" />
-      <workItem from="1744834972168" duration="1814000" />
+      <workItem from="1744834972168" duration="3186000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />
