@@ -1,0 +1,128 @@
+---
+title: Chronometer
+---
+
+
+# Chronometer
+:::note Chronometer
+- widget in Android is a simple timer that can be used to count up from a base time.
+- It’s useful for things like stopwatch apps.
+:::
+
+## Chronometer in XML
+```xml
+<Chronometer
+    android:id="@+id/myChronometr"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textSize="30sp"
+    android:layout_margin="20dp"
+    android:layout_gravity="center"
+/>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+>
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="start"
+        android:layout_margin="20dp"
+        android:backgroundTint="#123abc"
+    />
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="stop"
+        android:layout_margin="20dp"
+        android:backgroundTint="#4CAF50"
+    />
+
+</LinearLayout>
+<Button
+    android:id="@+id/resetButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="reset"
+    android:layout_margin="20dp"
+    android:layout_gravity="center"
+    android:backgroundTint="#9C27B0"
+/>
+```
+## Chronometer in Kotlin
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var chronometer: Chronometer
+    private lateinit var startBtn: Button
+    private lateinit var stopBtn: Button
+    private lateinit var resetBtn: Button
+    private var running = false
+    private var pauseOffset: Long = 0
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        chronometer = findViewById<Chronometer>(R.id.myChronometr)
+        startBtn = findViewById(R.id.startButton)
+        stopBtn = findViewById(R.id.stopButton)
+        resetBtn = findViewById(R.id.resetButton)
+
+
+        startBtn.setOnClickListener {
+
+            if (!running) {
+                chronometer.base = SystemClock.elapsedRealtime() - pauseOffset
+                chronometer.start()
+                running = true
+            }
+        }
+
+        stopBtn.setOnClickListener {
+            if (running) {
+                pauseOffset = SystemClock.elapsedRealtime() - chronometer.base
+                Log.i("offset", "pauseOffset: $pauseOffset")
+                chronometer.stop()
+                running = false
+            }
+        }
+
+        resetBtn.setOnClickListener {
+            chronometer.base = SystemClock.elapsedRealtime()
+            Log.i("offset", "base: ${chronometer.base}")
+            pauseOffset = 0
+            chronometer.stop()
+            running = false
+        }
+    }
+}
+```
+## Wyjaśnienia
+### `SystemClock`
+- to klasa w Androidzie, która dostarcza różne metody do mierzenia czasu systemowego.
+- Jedną z tych metod jest `elapsedRealtime()`, która zwraca czas w milisekundach od momentu uruchomienia urządzenia.
+
+
+### `elapsedRealtime()`
+`val time = SystemClock.elapsedRealtime()`
+- zwraca liczbę milisekund od momentu włączenia urządzenia,
+- Ignoruje zmiany czasu systemowego (np. jeśli użytkownik zmieni czas w ustawieniach),
+- nie resetuje się przy uśpieniu telefonu – nadal liczy czas.
+
+### `pauseOffset`
+`private var pauseOffset: Long = 0`
+- przechowuje ilość czasu, który upłynął do momentu zatrzymania chronometru
+- zapewnia poprawne wznowienie po zatrzymaniu chronometru bez niego timer resetowałby się za każdym razem na 0 po ponownym starcie.

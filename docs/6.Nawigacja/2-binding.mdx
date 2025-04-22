@@ -1,0 +1,229 @@
+---
+title: Binding
+---
+
+# Wprowadzenie do bindingu
+:::info Co to jest binding?
+- View Binding to mechanizm wprowadzony przez Google, który pozwala na bezpieczne i wygodne odwoływanie się do widoków XML w kodzie Kotlin, bez użycia `findViewById()`.
+- Zamiast tego, Android generuje klasy bindingowe dla każdego pliku XML w folderze res/layout/, co pozwala na łatwy dostęp do widoków za pomocą wygenerowanych właściwości.
+:::
+
+:::tip Zalety
+- Nie musisz używać `findViewById()`
+- Bezpieczne typowanie – `binding.textView` jest typu `TextView`, więc nie musisz rzutować (`findViewById<TextView>(R.id.textView)`)
+- Czytelniejszy kod – wszystkie widoki są dostępne przez binding
+:::
+
+
+# *View Binding* we fragmentach
+
+W Fragment musisz dbać o cykl życia widoku (onCreateView() → onDestroyView()), dlatego stosujemy nullable _binding:
+
+```kotlin
+class HomeFragment : Fragment() {
+
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+...
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null // Zapobieganie wyciekom pamięci
+    }
+```
+
+## Dlaczego `_binding` jest `nullable` (?) i ustawiane na `null` w `onDestroyView()`?
+Fragment przechowuje swoją instancję dłużej niż widok, więc musimy usunąć referencję do View, gdy jest niszczony.
+Zapobiega wyciekom pamięci!
+
+## Włączenie bindingu
+```
+build.gradle.kts(Modul: app)
+
+android {
+namespace = "com.example.mynavgraph"
+compileSdk = 35
+
+//...
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    buildFeatures {
+        viewBinding = true
+    }
+}
+```
+
+## binding w MainActivity
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var navController: NavController
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+
+        enableEdgeToEdge()
+        //setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        // Połączenie z NavControllerem
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+        // ToolBar jako ActioBar
+//        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+//        setSupportActionBar(toolbar)
+setSupportActionBar(binding.toolbar)
+
+        // Połączenie ToolBara z NavControllerem
+        setupActionBarWithNavController(navController)
+
+    }
+```
+
+## binding w `HomeFragment.kt`
+
+```kotlin
+class HomeFragment : Fragment() {
+
+    private var _binding: FragmentHomeBinding? = null // _binding będzie przechowywac obiekt View Binding
+    private val binding get() = _binding!! // dzięki temu możemy pisać binding. zamiast _binding?.
+
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        // return inflater.inflate(R.layout.fragment_home, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return  binding.root
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) = HomeFragment()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val navController = findNavController()
+
+
+        // automatyczna konwersja python_case na camelCase
+        binding.navigationButton.setOnClickListener {
+            val action = HomeFragmentDirections.homeToDetailsAction(userName = "Jarek")
+            navController.navigate(action)
+        }
+
+//        view.findViewById<Button>(R.id.navigation_button).setOnClickListener {
+//            val action = HomeFragmentDirections.homeToDetailsAction(userName = "Jarek")
+//            navController.navigate(action)
+//        }
+}
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Fragmenty mają cykl życia, a _binding powinien być nullem,
+        // gdy View jest niszczony, aby uniknąć wycieków pamięci.
+        _binding = null
+    }
+}
+```
+
+## binding w `DetailsFragment.kt`
+```kotlin
+class HomeFragment : Fragment() {
+
+    private var _binding: FragmentHomeBinding? = null // _binding będzie przechowywac obiekt View Binding
+    private val binding get() = _binding!! // dzięki temu możemy pisać binding. zamiast _binding?.
+
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        // return inflater.inflate(R.layout.fragment_home, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return  binding.root
+    }
+
+    ...
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val navController = findNavController()
+
+
+        // automatyczna konwersja python_case na camelCase
+        binding.navigationButton.setOnClickListener {
+            val action = HomeFragmentDirections.homeToDetailsAction(userName = "Jarek")
+            navController.navigate(action)
+        }
+
+//        view.findViewById<Button>(R.id.navigation_button).setOnClickListener {
+//            val action = HomeFragmentDirections.homeToDetailsAction(userName = "Jarek")
+//            navController.navigate(action)
+//        }
+}
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Fragmenty mają cykl życia, a _binding powinien być nullem,
+        // gdy View jest niszczony, aby uniknąć wycieków pamięci.
+        _binding = null
+    }
+}
+```
+
+
+## binding w `ThirdFragment.kt`
+```kotlin
+class ThirdFragment : Fragment() {
+    private val args: ThirdFragmentArgs by navArgs()
+    private var _binding: FragmentThirdBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.infoThirdFragmentTextview.text = "informacja z Details: ${args.message}"
+        binding.backHomeBtn.setOnClickListener {
+            findNavController().navigate(R.id.back_home_form_third)
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+
+        _binding = FragmentThirdBinding.inflate(inflater, container, false)
+        return binding.root
+
+        //return inflater.inflate(R.layout.fragment_third, container, false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) = ThirdFragment()
+    }
+```
+

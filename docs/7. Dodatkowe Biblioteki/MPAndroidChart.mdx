@@ -1,0 +1,473 @@
+---
+title: MPAndroidChart
+---
+
+import TabItem from "@theme/TabItem";
+import Tabs from "@theme/Tabs";
+
+
+
+
+# Instalacja biblioteki
+## `build.gradle.kts` (*module*)
+- To jest plik konfiguracyjny modułu Twojej aplikacji, w którym definiujesz:
+    - biblioteki, z których korzystasz (dependencies)
+    - wersje SDK i build tools
+        -  SDK to skrót od Software Development Kit, czyli Zestaw Narzędzi Programistycznych
+    - ustawienia kompilacji aplikacji
+
+:::info Android SDK
+- biblioteki i narzędzia, które pozwalają tworzyć aplikacje działające na systemie Android
+- zawiera m.in. API do tworzenia interfejsów, obsługi kamer, GPS, sieci, itd.
+- umożliwia kompilację i uruchamianie aplikacji na różnych wersjach Androida
+:::
+
+## Dodajemy nową bibliotekę
+### `libs.versions.toml`
+```toml
+[versions]
+...
+mpandroidchart = "v3.1.0"
+
+
+[libraries]
+...
+mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version = "v3.1.0" }
+
+```
+
+### `build.gradle.kts (module)`
+```kts
+dependencies {
+
+    implementation(libs.mpandroidchart)
+...
+
+```
+
+### `settings.gradle.kts`
+```kts
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+
+        mavenCentral()
+        gradlePluginPortal()
+
+        // nowa linia
+        maven (url = "https://jitpack.io" )
+    }
+
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+
+        // nowa linia
+        maven (url = "https://jitpack.io" )
+    }
+}
+```
+
+**ZSYNCHRONIZUJ PROJEKT !!!**
+
+## Wyjaśnienia
+:::info `settings.gradle.kts`
+- plik skryptowy napisany w Kotlinie
+- plik konfiguracyjny Gradle.
+    - Gradle to system budowania projektów w Android Studio
+- mówi Gradle'owi:
+    - jak się nazywa projekt (`rootProject.name`)
+    - jakie moduły ma projekt (`include(":app")`)
+    - skąd pobierać zależności (*repositories*)
+- to jest pierwszy plik, jaki Gradle czyta, zanim zacznie budować projekt.
+:::
+
+:::tip Co to jest `jitpack.io`?
+- `jitpack.io` to serwis, który pozwala łatwo dodawać biblioteki z GitHuba do Twojego projektu Gradle lub Maven.
+- normalnie, żeby użyć jakiejś biblioteki, musi być ona opublikowana w dużym repozytorium jak:
+    - Maven Central
+    - Google Maven
+- ale nie wszystkie biblioteki tam są. Wtedy z pomocą przychodzi JitPack.
+:::
+
+
+
+<Tabs>
+    <TabItem value="linechart" label="LineChart" default>
+      ## LineChart
+      ### `acitivity_main.xml`
+      ```xml
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/myLineChart"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_margin="20dp"/>
+        ```
+
+        ### `MainActivity.kt`
+        ```kotlin
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            enableEdgeToEdge()
+            setContentView(R.layout.activity_main)
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+                insets
+            }
+
+
+            val chart = findViewById<LineChart>(R.id.myLineChart)
+
+            val entries = listOf(
+                Entry(0f, 1f),
+                Entry(1f, 2f),
+                Entry(2f, 0f),
+                Entry(3f, 4f),
+                Entry(4f, 3f),
+            )
+
+            val dataSet = LineDataSet(entries, "Przykładowe dane")
+            dataSet.color = ContextCompat.getColor(this,
+
+            android.R.color.holo_red_dark)
+            dataSet.valueTextSize=12f
+
+            val lineData = LineData(dataSet)
+            chart.data = lineData
+
+            chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+            chart.axisRight.isEnabled = false
+
+            chart.description.isEnabled = false
+            chart.invalidate()
+        }
+        ```
+
+        ### Wyjaśnienia
+        #### Klasa `Entry`
+            - to podstawowy model danych w *MPAndroidChart*, który reprezentuje pojedynczy punkt na wykresie.
+            - dzięki niej możesz przekazać bibliotece informacje o wartościach, które mają być wyświetlone na osi *X* i *Y*.
+            - używając obiektów `Entry`, możesz łatwo tworzyć, modyfikować i przekazywać dane do komponentów wykresowych, takich jak LineDataSet. Klasa ta umożliwia dodanie dodatkowych właściwości (np. ikony, formatowania) bez komplikowania struktury danych.
+            - funkcje i klasy `MPAndroidChart`, jak `LineDataSet` czy `LineData`, oczekują danych w konkretnym formacie.
+            - Obiekty typu `Entry` są właśnie takim formatem, co pozwala bibliotece poprawnie interpretować i wyświetlać dane.
+
+        #### `ContextCompat`
+            - to klasa pomocnicza z biblioteki `AndroidX` (`androidx.core.content.ContextCompat`), która daje kompatybilny sposób dostępu do zasobów w różnych wersjach Androida.
+            - użycie:
+                - pobieranie koloru `ContextCompat.getColor(this, R.color.nazwaColoru)`
+                - pobieranie obrazka `ContextCompat.getDrawable(context, R.drawable ...)`
+                - `...`
+
+        #### klasa `LineDataSet`:
+        - `LineDataSet` przechowuje listę obiektów typu `Entry`, gdzie każdy `Entry` reprezentuje pojedynczy punkt (współrzędne *X* i *Y*) na wykresie.
+        - Konfiguracja wyglądu wykresu, dzięki metodom udostępnianym przez tę klasę możesz ustawiać różne właściwości wyglądu linii, takie jak:
+            - Kolor linii
+            - Szerokość linii
+            - Kolor i rozmiar tekstu (wartości przypisanych do punktów)
+            - Styl linii (np. kreskowana lub ciągła)
+            - Opcjonalnie konfigurację wypełnienia pod linią (ang. fill)
+        - Interakcja z wykresem:
+            - LineDataSet umożliwia także ustawienie właściwości związanych z interakcją, takich jak:
+            - Włączenie lub wyłączenie podświetlania wybranego punktu
+            - Ustawienie granic (ang. limits) dla danych
+
+        #### klasa `LineData`
+
+        - Agregacja danych:
+            - `LineData` zbiera wszystkie zestawy danych (DataSets), które mają być wyświetlone na jednym wykresie.
+            - dzięki temu możesz np. pokazać kilka linii na jednym wykresie – każda reprezentowana przez inny `LineDataSet`.
+        - Łatwa aktualizacja wykresu:
+            - po przypisaniu obiektu `LineData` do wykresu (np. `LineChart`) poprzez metodę `chart.data = lineData`, MPAndroidChart wie, jakie dane ma wyświetlić.
+            - aby odświeżyć widok, używasz metody `chart.invalidate()`.
+        - Możliwość konfiguracji:
+            - klasa `LineData` udostępnia metody do ustawiania różnych parametrów, takich jak  domyślny rozmiar tekstu dla wszystkich wartości, co pozwala na centralną konfigurację wyglądu całego wykresu.
+
+
+        ### Dodajemy drugi wykres
+        ```kotlin
+        val dataSet = LineDataSet(entries, "Przykładowe dane")
+        dataSet.color = ContextCompat.getColor(this, android.R.color.holo_green_light)
+        dataSet.valueTextSize=12f
+
+        val entries2 = listOf(
+        Entry(0f, 2f),
+        Entry(1f, 1f),
+        Entry(2f, 3f),
+        Entry(3f, 2f),
+        Entry(4f, 5f)
+        )
+
+        val dataSet2 = LineDataSet(entries2, "drugi wykres")
+        dataSet.color = ContextCompat.getColor(this, R.color.drugi)
+        dataSet.valueTextSize=12f
+
+        val lineData = LineData(dataSet, dataSet2)
+        chart.data = lineData
+
+        // zmiana description, czyli włączamy własny opis
+        chart.description.isEnabled = true
+        chart.description.text = "To jest pewien opis, ale nie wiem czego"
+
+        chart.description.textSize = 14f
+        chart.description.textColor = ContextCompat.getColor(this, R.color.drugi)
+        ```
+    </TabItem>
+
+
+    <TabItem value="barchart" label="BarChart">
+        ## BarChart - wykres słupkowy
+
+        `activity_main.xml`
+        ```xml
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/myBaChart"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_margin="20dp"/>
+
+        ```
+        `MainActivity.kt`
+        W metodzie  *onCreate*
+        ```kotlin
+        val barChart = findViewById<BarChart>(R.id.myBaChart)
+        val entriesB = listOf(
+            BarEntry(0f, 4f),
+            BarEntry(1f, 8f),
+            BarEntry(2f, 6f),
+            BarEntry(3f, 12f),
+            BarEntry(4f, 2f)
+        )
+        val dataSetB = BarDataSet(entriesB, "Przykładowe dane")
+        dataSetB.color = ContextCompat.getColor(this, android.R.color.holo_blue_dark)
+        dataSetB.valueTextColor = ContextCompat.getColor(this, android.R.color.holo_red_dark)
+        dataSetB.valueTextSize = 11f
+
+        val barData = BarData(dataSetB)
+        barChart.data = barData
+        barChart.description.isEnabled = false //wyłączamy opis
+
+        // odświeżanie wykresu
+        barChart.invalidate()
+        ```
+
+        ### Wyjaśnienie
+        #### klasa `BarEntry`
+
+
+        #### klasa `BarDataSet`
+
+
+        #### klasa `BarData`
+
+
+
+
+
+        ### Dodajemy drugi
+
+        #### Nowe dane
+        ```kotlin
+        val entriesBarEntry2 = listOf(
+            BarEntry(0f, 4f),
+            BarEntry(1f, 2f),
+            BarEntry(2f, 15f),
+            BarEntry(3f, 4f),
+            BarEntry(4f, 6f)
+        )
+        ```
+        #### Nowy obietk  `BarDataSet`
+        ```kotlin
+        val dataSetB2 = BarDataSet(entriesBarEntry2, "Druga seria danych")
+        val colorB2 = ContextCompat.getColor(this, android.R.color.holo_orange_dark)
+        dataSetB2.color = colorB2
+        dataSetB2.valueTextColor = ContextCompat.getColor(this, android.R.color.holo_green_light)
+        dataSetB2.valueTextSize = 12f
+
+        ```
+
+        #### Łączenie w jeden wykres `BarData`
+        ```kotlin
+        val barData = BarData(dataSetB, dataSetB2)
+        barChart.data = barData
+        barData.barWidth = 0.5f // dopasuje widok do szerokości słupka
+        barChart.description.isEnabled = false //wyłączamy opi
+
+        barChart.invalidate()
+
+        ```
+
+        #### Słupki obok siebie
+    ``` kotlin
+        val barData = BarData(dataSetB, dataSetB2)
+        barChart.data = barData
+        barChart.description.isEnabled = false //wyłączamy opi
+
+
+        // definiujemy przestrzeń zajmowaną przez słupki
+        val groupSpace = 0.1f
+        val barSpace = 0.05f
+        barData.barWidth = 0.4f // szerokość słupka
+
+        // zaczynamy od lewej strony
+        barChart.xAxis.axisMinimum = 0f
+        // obliczamy, ile przestrzeni oś X potrzbuje, aby wyświetlić wszystkie słupki
+        barChart.xAxis.axisMaximum = 0f +
+                                     barData.getGroupWidth(groupSpace, barSpace) *
+                                     entriesBarEntry2.size
+
+
+        //grupujemy zestawy słupków
+        barChart.groupBars(0f,groupSpace, barSpace)
+
+        barChart.invalidate()
+        ```
+
+
+
+    </TabItem>
+
+    <TabItem value="piechart" label="PieChart">
+        ## PieChart
+        To widok odpowiadający za wyświetlanie wykresu kołowego.
+        Każdy wycinek reprezentuje procentowy udział danej kategorii względem całości.
+        Przykład: jeśli masz dane o sprzedaży trzech produktów, możesz pokazać, że Produkt A to 50%, B to 30%, a C to 20%.
+
+        `activity_main.xml`
+        ```xml
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/myPieChart"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"/>
+        ```
+
+        `MainActivity.kt`
+        ```kotlin
+        val myPieChart: PieChart = findViewById(R.id.myPieChart)
+
+        val pieChartEntries = listOf(
+            PieEntry(40f, "Wanilia"),
+            PieEntry(40f, "Czekolada"),
+            PieEntry(20f, "Truskawka")
+        )
+
+        val pieDataSet = PieDataSet(pieChartEntries, "Smaki lodów")
+        pieDataSet.setColors(ColorTemplate.COLORFUL_COLORS.toList())
+        pieDataSet.valueTextSize = 15f
+
+
+        val pieData = PieData(pieDataSet)
+        myPieChart.data = pieData
+        myPieChart.description.isEnabled = false
+        myPieChart.centerText = "Sprzedaż"
+        myPieChart.animateY(2000)
+
+        myPieChart.invalidate()
+        ```
+
+        :::info klasa `PieEntry`
+        - pojedynczy element danych w wykresie kołowym
+        - struktura `PieEntry(value: Float, label: String)`
+        - metody i pola
+            - `value` (`getValue`) wartość liczbowa, wielkość wycinka w procentach
+                - `getValue()`          - pobieranie wartości
+                - `setValue()`          - pobieranie wartości
+            - `label` (`getLabel`) etykieta wycinka (co to jest):
+                - `setLabel(String)`    - ustawianie etykiety
+                - `setLabel(Float)`          - zmienianie wartości
+            - `getDatad()` - przypisanie dodatkowych danych do wycinka
+        :::
+
+        :::tip klasa `PieDataSet`
+        - klasa, która łączy dane (`PieEntry`) w jedną całość,
+        - klasa, która odpowiada za wygląd całego zestawu (kolor, rozmiar, ...):
+            - kolorowe wycinki `.setColors(ColorTemplate.COLORFUL_COLORS.toList())`
+            - `.valueTextSize = 16f // Float`
+            - `.valueTextColor = Color.BLACK`
+            - odstęp między wycinkami `.sliceSpace = 4f`
+            - wysunięcie wycinka po kliknięciu `.selectionShift = 5f`
+
+        - struktura `PieDataSet(PieEntry[], String)`)
+        :::
+
+        :::note klasa `PieData`
+        - klasa, która łączy dane (`PieDataSet`) i przekazuje je do wykresu (`PieChart`):
+            - obiekt tej klasy to "opakowanie" dla danych typu `PieDataSet`
+            - obiekt tej klasy jest przekazywany do wykresu jako parametr `myPieChart.data = pieData`
+        - jest niezbędna, żeby wykres wiedział co i jak ma wyświetlać
+        - umożliwia zmianę:
+            - rozmiaru wartości `pieData.setValueTextSize(21f)`
+            - koloru etykiet `pieData.setValueTextColor("#fff222".toColorInt())`
+            - format wartości (procenty, waluty, ...) `pieData.
+        :::
+
+        przykład użycia tych właściwości w naszej aplikacji
+        ```kotlin
+        val pieData = PieData(pieDataSet)
+        pieData.setValueTextSize(18f)
+        pieData.setValueTextColor("#aabbcc".toColorInt())
+        pieData.setValueFormatter(PercentFormatter(myPieChart))
+        // trzeba użyć tej funkcji, aby wyświetliły się procenty
+        myPieChart.setUsePercentValues(true)
+
+        myPieChart.data = pieData
+        ```
+
+        ### Własne kolorowanie wycinków
+        ```kotlin
+        val pieDataSet = PieDataSet(pieChartEntries, "Smaki lodów")
+        //pieDataSet.setColors(ColorTemplate.COLORFUL_COLORS.toList())
+        pieDataSet.valueTextSize = 15f
+
+        pieDataSet.colors = listOf(
+            "v#8d6e63".toColorInt(),
+            "#fff176".toColorInt(),
+            "#f48fb1".toColorInt(),
+        )
+
+        pieDataSet.valueTextColor = "#123123".toColorInt()
+        pieDataSet.selectionShift = 5f // "pogrubienie" po kliknięciu
+        pieDataSet.sliceSpace = 10f // odstęp międz wycinkiami
+
+        val pieData = PieData(pieDataSet)
+
+        ```
+
+        ### Obsługa zdarzeń
+        ```kotlin
+        myPieChart.setOnChartValueSelectedListener(object: OnChartValueSelectedListener{
+            override fun onValueSelected(e: Entry?, h: Highlight?) {
+                if(e is PieEntry){
+                    val label = e.label
+                    val value = e.value
+                    Toast.makeText(this@MainActivity,
+                        "$label: $value",
+                        Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onNothingSelected() {
+                Toast.makeText(this@MainActivity,
+                "Nic nie wybrano",
+                Toast.LENGTH_LONG).show()
+            }
+
+        })
+        ```
+
+
+
+
+
+    </TabItem>
+</Tabs>
