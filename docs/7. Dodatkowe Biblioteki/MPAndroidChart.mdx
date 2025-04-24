@@ -7,6 +7,9 @@ import Tabs from "@theme/Tabs";
 
 
 
+# MPAndroidChart
+https://github.com/PhilJay/MPAndroidChart
+
 
 # Instalacja biblioteki
 ## `build.gradle.kts` (*module*)
@@ -222,6 +225,25 @@ dependencyResolutionManagement {
         chart.description.textSize = 14f
         chart.description.textColor = ContextCompat.getColor(this, R.color.drugi)
         ```
+
+        ## Obsługa zdarzeń
+        ### `setOnChartValueSelectedListener`
+        ```kotlin
+        chart.setOnChartValueSelectedListener(object: OnChartValueSelectedListener{
+            override fun onValueSelected(e: Entry?, h: Highlight?) {
+                Log.i("chart", "entry: $e, dodatkowe info: $h")
+            }
+
+            override fun onNothingSelected() {
+            // odznaczenie zaznaczonej wartości
+                Log.i("chart", "nothing")
+            }
+
+        })
+        ```
+
+
+
     </TabItem>
 
 
@@ -263,18 +285,68 @@ dependencyResolutionManagement {
 
         ### Wyjaśnienie
         #### klasa `BarEntry`
+        - to podstawowy „pojemnik” na pojedynczy słupek w wykresie słupkowym (BarChart) MPAndroidChart
+        - każdy obiekt `BarEntry` reprezentuje jeden słupek na wykresie:
+            - `x` pozycja na osi `X`
+            - `y` wysokość słupka (wartość na osi `Y`)
+        - obsługuje wykresy skumulowane (*stacked bars*)
+        ```kotlin
+        // zwykły słupek
+        BarEntry(x=0f, y=4f)
 
+        // słupek skumulowany z dwoma wartościami 2f i 3f
+        BarEntry(x=1f, ys= floatArrayOf(2f, 3f))
+        ```
 
         #### klasa `BarDataSet`
+        - klasa, która reprezentuje zbiór słupków (*bar entries*) w jednym zestawie danych.
+        - konfiguruje wygląd słupków:
+            - kolor słupków (`setColor(...)`, np. `dataSetB.setColor("#123123".toColorInt()))`
+            - kolor obramowania i szerokość obramowania (`barBorderColor`, `barBorderWidth`)
+            - kolor i rozmiar tekstu (`valueTextColor`, `valueTextSize`)
+            - rysowanie wartości nad słupkami (`dataSetB.setDrawValues(false)`)
+        - konfigurowanie skumulowanych słupków (*stacked bars*):
+        zakładamy, że mamy:
+            ```kotlin
+            val entriesB = listOf(
+                BarEntry(0f, 4f),
+                BarEntry(1f, 8f),
+                BarEntry(2f, 6f),
+                BarEntry(3f, floatArrayOf(2f, 5f,3f)),
+                BarEntry(4f, 2f)
+            )
+            ```
+            , czyli czwarty element jest *stacked bar*
+
+            ustawiamy dla poszczególnych wartości tego słupka etykiety:
+            ```kotlin
+            dataSetB.stackLabels = arrayOf("Seg A", "Seg B", "Seg C")
+            ```
+
+            ustawiamy dla słupków różne kolory
+            ```kotlin
+            dataSetB.colors = listOf(
+                "#123abc".toColorInt(),
+                "#abc123".toColorInt(),
+                "#0fa0fb".toColorInt()
+            )
+
+            ```
+
 
 
         #### klasa `BarData`
+        -  to klasa, którą przekazujesz do BarChart jako „pojemnik” na wszystkie zestawy słupków,
+        ```kotlin
+        val barData = BarData(dataSet1, dataSet2, …)
+        chart.data = barData
+
+        ```
+        - przechowuje listę `BarDataSet` (każdy obiekt typu `BarDataSet` to osobna seria słupków)
+        - steruje szerkością słupka np. `barData.barWidth = 0.5f`
 
 
-
-
-
-        ### Dodajemy drugi
+        ### Dodajemy drugi wykres słupkowy
 
         #### Nowe dane
         ```kotlin
@@ -286,7 +358,7 @@ dependencyResolutionManagement {
             BarEntry(4f, 6f)
         )
         ```
-        #### Nowy obietk  `BarDataSet`
+        #### Nowy obiekt  `BarDataSet`
         ```kotlin
         val dataSetB2 = BarDataSet(entriesBarEntry2, "Druga seria danych")
         val colorB2 = ContextCompat.getColor(this, android.R.color.holo_orange_dark)

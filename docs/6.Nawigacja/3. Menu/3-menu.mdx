@@ -1,0 +1,221 @@
+---
+title: Toolbar jako Menu
+---
+
+
+# Menu
+## Przygotowanie aktywności
+Aktywność domyślnie ma wyłączony `actionbara`
+`/res/values/themes/themes.xml` :
+```xml
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MyMenu" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.MyMenu" parent="Base.Theme.MyMenu" />
+</resources>
+```
+
+:::note ActionBar
+- to klasyczny pasek u góry ekranu.
+- ograniczone możliwości personalizacji.
+- powiązany z Activity
+
+:::
+
+
+:::tip ToolBar jako ActionBar
+- to normalny widok, który możesz wstawić w dowolne miejsce layoutu.
+- może zastąpić `ActionBar`,
+- daje pełną kontrolę: styl, animacje, kolory, menu, logo itp.
+- można go dodać nawet na środku ekranu lub mieć różne `Toolbary` w różnych fragmentach
+- wymaga `setSupportActionBar(toolbar)` w kodzie.
+
+:::
+
+## Dodanie `Toolbar` do `activity_main.xml`
+```xml
+<androidx.appcompat.widget.Toolbar
+    android:id="@+id/myToolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorPrimary"
+    app:title="Moje Menu"
+    app:titleTextColor="#E5F87E"
+    />
+
+
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="tekst z aktywnośći"
+    android:layout_margin="40px"
+    />
+```
+
+## Tworzenie xml dla `Menu`
+- utwórz folder `/res/menu`
+- w tym folderze zrób plik `menu_main.xml` jak `Menu Resource File`
+- w tym pliku zdefiniuj menu
+```xml
+ <item android:id="@+id/action_preferences"
+    android:title="Preferences"
+    android:icon="@android:drawable/ic_menu_preferences"
+    app:showAsAction="never"/>
+
+<item android:id="@+id/action_info"
+    android:title="Information"
+    android:icon="@android:drawable/ic_menu_info_details"
+    app:showAsAction="never" />
+
+```
+:::tip Atrybut `app:showAsAction`
+- kontroluje, gdzie i jak element menu ma się pojawić – np. jako
+    - ikona w ActionBarze/Toolbarze, czy
+    - w rozwijanym menu („overflow menu” – trzy kropki).
+- wartości:
+    - `always`
+        - Ikona zawsze będzie widoczna w Toolbarze (jeśli to możliwe).
+        - Nie trafi do "trzech kropek" – nawet jeśli nie ma miejsca, Android będzie próbował ją pokazać.
+    - `ifRoom`
+        - Ikona pojawi się w Toolbarze, jeśli będzie miejsce.
+        - Jeśli miejsca zabraknie – trafi do overflow menu (⋮)
+    - `never`
+        - Element nigdy nie pojawi się jako ikona w Toolbarze.
+        - Zawsze trafi do "trzech kropek" (overflow menu).
+    - `withText`
+        - Pokazuje tekst obok ikony, jeśli *ActionBar* na to pozwala.
+        - Działa tylko z `always` lub `ifRoom`.
+        - `app:showAsAction="ifRoom|withText"`
+
+:::
+## Dodanie menu do `MainActivity.kt`
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+//toolbar jako actionbar
+        val toolbar = findViewById<Toolbar>(R.id.myToolbar)
+        setSupportActionBar(toolbar)
+    }
+
+// nowa metoda
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+
+        return true
+    }
+
+// dodana nowa metoda
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.action_preferences ->{
+                Toast.makeText(this, "Kliknięto: Preferences", Toast.LENGTH_LONG).show()
+                true
+            }
+            R.id.action_info -> {
+                Toast.makeText(this, "Kliknięto: action info", Toast.LENGTH_LONG).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+}
+```
+:::tip `override fun onCreateOptionsMenu(menu: Menu?): Boolean {...`
+- wywoływana automatycznie przez system Android, gdy ma być pokazane menu
+- `menuInflater`  narzędzie do przekształcania (inflacji) pliku XML w obiekt menu
+- menu obiekt, do którego te opcje zostaną dodane
+
+:::
+
+:::tip `override fun onOptionsItemSelected(item: MenuItem): Boolean {...`
+- ta metoda obsługuje kliknięcia w opcje menu, które wcześniej zdefiniowano (np. w main_menu.xml).
+- `item: MenuItem` obiekt, który reprezentuje kliknięty element menu
+:::
+
+:::warning Co to jest "nadmuchiwanie"/Inflate?
+- `inflate` przekształć plik XML w realny obiekt w pamięci aplikacji,
+- np. mamy layout zapisany w XML, np. res/layout/my_button.xml, ale, żeby go użyć w aplikacji, trzeba
+    - „nadmuchać” ten plik, czyli
+    - zamienić go na prawdziwy obiekt View w Kotlinie.
+
+:::
+
+
+## Dodajemy nowe ikony do pozycji menu
+### Ikona w `ifroom`
+```xml
+<item android:title="Search"
+    android:id="@+id/mySearch"
+    android:icon="@android:drawable/ic_menu_search"
+    app:showAsAction="ifRoom"
+    />
+```
+
+### Podmenu
+#### Wygląd
+```xml
+<item android:title="więcej"
+    android:id="@+id/moreAction">
+    <menu>
+        <item android:id="@+id/action_about"
+            android:title="O aplikacji"/>
+        <item  android:id="@+id/action_help"
+            android:title="Pomoc"/>
+    </menu>
+</item>
+
+<item android:title="Groźne menu"
+    android:id="@+id/wildAction"
+    app:showAsAction="ifRoom">
+    <menu>
+        <item android:id="@+id/action_eating"
+            android:title="O zjadaniu użytkownika"/>
+        <item  android:id="@+id/action_sleeping"
+            android:title="O zasypianiu">
+            <menu>
+                <item android:id="@+id/action_studing"
+                    android:title="O uczeniu się"/>
+                <item  android:id="@+id/action_walking"
+                    android:title="O chodzeniu"/>
+            </menu>
+        </item>
+    </menu>
+</item>
+
+```
+
+#### Logika - obsługa podmenu (po `id`)
+```kotlin
+override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when(item.itemId){
+        R.id.action_preferences ->{
+            Toast.makeText(this, "Kliknięto: Preferences", Toast.LENGTH_LONG).show()
+            true
+        }
+        R.id.action_info -> {
+            Toast.makeText(this, "Kliknięto: action info", Toast.LENGTH_LONG).show()
+            true
+        }
+// id z podmenu
+        R.id.action_walking -> {
+            Toast.makeText(this, "No to IDĘ SOBIĘ", Toast.LENGTH_LONG).show()
+            true
+        }
+        else -> super.onOptionsItemSelected(item)
+    }
+}
+
+```
