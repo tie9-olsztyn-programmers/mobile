@@ -5,12 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
-      <change afterPath="$PROJECT_DIR$/docs/6.Nawigacja/3. Menu/3-menu.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/6.Nawigacja/3. Menu/4-themes-xml-zmiana-wygladu.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/6.Nawigacja/3. Menu/5-toolbar-navigationComponent.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/0.OOP.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/1.Wprowadzenie do klas.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/2.Konstruktor.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/3.Właściwości.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/4.Dziedziczenie.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/5.Enkapsulacja.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/6.Abstrakcja.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/7.Polimorfizm.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/01-intro.mdx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/6.Nawigacja/3-menu.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/7. Dodatkowe Biblioteki/MPAndroidChart.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/7. Dodatkowe Biblioteki/MPAndroidChart.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/2. Podstawowe View/intro.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/2. Podstawowe View/0.intro.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,6 +39,31 @@
     &quot;accountId&quot;: &quot;753b96f1-344d-41e4-816b-f7fe067658a6&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/05-tablitc-i-listy.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/06-Funkcje/01-funkcje.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/06-Funkcje/02-funkcje-strzalkowe.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/06-Funkcje/07-podsumowanie.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/0.OOP.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/1.Wprowadzenie do klas.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/2.Konstruktor.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/3.Właściwości.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/4.Dziedziczenie.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/5.Enkapsulacja.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/6.Abstrakcja.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/1. Intro Kotlin/07-Klasy/7.Polimorfizm.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/100. Jetpack Compose/01-intro.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/2. Podstawowe View/0.intro.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/3. Kolejne View/1. Time View/1.TimePicker.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/3. Kolejne View/1. Time View/2.DatePicker.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/3. Kolejne View/1. Time View/3.Chronometer.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/6.Nawigacja/2-binding.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/6.Nawigacja/3. Menu/3-menu.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/6.Nawigacja/3. Menu/4-themes-xml-zmiana-wygladu.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/6.Nawigacja/3. Menu/5-toolbar-navigationComponent.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/7. Dodatkowe Biblioteki/MPAndroidChart.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/docs/test.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -70,7 +102,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-WS-251.23774.424" />
+        <option value="bundled-js-predefined-d6986cc7102b-b26f3e71634d-JavaScript-WS-251.26094.131" />
       </set>
     </attachedChunks>
   </component>
@@ -106,7 +138,13 @@
       <workItem from="1745390660215" duration="14000" />
       <workItem from="1745404753437" duration="2069000" />
       <workItem from="1745434568298" duration="2743000" />
-      <workItem from="1745475155570" duration="6373000" />
+      <workItem from="1745475155570" duration="9462000" />
+      <workItem from="1747918070448" duration="1878000" />
+      <workItem from="1748980859462" duration="1121000" />
+      <workItem from="1749024346944" duration="5627000" />
+      <workItem from="1749062040173" duration="13000" />
+      <workItem from="1749468657831" duration="8979000" />
+      <workItem from="1749582933224" duration="3836000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />
