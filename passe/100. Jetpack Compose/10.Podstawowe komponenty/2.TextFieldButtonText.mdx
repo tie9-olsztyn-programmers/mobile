@@ -1,0 +1,334 @@
+---
+title: TextField, Button, Text
+---
+
+# TextField, Button, Text
+
+## Przygotowanie projektu
+- zrób projekt `Empty Activity`
+- usuń funkcję Compose `Greeting`, też w `onCreate()` oraz w `Preview()`
+
+## Definicja funkcji Compose `SimpleInputApp`
+```kotlin
+@Composable
+fun SimpleInputApp(modifier: Modifier = Modifier){
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(24.dp)
+    ) {
+        Text(
+            text = "Simple Input App",
+            fontSize = 30.sp,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+        TextField(
+            value = "jakis tekst",
+            onValueChange = {},
+            label = { Text("Enter yoour name:") },
+            singleLine = true
+            )
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            modifier = Modifier.align ( Alignment.CenterHorizontally ),
+            onClick = {
+            println("Button Clicked")
+        }) {
+            Text("Show name")
+        }
+
+        Text(modifier = Modifier
+            .padding(top = 24.dp)
+            .align(Alignment.End),
+            fontSize = 20.sp,
+            text="Hej, ... ?")
+    }
+}
+```
+
+
+W `onCreate()`
+```kotlin
+ Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    SimpleInputApp(
+                        modifier = Modifier.padding(innerPadding)
+
+                    )
+                }
+```
+- Do naszej funkcji Compose *SimpleInputApp* przekazujemy `innerPadding`
+- `innerPadding` zabezpiecza przed sytuacją, że nasza funkcja Compose zasłoniłaby stałe elementy UI
+- `Scaffold` to ogólna rama dla aplikacji, pilnuje, aby inne elementy UI nie zasłaniały stałych elementów IU
+
+
+
+Zrobimy własny podgląd:
+```kotlin
+@Preview(showBackground = true)
+@Composable
+fun SimpleInputAppPreview() {
+    TextFieldJCTheme {
+        SimpleInputApp()
+    }
+}
+```
+- powinien wyświetlić się:
+    - duży napis `Simple Intput App`
+    - pole do wprowadzania danych z etykietą
+    - na razie do pola nie można wprowadzać danych
+    - Przycisk pośrodku
+    - napis `Hej, ...?` po prawej stronie ekranu
+
+
+PAMIĘTAJ O ZAIMPORTOWANIU WSZYSTKICH BRAKUJĄCYCH KLAS!!!
+
+:::tip Zamiana
+- zamień `TextField`
+- na `OutlinedTextField` ładne pole tekstowe z ramką
+- reszta bez zmian
+
+
+:::
+
+
+## Przechowywanie tekstu z komponentu `OutlinedTextField`
+#### Nowa zmienna `name` do przechowywania tekstu i aktualizacji UI
+```
+ var name by remember { mutableStateOf("your name") }
+```
+-  `mutableStateOf("your name")`
+    - tworzy zmienną, której zmiana wartości odświeża UI
+    - jeżeli jej stan ulegnie zmianie, Compose automatycznie przerysuje powiązane elementy ekranu
+    - zwraca obiekt `MutableState<String>`
+        - `MutableState<T>` to interfejs, który
+            - przechowuje wartość
+            - pozwala na reakcję na zmiany tej wartości
+- `remember{ ... } `
+    - zapamiętuje wartość między odświeżeniami ekrany
+    - dzięki temu po kliknięciu przycisku nie resetuje się do wartości początkowej
+    - u nas zwraca obiekt `MutableState<String>`
+
+:::tip
+
+
+- w Compose UI często coś się odświeża (np. po zmianie stanu),
+- a wtedy funkcje `@Composable` są wykonywane od nowa.
+- `remember` sprawia, że dana wartość nie resetuje się przy każdym odświeżeniu.
+
+:::
+
+- `by`
+    - pozwala używać prostego zapisu (`name` zamiast `name.value`)
+    - to tak zwana delegacja
+```kotlin
+// bez `by`, czyli bez delegacji kod wyglądałby tak:
+
+    var nameState = remember {mutableStateOf("your name") }
+    val name = nameState.value
+    nameState.value = "new name"
+```
+
+
+#### Modyfikacja `OutlinedTextField` i `Button`
+```
+OutlinedTextField(
+            value = name,
+            onValueChange = {
+                name = it
+                println("Name: $name")
+                            },
+```
+
+```
+ Button(
+            modifier = Modifier.align ( Alignment.CenterHorizontally ),
+            onClick = {
+            println("Button Clicked")
+        }) {
+```
+
+
+```kotlin
+@Composable
+fun SimpleInputOutput(modifier: Modifier = Modifier){
+
+    var name by remember { mutableStateOf("your name") }
+    var displayName by remember { mutableStateOf("") }
+
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(24.dp)
+    ) {
+        Text(
+            text = "Simple Input App",
+            fontSize = 30.sp,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+        OutlinedTextField(
+            value = name,
+            onValueChange = {
+                name = it
+                println("Name: $name")
+                            },
+            label = { Text("Enter your name:") },
+            singleLine = true
+            )
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            modifier = Modifier.align ( Alignment.CenterHorizontally ),
+            onClick = {
+            println("Button Clicked")
+        }) {
+            Text("Show name")
+        }
+
+        Text(modifier = Modifier
+            .padding(top = 24.dp)
+            .align(Alignment.End),
+            fontSize = 20.sp,
+            text="Hej, ... ?")
+    }
+}
+```
+- w konsoli powinno pojawiać się to, co w piszemy w komponent `OutlinedTextField`
+- w konsoli powinien pojawiać się napis `Button Clicked`, o ile naciśniemy przycisk
+
+## Wyświetlanie zapamiętanego tekstu na ekrania
+- w naszej aplikacji ostatni `Text()` ma służyć do wyświetlania danych:
+    - wprowadzonych w `TextField`
+    - po naciśnięciu `Button`
+
+
+#### Nowa zmienna `displayName` do przechowyania tekstu do wyświetlania
+```kotlin
+fun SimpleInputOutput(modifier: Modifier = Modifier){
+
+    var name by remember { mutableStateOf("your name") }
+    var displayName by remember { mutableStateOf("") }
+
+//...
+```
+
+#### Modyfikacja `onClick` w `Button` oraz `text` w `Text()`
+```kotlin
+//...
+Button(
+            modifier = Modifier.align ( Alignment.CenterHorizontally ),
+            onClick = {
+                displayName = name
+                println("Button Clicked")
+            }) {
+            Text("Show name")
+        }
+
+if(displayName.isNotBlank()){
+            Text(
+                text = "Hej, $displayName !",
+                style = MaterialTheme.typography.headlineSmall
+            )
+        } else {
+            Text(modifier = Modifier
+                .padding(top = 24.dp)
+                .align(Alignment.End),
+                fontSize = 20.sp,
+                text="Hej, ... ?")
+        }
+
+//...
+```
+
+## Dodanie licznika
+
+#### Pierwsza wersja — niedziałająca
+```kotlin
+@Composable
+fun SimpleInputOutput(modifier: Modifier = Modifier){
+- po `if`, który został dodany poprzednio, dodajmy:
+```kotlin
+   Spacer(modifier= Modifier.height(50.dp))
+
+        var count = 0
+        Button(onClick = {
+            count++
+            println("Button Clicked $count times")
+        }) {
+            Text("Clicked $count times")
+            println("I'm in the body of the Button component ($count times)")
+        }
+```
+EFEKT DZIAŁANIA:
+- `println("Button Clicked $count times")`
+    - wyświetlany po każdym kliknięciu przycisku
+    - zmienna `count` zwiększa swoją wartość
+- ` println("I'm in the body of the Button component ($count times)")`
+    - wyświetlony napis tylko raz
+    - `count` ciągle ma wartość `0`
+
+:::tip
+- `count` to
+    - zwykła zmienna lokalna,
+    - tworzona za każdym razem, gdy Compose rysuje ekran (tzw. *recomposition*).
+- Czyli:
+    - Po kliknięciu przycisku Compose odrysowuje całą funkcję `@Composable`.
+    - Tworzy nowe `var count = 0`, więc licznik zawsze wraca do zera.
+    - `println` w ciele komponentu wykonuje się tylko raz (przy pierwszym kliknięciu),
+        bo potem wartość i cała funkcja są „odświeżane” od początku.
+
+- wyjaśnienie końcowe ;) :
+    - Jeśli zmiana stanu (`count`) nie wpływa na wnętrze `Button()`,
+    - to Compose nie wywoła *recomposition w tym miejscu*, więc
+    - `println` z ciała komponentu `Button` nie jest wykonywany.
+
+:::
+
+#### Druga wersja — działająca
+```kotlin
+ var count by remember { mutableIntStateOf(0) }
+        Button(onClick = {
+            count++
+            println("Button Clicked $count times")
+        }) {
+            Text("Clicked $count times")
+            println("I'm in the body of the Button component ($count times)")
+        }
+```
+
+## Metafory na koniec
+### Metafora dla `mutableStateOf`
+:::tip `mutableStateOf` jak pudełko z czujnikiem
+- Wyobraź sobie, że masz pudełko z czujnikiem ruchu.
+    - Wkładasz do niego jakąś wartość — np. napis „Hello”.
+    - Gdy tylko wymienisz zawartość pudełka, czujnik od razu wysyła sygnał:
+        - „hej Compose! zmieniło się!”
+    - Compose wtedy mówi:
+        - "Dzięki, już rysuję ekran od nowa z nową wartością"
+
+
+- To pudełko to właśnie `mutableStateOf("Hello")`.
+    - W środku jest wartość (`value`),
+    - A czujnik wykrywa każdą zmianę (`value = coś nowego`)
+    - Compose reaguje automatycznie — bez Twojej interwencji.
+
+- krótko
+    - `mutableStateOf()` to wartość, która potrafi „powiadomić” Compose, że coś się zmieniło.
+
+
+:::
+
+### Metafora dla `remember`
+:::tip `remember` jako półki z pamięcią
+- Wyobraź sobie, że Compose to artysta, który rysuje Twój ekran w kółko od nowa.
+    - Ale przy każdym odświeżeniu wszystko mu znika ze stołu.
+    - Żeby nie tracił ważnych rzeczy (np. zmiennej `count`),
+    - dostaje półkę z napisem `„remember”️`.
+    - Możesz na niej coś położyć – np. swoje magiczne pudełko ze stanem (`mutableStateOf`).
+
+- Następnym razem, gdy artysta znowu zacznie rysować ekran,
+    - zajrzy na półkę i powie:
+        - "Aaa, tu leży moje `count = 3`, nie muszę tworzyć nowego!"
+
+- Krótko:
+    - `remember` to półka pamięci Compose – przechowuje wartości między odświeżeniami (recomposition).
+    - Gdyby jej nie było, każda zmienna resetowałaby się do zera przy każdym narysowaniu UI.
+
+
+:::

@@ -1,0 +1,32 @@
+---
+title: Funkcja fold()
+---
+
+Jeśli chcesz ręcznie ustawić początkową wartość akumulatora, możesz użyć funkcji `fold`.
+Działa podobnie jak `reduce`, ale umożliwia zdefiniowanie początkowej wartości dla akumulatora.
+
+```kotlin
+fun main() {
+val liczby = listOf(1, 2, 3, 4, 5)
+
+    // Sumowanie z początkową wartością 10
+    val suma = liczby.fold(10) { acc, element -> acc + element }
+    println("Suma liczb z początkową wartością: $suma")  // Wypisze: Suma liczb z początkową wartością: 25
+}
+```
+
+Lambda jako argument funkcji
+```kotlin
+fun operujNaLiczbach(a: Int, b: Int, operacja: (Int, Int) -> Int): Int {
+    return operacja(a, b)
+}
+
+fun main() {
+    val wynikDodawania = operujNaLiczbach(3, 5) { x, y -> x + y }
+    val wynikMnozenia = operujNaLiczbach(3, 5) { x, y -> x * y }
+
+    println(wynikDodawania)  // Wypisze: 8
+    println(wynikMnozenia)   // Wypisze: 15
+}
+```
+

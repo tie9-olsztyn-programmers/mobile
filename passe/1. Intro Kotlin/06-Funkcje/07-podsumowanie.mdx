@@ -1,0 +1,53 @@
+---
+title: Podsumowanie funkcji strzałkowych wbudowanych
+---
+
+```kotlin
+fun main() {
+// Przywitanie
+println("Witaj w aplikacji demonstracyjnej lambd w Kotlinie!")
+
+    // Lista liczb
+    val liczby = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    println("Oto lista liczb: $liczby")
+
+    // 1. Filtrowanie parzystych liczb z listy
+    println("\n1. Filtrowanie parzystych liczb z listy:")
+    val parzyste = liczby.filter { it % 2 == 0 }
+    println("Parzyste liczby: $parzyste")
+
+    // 2. Mnożenie każdej liczby z listy przez 2 za pomocą mapowania
+    println("\n2. Mnożenie każdej liczby przez 2 (operacja mapowania):")
+    val podwojone = liczby.map { it * 2 }
+    println("Podwojone liczby: $podwojone")
+
+    // 3. Zsumowanie wszystkich liczb z listy
+    println("\n3. Sumowanie wszystkich liczb:")
+    val suma = liczby.reduce { acc, number -> acc + number }
+    println("Suma liczb: $suma")
+
+    // 4. Użycie lambdy jako argumentu do funkcji wyższego rzędu
+    println("\n4. Użycie lambdy jako argumentu do funkcji wyższego rzędu:")
+    val wynikDodawania = operujNaLiczbach(3, 5) { a, b -> a + b }
+    println("Wynik dodawania 3 + 5: $wynikDodawania")
+
+    val wynikMnozenia = operujNaLiczbach(4, 6) { a, b -> a * b }
+    println("Wynik mnożenia 4 * 6: $wynikMnozenia")
+
+    // 5. Użycie lambdy do sortowania listy
+    println("\n5. Sortowanie listy w odwrotnej kolejności:")
+    val odwrotnaLista = liczby.sortedByDescending { it }
+    println("Odwrotnie posortowana lista: $odwrotnaLista")
+
+    // 6. Lambdy z nazwanym parametrem 'it'
+    println("\n6. Lambdy z parametrem 'it':")
+    val wiekszeOdPiec = liczby.filter { it > 5 }
+    println("Liczby większe od 5: $wiekszeOdPiec")
+}
+
+// Funkcja wyższego rzędu, przyjmująca lambdę
+fun operujNaLiczbach(a: Int, b: Int, operacja: (Int, Int) -> Int): Int {
+    return operacja(a, b)
+}
+
+```

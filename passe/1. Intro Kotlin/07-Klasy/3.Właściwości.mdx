@@ -1,0 +1,169 @@
+---
+title: Właściwości (Properties)
+---
+
+# Właściwość
+
+## Właściwość (*property*) vs pole (*field*)
+:::info Pole to nie właściwość
+- *Field* (pole) to najprostsza zmienna zadeklarowana w klasie,
+- jest po prostu miejscem, gdzie przechowywana jest wartość,
+- w wielu językach programowania (np. Python, JavaScript, C#) pole jest zwykłym kawałkiem pamięci przypisanym do obiektu,
+- zazwyczaj nie ma żadnej dodatkowej logiki — po prostu tam coś jest zapisane.
+
+:::
+
+
+
+- w Kotlinie właściwość (*property*) to coś, co łączy w sobie:
+    - pole (*field*) i
+    - metody dostępowe (czyli *getter* i *setter*), znane z innych języków programowania (np. Java lub C#).
+- w Kotlinie, kiedy deklarujesz właściwość (np. `var speed`), kompilator automatycznie
+    - generuje pole (`field`) o nazwie `speed` oraz d
+    - omyślne metody *getter* i *setter*.
+
+- *property* (właściwość) to cecha obiektu, do której można się odwołać z zewnątrz, często za pomocą specjalnych metod (get/set).
+- w Kotlinie property to interfejs do wartości – możesz czytać i zmieniać wartość, a także dodawać logikę (np. ograniczenia).
+- *property* może korzystać z pola (`field`) do przechowywania wartości, ale nie musi — getter/setter mogą generować wartości dynamicznie.
+
+```kotlin
+class Car {
+    var speed: Int = 0
+        set(value) {
+            field = if (value > 180) 180 else value // property z własną logiką
+        }
+}
+```
+- `speed` jest *property*,
+- `field` to pole, które przechowuje wartość właściwości
+- Logika settera pilnuje, by nie przekroczyć 180 km/h
+
+:::important Field vs Property - metafora
+- `field` – to zbiornik paliwa pod maską (jest, trzyma benzynę, nie zaglądasz tam na co dzień),
+- `property` – to wskaźnik poziomu paliwa na desce rozdzielczej:
+    - możesz sprawdzić ile masz paliwa (odczytać wartość – *getter*)
+    - możesz próbować nalać paliwa (zmienić wartość – *setter*),
+    - ale czasem komputer pokładowy nie pozwoli ci nalać za dużo lub wyświetli specjalny komunikat.
+- Pole to techniczny „pojemnik”, property to „interfejs” dla użytkownika.
+
+:::
+
+## Właściwości
+Właściwości w Kotlinie definiuje się za pomocą słów kluczowych:
+- `var` (dla zmiennych, które można modyfikować) lub
+- `val` (dla zmiennych tylko do odczytu)
+
+```kotlin
+
+class Osoba {
+     var imie: String = "Nieznane" // Zmienna właściwość (można ją modyfikować)
+     val wiek: Int = 30 // Właściwość tylko do odczytu (stała)
+}
+
+fun main() {
+     val osoba = Osoba()
+     osoba.imie = "Jan" // Zmiana właściwości imie
+     println(osoba.imie) // Wypisze: Jan
+     println(osoba.wiek) // Wypisze: 30
+     // osoba.wiek = 35 // Błąd kompilacji, ponieważ `wiek` jest właściwością tylko do odczytu (val)
+}
+```
+
+## Niestandardowe gettery i settery
+### Własna definicja gettera
+```kotlin
+class Prostokat(var szerokosc: Int, var wysokosc: Int) {
+     val pole: Int
+     get() = szerokosc * wysokosc // Niestandardowy getter, oblicza pole na podstawie szerokości i wysokości
+}
+
+
+fun main() {
+     val prostokat = Prostokat(5, 10)
+     println(prostokat.pole) // Wypisze: 50
+
+     prostokat.szerokosc = 7
+     println(prostokat.pole) // Wypisze: 70 (wartość została przeliczona na nowo)
+}
+```
+
+### Własna definicja settera
+```kotlin
+class Osoba {
+     var wiek: Int = 0
+     set(value) {
+         if (value >= 0) field = value // Ustawiamy wartość tylko, jeśli jest nieujemna
+         else println("Wiek nie może być ujemny.")
+     }
+}
+
+fun main() {
+     val osoba = Osoba()
+     osoba.wiek = 25 // Zadziała poprawnie
+     println(osoba.wiek) // Wypisze: 25
+
+     osoba.wiek = -5 // Wypisze: Wiek nie może być ujemny.
+     println(osoba.wiek) // Wypisze: 25 (wartość nie została zmieniona)
+}
+```
+
+### Opóźniona inicjalizacja
+```kotlin
+class Osoba {
+    lateinit var imie: String // Deklaracja właściwości z późną inicjalizacją
+
+    fun inicjalizujImie(noweImie: String) {
+        imie = noweImie
+    }
+
+
+    fun powitaj() {
+        if (::imie.isInitialized) { // Sprawdzamy, czy właściwość została zainicjalizowana
+            println("Cześć, mam na imię $imie")
+        } else {
+            println("Imię nie zostało jeszcze zainicjalizowane.")
+        }
+    }
+}
+
+fun main() {
+    val osoba = Osoba()
+    osoba.powitaj() // Wypisze: Imię nie zostało jeszcze zainicjalizowane.
+    osoba.inicjalizujImie("Marek")
+    osoba.powitaj() // Wypisze: Cześć, mam na imię Marek
+}
+```
+
+## Operator referencji `::`
+- operator `::` pozwala uzyskać referencję do właściwości, funkcji lub klasy,
+- właściwości `lateinit` mogą być sprawdzane pod kątem inicjalizacji za pomocą `::property.isInitialized`,
+- operator ten jest używany, aby uzyskać referencję do nazwy właściwości, funkcji lub klasy, a nie samej jej wartości,
+- pozwala na pracę z funkcjami i właściwościami jak z obiektami (można je przekazyważ jako argumenty funkcji wyższego rzędu)
+
+```kotlin
+
+class Osoba(val imie: String, val wiek: Int)
+
+fun main() {
+     val osoba = Osoba("Jan", 30)
+
+     // Referencja do właściwości `imie`
+     val referencjaDoImienia = Osoba::imie
+     println(referencjaDoImienia) // wypiesz property imie
+
+    // Uzyskanie wartości właściwości z referencji
+     println(referencjaDoImienia.get(osoba)) // Wypisze: Jan
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
