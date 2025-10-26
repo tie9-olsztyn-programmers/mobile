@@ -1,0 +1,146 @@
+---
+title: Wprowadzenie
+---
+
+# Wprowadzenie - Jetpack Compose
+
+## Co to jest Jetpack Compose
+- Jetpack Compose to nowoczesny framework Google’a do tworzenia interfejsów użytkownika (UI) w Androidzie, który zastępuje XML.
+- W klasycznym Androidzie
+    - Interfejs tworzyło się w plikach XML, np. activity_main.xml.
+    - Kotlin obsługiwał logikę (np. findViewById, setOnClickListener).
+- W Jetpack Compose
+    - Cały interfejs tworzysz bezpośrednio w Kotlinie, przy pomocy specjalnych funkcji oznaczonych @Composable.
+    - Nie ma plików XML, a UI reaguje automatycznie na zmiany danych (reaktywny UI).
+
+
+==Compose = Kotlinowy sposób budowania interfejsu==
+
+## Filozofia Compose — „Deklaratywny UI”
+
+- W klasycznym Androidzie (XML) mówisz:
+    - „Narysuj przycisk tutaj, ustaw mu tekst taki, zmień kolor, gdy kliknięty”.
+    - na przykład
+        - ustawienie tekstu do wyświetlania`textView.text = "Hello"`
+        - ustawienie obsługi zdarzenia kliknięcia `button.setOnClickListener{ ... }`
+- W Compose mówisz:
+    - „Gdy stan aplikacji jest taki, ekran ma wyglądać tak”.
+    - Czyli:
+        - nie opisujesz działań krok po kroku,
+        - tylko deklarujesz, jak UI ma wyglądać w danym stanie.
+    - na przykład
+        - ustawienie tekstu do wyświetlania`Text("Hello")`
+        - ustawienie obsługi zdarzenia kliknięcia `Button(onClick = { ... })`
+
+
+## Jak stworzyć pierwszy projekt w Compose?
+- Android Studio `New Project -> Empty Activity`
+- Nadaj nazwę i masz już gotowy projekt
+
+
+
+### `class MainActivity : ComponentActivity()`
+ComponentActivity to nowoczesna baza aktywności, która potrafi uruchamiać kod Compose.
+To zastępuje:
+`setContentView(R.layout.activity_main)`
+bo w Compose nie ma XML.
+
+### `enableEdgeToEdge()`
+- To nowy „drobny” detal — ustawia pełnoekranowe wyświetlanie (pod paskiem stanu i nawigacji).
+- Nie jest niezbędny, ale poprawia wygląd aplikacji w Material 3.
+
+
+### `setContent { ... }`
+- Wszystko, co znajduje się w klamrach `{ ... }`, jest Twoim drzewem Composable funkcji.
+- Tu startuje aplikacja wizualna.
+
+
+### Każdy projekt Compose ma własny plik `ui/theme/Theme.kt`, który definiuje:
+- kolory (`colorScheme`),
+- kształty,
+- typografię.
+- To jest odpowiednik plików `colors.xml`, `themes.xml`, `styles.xml` z dawnych XML-owych projektów.
+
+### `Scaffold(...)`
+- to szkielet ekrany, który potrafi trzymać:
+    - `TopAppBar`,
+    - `BottomNavigation`,
+    -`FloatingActionButton`
+
+
+### `@Composable fun Greeting(...)`
+Każda funkcja z adnotacją `@Composable` tworzy fragment interfejsu
+:::tip Funkcja Compose
+- A Composable function is a building block of the Compose UI.
+- It defines part of your UI in a declarative way.
+- Layout composables organize content on the screen.
+
+
+:::
+
+### @Preview
+To magiczna adnotacja, która pozwala zobaczyć podgląd UI w Android Studio, bez uruchamiania aplikacji.
+
+## Pierwsze zmiany
+- do naszego `Greeting` dodamy:
+    - układ pionowy
+    - przycisk
+    - przestrzeń między elementami
+    - obsługę kliknięcia
+
+```kotlin
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Hello $name!", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { println("Button clicked!") }) {
+            Text("Click me")
+        }
+    }
+}
+```
+### Funkcje układu (*Layout composables*)
+- `Column()` układ pionowy
+    - Ustawienia rozmieszczenia w układzie:
+        - `Arrangement`
+        - `Alignment`
+- `Row()` układ poziomy
+- `Box()` układ warstwowy
+
+### Elementy  interfejsu/komponenty (*UI components*)
+- Compose provides Material Design components such as Text, Button, and Card.
+- `Text()` wyświetla tekst
+- `Button()` tworzy przycisk
+- `Spacer()` generuje przerwę między elementami
+- ...
+
+### Modifier
+- modyfikator wykładu i układu
+- łączy się w łańcuchy
+- rozmiar:
+    - `.fillMaxSize()` wypełnia cały ekran (w XML to `match_parent`)
+    - `.fillMaxWidth()`/`.fillMaxHeight()` wypełnia szerokość/wysokoać (XML to `match_parent`)
+    - `.wrapCOntentSize()` dopasowuje się do zawartości (XML to `wrap_parent)
+    - ...
+
+:::tip `Modifier` jako instrukcja stolarza
+Metafora 3 – „Instrukcje dla stolarza”
+- Wyobraź sobie, że robisz drewnianą tabliczkę z napisem.
+- Mówisz stolarzowi:
+    - Przytnij ją do szerokości 200 mm, czyli  `.width(200.dp)`
+    - Wygładź brzegi, czyli  `.clip(RoundedCornerShape(8.dp))`
+    - Pomaluj ją na czerwono, czyi `.background(Color.Red)`
+    - Dodaj ramkę, czyli `.border(2.dp, Color.Black)`
+    - Zrób, żeby można było nacisnąć, czyli `.clickable { ... }`
+    - Każda instrukcja to kolejny Modifier.
+
+:::
+
+

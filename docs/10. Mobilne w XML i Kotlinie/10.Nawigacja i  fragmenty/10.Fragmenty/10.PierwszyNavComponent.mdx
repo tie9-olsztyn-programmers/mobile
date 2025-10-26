@@ -1,0 +1,432 @@
+---
+title: NavComponent - pierwsza aplikacja
+---
+
+# Pierwsza aplikacja z NavComponent
+## Konfiguracja projektu
+Utwórz projekt `Empty Views Activity` Api 30.
+
+### Włączamy *binding*
+- w pliku `build.gradle` (*Module: app*) dodajemy `BuildFeature`
+```kts
+   kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    buildFeatures {
+        viewBinding = true
+    }
+}
+```
+PAMIĘTAJ, ABY PO DODANIU `viewBinding=true` ZSYNCHRONIZOWAĆ PROJEKT!!!
+
+- w `MainActivity` uruchamiamy *binding*
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    // dodajemy właściwość obiektu
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root) // uwaga!!!!
+
+```
+- uruchom projekt, aby sprawdzić, czy wszystko działa
+
+----
+
+## Dołączamy niezbędne biblioteki
+### `libs.versions.toml` dodajemy
+
+```toml
+[versions]
+navigation = "2.9.5" # najnowsze stabilne Jetpack Navigation
+
+[libraries]
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+androidx-navigation-ui-ktx       = { group = "androidx.navigation", name = "navigation-ui-ktx",       version.ref = "navigation" }
+
+# (opcjonalnie, rzadziej potrzebne)
+androidx-navigation-runtime-ktx  = { group = "androidx.navigation", name = "navigation-runtime-ktx",  version.ref = "navigation" }
+
+[plugins]
+androidx-navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }
+```
+:::tip
+- `libs.version.toml` plik konfiguracji Gradle Version Catalog, który pozwala centralnie zarządzać wersjami zależności w projekcie Android.
+- `[versions]` definiuje wersje używanych bibliotek
+- `[libraries]` definiuje aliasy dla zależności
+- `[plugins]`definiuje aliasy dla pluginów Gradle
+
+
+- `androidx` to zestaw bibliotek Jetpack, które rozszerzają funkcje Androida
+:::
+
+### `build.gradle.kts` (Module: app) dodajemy
+```kts
+plugins {
+    // ...
+    alias(libs.plugins.androidx.navigation.safeargs)
+}
+
+//...
+
+dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
+
+    // Navigation - ten fragment dodajesz
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+
+//...
+
+```
+
+### `build.gradle.kts` (Project)
+- te pluginy nie będą używane na poziomie projektu, ale w modułach
+- w tym miejscu tylko definiujemy pluginy, ale ich nie używamy
+```kts
+plugins {
+    //...
+    alias(libs.plugins.androidx.navigation.safeargs) apply false
+}
+
+```
+
+## Kod w aktywności
+### `activity_main.xml`
+- jako główny menadżer układu stosujemy `Linearlayout` z orientacją `vertical`
+```xml
+ <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="MainActivity"
+      android:textSize="30sp"
+      />
+
+    <!-- Kontener nawigacji -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:background="#00BCD4"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        app:navGraph="@navigation/navigation"
+        app:defaultNavHost="true"/>
+```
+:::info **Wyjaśnienie kluczowych atrybutów**
+- `android:name="androidx.navigation.fragment.NavHostFragment"`
+    - mówi, że to kontener nawigacyjny.
+    - `android:name`
+        - określa, jaka klasa `Fragment` zostanie użyta w tym kontenerze.
+        - W tym przypadku jest to `androidx.navigation.fragment.NavHostFragment`,
+        - czyli specjalny fragment zarządzający nawigacją.
+    - `NavHostFragment`:
+        - Automatycznie przełącza fragmenty zgodnie z *Nav Graph*.
+        - Obsługuje *Back Stack* – Android automatycznie pamięta poprzednie fragmenty.
+        - Pozwala nawigować między ekranami za pomocą `findNavController()`.
+
+- `app:navGraph="@navigation/navigation"`
+    - wskazuje plik graficznego grafu nawigacji (np. `res/navigation/navigation.xml`),
+    - Określa plik Nav Graph, który definiuje całą nawigację w aplikacji.
+    - Wartość `@navigation/nav_graph` oznacza, że nasz Nav Graph znajduje się w `res/navigation/nav_graph.xml`
+
+- `app:defaultNavHost="true"`
+    - ten `NavHostFragment` przejmuje obsługę przycisku „wstecz”.
+    - ten konkretny `NavHostFragment` będzie domyślnym odbiorcą zdarzeń nawigacyjnych,
+    takich jak naciśnięcie przycisku "Wstecz" (*Back Button*).
+
+:::
+
+### `ActivityMain.kt`
+Bez zmian.
+
+## Tworzymy `NavGraph`a
+Na folderze `res`:
+- Klikamy prawym  *New → Android Resource File*
+- nazywamy `Name: navigation.xml`
+- ustawiamy `Resource type: Navigation`.
+
+Otwiera się edytor wizualny (wszystko do wyklikania).
+- Dodajemy `FirstFragment` jako startowy.
+- Dodajemy `SecondFragment`.
+- Tworzymy `Action` z `First → Second`.
+
+W folderze `res/navigation` powinieneś mieć podobny plik `navigation.xml`
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/firstFragment">
+
+    <fragment
+        android:id="@+id/firstFragment"
+        android:name="com.example.navigationfirst.FirstFragment"
+        android:label="fragment_first"
+        tools:layout="@layout/fragment_first" >
+        <action
+            android:id="@+id/action_firstFragment_to_secondFragment"
+            app:destination="@id/secondFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/secondFragment"
+        android:name="com.example.navigationfirst.SecondFragment"
+        android:label="fragment_second"
+        tools:layout="@layout/fragment_second" />
+</navigation>
+```
+:::info Wyjaśnienie
+- nawigacja `<navigation>`
+    -`<navigation ... app:startDestination="@id/firstFragment">` wskazuje, który fragment jest ekranem startowym aplikacji.
+- fragmenty `<fragment ...>` - każdy fragment w grafie ma kilka kluczowych atrybutów:
+    - `android:id="@+id/firstFragment"` – identyfikator fragmentu w grafie (potrzebny przy akcjach navigate).
+    - `android:name="com.example.navigationfirst.FirstFragment"` – pełna nazwa klasy fragmentu (package + nazwa).
+    - `android:label="fragment_first"` – etykieta fragmentu (może być np. tytułem w ActionBar/Toolbar).
+    - `tools:layout="@layout/fragment_first"` – podglądowy layout używany tylko w edytorze (nie w kodzie w runtime). Ułatwia wizualne projektowanie w Android Studio.
+
+- akcje `<action ..>`
+    - `android:id="@+id/action_firstFragment_to_secondFragment"` – unikalny identyfikator akcji (służy do wywołania navigate(R.id.action_firstFragment_to_secondFragment)).
+    - `app:destination="@id/secondFragment"` – określa, dokąd prowadzi ta akcja (czyli cel przejścia w grafie).
+:::
+
+## Kody w fragmentach
+### `fragment_first.xml`
+```xml
+  <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="First Fragment"/>
+    <!-- TODO: Update blank fragment layout -->
+    <Button
+        android:id="@+id/navigateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Navigate to Second Fragment"/>
+
+```
+
+
+### `FirstFragment.kt`
+- tworzymy *binding* - `onCreateView()`
+```kotlin
+//...
+
+class FirstFragment : Fragment() {
+
+    private lateinit var binding: FragmentFirstBinding
+//...
+
+ override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentFirstBinding.inflate(inflater, container, false)
+
+        return binding.root
+    }
+//...
+```
+:::info Wyjaśnienie `FragmentFirstBinding.inflate(inflater, container, false)`
+- `inflater` przekazany przez system (ma kontekst powiązany z fragmentem/aktywnością).
+- `container` rodzic, do którego widok zostanie dołączony.
+- `false` informujemy, żeby nie podłączać od razu widoku do kontenera – my go zwrócimy ręcznie (return binding.root).
+
+:::
+
+
+
+- tworzymy nawigację `onViewCreated()`
+```kotlin
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.navigateButton.setOnClickListener {
+            findNavController().navigate(R.id.action_firstFragment_to_secondFragment)
+        }
+
+    }
+```
+:::info Wyjaśnienie
+- `findNavController()`
+    - To metoda dostępna w fragmencie, która odnajduje NavController – czyli obiekt odpowiedzialny za sterowanie nawigacją w danym NavHostFragment.
+    - Możesz go sobie wyobrazić jako „pilot do mapy przejść” zdefiniowanej w navigation.xml.
+  .navigate(R.id.action_firstFragment_to_secondFragment)
+
+- `navigate(...)`
+    - polecenie wykonania przejścia zgodnie z grafem nawigacji,
+    - `R.id.action_firstFragment_to_secondFragment` – identyfikator akcji z pliku `navigation.xml`.
+
+
+:::
+
+### Definiowanie widoku `fragment_second.xml`
+```xml
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Second Fragment"
+      android:textSize="40sp" />
+```
+
+
+## Dodajemy trzeci fragment `ThirdFragment`
+- dodamy trzeci fragment
+- przycisk w tym fragmencie przekieruje nas do pierwszego fragmentu
+- potrzebujemy jeszcze przejścia między `SecondFragment` a `ThirdFragment`
+
+### Zmiany ` SecondFragment.kt`
+- do `TextView` dodamy `id` `secondFragmentTextView`
+- ustawimy na nim "nasłuchiwacza" na kliknięcie tekstu, aby aplikacja przeniosła nas do trzeciego fragmentu:
+```kotlin
+//...
+
+class SecondFragment : Fragment() {
+
+    // utworzenie właściwości do bindingu
+    lateinit var binding: FragmentSecondBinding
+//...
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // utworzenie bindingu
+        binding = FragmentSecondBinding.inflate(inflater, container, false)
+
+        return binding.root
+    }
+
+// przygotowanie metody obsługującej kliknięcie napisu
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.secondFragmentTextView.setOnClickListener {
+
+        }
+
+    }
+
+```
+
+## Tworzenie `ThirdFragment` i definiowanie nawigacji
+- przejdź do pliku `navigation.xml`
+- dodaj nowy fragment (znak `+` w górnej części interfejsu, gdy wyświetlasz sam wygląd `xml` bez kodu)
+- nazwij ten fragment `ThirdFragment`
+- klikając najpierw na `SecondFragment` potem na `ThirdFragment` utwórz akcje odpowiednio (atrybut `destination`):
+    - przejście z `SecondFragment` do `ThirdFragment`
+    - przejście z `ThirdFragment` do `FirstFragment`
+- powinieneś mieć mniej więcej taką zawartość pliku
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/firstFragment">
+
+    <fragment
+        android:id="@+id/firstFragment"
+        android:name="com.example.navigationfirst.FirstFragment"
+        android:label="fragment_first"
+        tools:layout="@layout/fragment_first" >
+        <action
+            android:id="@+id/action_firstFragment_to_secondFragment"
+            app:destination="@id/secondFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/secondFragment"
+        android:name="com.example.navigationfirst.SecondFragment"
+        android:label="fragment_second"
+        tools:layout="@layout/fragment_second" >
+        <action
+            android:id="@+id/action_secondFragment_to_thirdFragment"
+            app:destination="@id/thirdFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/thirdFragment"
+        android:name="com.example.navigationfirst.ThirdFragment"
+        android:label="fragment_third"
+        tools:layout="@layout/fragment_third" >
+        <action
+            android:id="@+id/action_thirdFragment_to_firstFragment"
+            app:destination="@id/firstFragment" />
+    </fragment>
+</navigation>
+```
+
+## Trzeci fragment
+### Wygląd `fragment_third.xml`
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ThirdFragment"
+    android:orientation="vertical"
+    >
+
+    <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="To jest trzeci fragment" />
+
+    <Button
+        android:id="@+id/thirdFragmentNavigateButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#123123"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:text="Navigate to First Fragment"/>
+
+
+</LinearLayout>
+```
+
+### Definiujemy binding
+`ThirdFragment.kt`
+```kotlin
+//...
+class ThirdFragment : Fragment() {
+    lateinit var binding: FragmentThirdBinding
+    //...
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentThirdBinding.inflate(inflater, container, false)
+        // Inflate the layout for this fragment
+        return binding.root
+    }
+//...
+```
+
+### Definiujemy nawigację
+```kotlin
+//...
+override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+    binding.thirdFragmentNavigateButton.setOnClickListener {
+        findNavController().navigate(R.id.action_thirdFragment_to_firstFragment)
+    }
+//...
+```
+
+

@@ -1,0 +1,33 @@
+---
+title: Funkcja reduce()
+---
+
+Funkcja `reduce` jest funkcją wyższego rzędu, która pozwala zredukować:
+- listę do jednej wartości,
+- przetwarzając kolejne elementy z pomocą lambdy.
+
+```kotlin
+fun main() {
+val liczby = listOf(1, 2, 3, 4, 5)
+
+    // Sumowanie liczb za pomocą lambdy
+    val suma = liczby.reduce { acc, number -> acc + number }
+    println("Suma liczb: $suma")  // Wypisze: Suma liczb: 15
+
+    // Mnożenie liczb za pomocą lambdy
+    val iloczyn = liczby.reduce { acc, number -> acc * number }
+    println("Iloczyn liczb: $iloczyn")  // Wypisze: Iloczyn liczb: 120
+}
+```
+
+==Jak działa reduce?==
+- Dla listy `[1, 2, 3, 4, 5]` funkcja `reduce` zaczyna od pierwszego elementu, czyli `1`,
+i ustawia go jako początkową wartość akumulatora.
+- W kolejnych krokach, bierze następny element z listy i wykonuje na nim operację określoną w lambdzie, aktualizując akumulator:
+```
+Pierwsza iteracja: acc = 1, element = 2 → acc = 1 + 2 = 3
+Druga iteracja:      acc = 3, element = 3 → acc = 3 + 3 = 6
+Trzecia iteracja:    acc = 6, element = 4 → acc = 6 + 4 = 10
+Czwarta iteracja:  acc = 10, element = 5 → acc = 10 + 5 = 15
+```
+Wynik końcowy to wartość akumulatora po przetworzeniu wszystkich elementów listy, czyli `15` w przypadku sumowania.

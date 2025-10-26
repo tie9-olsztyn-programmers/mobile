@@ -1,0 +1,66 @@
+---
+title: Tablice i listy
+---
+
+
+# Tablice i listy
+
+- podstawowe struktury danych
+- służą do przechowywania kolekcji elementów
+
+# Tablica
+- struktura danych o stałym rozmiarze,
+- przechowuje elementy tego samego typu.
+- ma stałą długość
+- raz utworzona nie może zmienić swojego rozmiaru, ale elementy mogą być modyfikowane.
+
+## Tworzenie tablicy, dostęp, modyfikacja
+`val numbers = arrayOf(1, 2, 3, 4, 5)`
+`println(numbers[0])  // Wypisuje: 1`
+`println(numbers[2])  // Wypisuje: 3`
+`numbers[1] = 10  // Zmienia wartość na indeksie 1`
+`println(numbers[1])  // Wypisuje: 10`
+
+
+# Lista
+- uporządkowana kolekcja elementów,
+- elementy mogą występować wielokrotnie.
+- Kotlin oferuje kilka rodzajów list:
+    - lista niemutowalna (niezmienialna) ,
+    - lista mutowalna (zmienialna).
+
+## Lista niemutowalna - dane tylko do odczytu
+```kotlin
+fun main() {
+
+    val fruits = listOf("Apple", "Banana", "Orange")
+    println(fruits[0])  // Wypisuje: Apple
+    println(fruits[1])  // Wypisuje: Banana
+
+    for (fruit in fruits) {
+
+        println(fruit)
+    }
+}
+```
+
+## Lista mutowalna - Create Read Update Delete
+```kotlin
+fun main() {
+
+    val mutableFruits = mutableListOf("Apple", "Banana", "Orange")
+    mutableFruits.add("Grapes")  // Dodanie nowego elementu
+    println(mutableFruits)       // Wypisuje: [Apple, Banana, Orange, Grapes]
+
+    mutableFruits[1] = "Strawberry"  // Zamiana "Banana" na "Strawberry"
+    println(mutableFruits)           // Wypisuje: [Apple, Strawberry, Orange, Grapes]
+
+    val fruits = mutableListOf("Apple", "Banana", "Orange")
+    fruits.remove("Banana")
+    println(fruits)  // Wypisuje: [Apple, Orange]
+
+    val fruits = mutableListOf("Apple", "Banana", "Orange")
+    fruits.removeAt(1)
+    println(fruits)  // Wypisuje: [Apple, Orange]
+}
+```

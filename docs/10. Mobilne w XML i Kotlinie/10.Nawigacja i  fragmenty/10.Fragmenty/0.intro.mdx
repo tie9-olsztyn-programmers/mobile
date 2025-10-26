@@ -1,0 +1,52 @@
+---
+title: Fragmenty - wprowadzenie
+---
+
+# Fragmenty -teoria
+- to samodzielna, wielokrotnego użycia część interfejsu użytkownika, która jest osadzona w aktywności.
+- ma własny cykl życia i może istnieć niezależnie od innych fragmentów lub aktywności, w której jest osadzony.
+- dzieli cykl życia z aktywnością. Jeśli aktywność zostanie zniszczona, wszystkie jej fragmenty również zostaną zniszczone.
+- fragment ma własny cykl życia, który jest powiązany z cyklem życia aktywności, ale
+    - fragment zawsze działa w jej kontekście.
+    - może być dodawany, usuwany i wymieniany niezależnie od innych fragmentów,
+    - co pozwala na modularne i elastyczne budowanie interfejsu.
+- zarządzanie fragmentami odbywa się za pomocą `FragmentManager`, który pozwala na dodawanie, usuwanie i wymianę fragmentów w trakcie działania aplikacji.
+
+## Uproszczony cykl życia:
+- `onAttach()` Fragment zostaje połączony z aktywnością.
+- `onCreate()`
+    - Fragment jest tworzony.
+    - Inicjalizacja elementów niezwiązanych z widokiem (np. zmienne, adaptery).
+- `onCreateView()`Tworzenie i zwracanie widoku interfejsu użytkownika dla fragmentu.
+- `onViewCreated()`
+    - Wywoływana tuż po utworzeniu widoku.
+    - Konfiguracja widoków (np. ustawianie danych w widokach).
+    - Pracujemy już na utworzonych widokach (np. ustawiamy listenery, dane).
+- `onStart()` Fragment staje się widoczny dla użytkownika.
+- `onResume()` Fragment staje się aktywny i reaguje na interakcje użytkownika.
+
+
+**Najważniejsze z tych metody**:
+- `onCreateView()`:
+    - odpowiada za utworzenie i zwrócenie widoku, który będzie wyświetlany przez ten fragment.
+    - jest to jeden z podstawowych etapów cyklu życia fragmentu.
+    - system Android wywołuje `onCreateView()` podczas tworzenia widoku fragmentu.
+        - Dzieje się to po tym, jak fragment został dołączony do aktywności, ale zanim stanie się on widoczny dla użytkownika.
+    - Wewnątrz `onCreateView()` powinieneś:
+        - **Napompować** layout XML: Użyj `LayoutInflater` do utworzenia hierarchii widoków z pliku layout XML.
+        - **Związać widoki**: Jeśli to konieczne, znajdź widoki w hierarchii za pomocą `findViewById()` i zapisz je w zmiennych.
+        - **Zwrócić widok**: Zwróć napompowany widok jako wynik metody.
+- `onViewCreated()`: Inicjalizacja widoków i ustawianie danych:
+    - jest wywoływana zaraz po tym, jak widok fragmentu został utworzony przez `onCreateView()` i dołączony do hierarchii widoków.
+    - Jest to idealne miejsce do wykonywania operacji, które wymagają dostępu do widoków fragmentu, takich jak:
+    - Znajdowanie widoków: Możesz użyć `findViewById()` do znalezienia widoków w hierarchii i zapisania ich w zmiennych.
+    - Ustawianie listenerów: Możesz dodać listenery do widoków, aby reagować na interakcje użytkownika.
+    - Inicjalizacja danych: Możesz pobrać dane z bazy danych lub sieci i wyświetlić je w widokach.
+    - Rozpoczynanie animacji: Możesz uruchomić animacje widoków.
+- `onDestroyView()`: Czyszczenie zasobów związanych z widokiem.
+
+To podstawowy i najbardziej użyteczny zestaw metod.
+
+
+
+

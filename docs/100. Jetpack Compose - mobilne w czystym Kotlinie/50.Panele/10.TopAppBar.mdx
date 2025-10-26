@@ -1,0 +1,90 @@
+---
+title: Górne menu - `TopAppBar`
+---
+
+# Górne menu - `TopAppBar`
+## Nowy projekt
+- nowy projek
+- usuwamy domyślną funkcję `Greeting`
+- z `onCreate()` usuwamy `Scaffold`
+
+## Dodajmy komponent `TopMenuExample`
+```kotlin
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopMenuExample(){
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title= {Text("Moja aplikacja")},
+                navigationIcon= {
+                    IconButton(onClick = {println("Kliknięto menu")}) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {println("Kliknięto ustawienia")}) {
+                        Icon(Icons.Default.Settings, contentDescription = "Ustawienia")
+                    }
+                }
+            )
+
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Treść ekranu")
+        }
+    }
+
+}
+```
+:::tip  `navigationIcon`
+- To pojedyncza ikona po lewej stronie paska.
+- Zwykle służy do nawigacji lub otwierania menu.
+- Przykłady użycia:
+    - `☰` otwiera drawer (menu boczne),
+    - `←` wraca do poprzedniego ekranu,
+    - `⬅️` zamyka dialog lub kartę.
+
+- Cechy:
+    - Zazwyczaj tylko jedna ikona (nie lista),
+    - Umieszczana po lewej stronie tytułu,
+    - Typowo związana z nawigacją w aplikacji.
+
+:::
+
+:::tip `actions`
+To zestaw ikon lub przycisków, które wykonują operacje kontekstowe (nienawigacyjne).
+Przykłady użycia:
+    - `🔍` wyszukiwanie,
+    - `⚙️` ustawienia,
+    - `🗑️` usuwanie,
+    - `❤️` ulubione.
+
+- Cechy:
+    - Może zawierać wiele ikon,
+    - Umieszczane po prawej stronie tytułu,
+    - Odpowiadają za operacje w bieżącym ekranie.
+
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

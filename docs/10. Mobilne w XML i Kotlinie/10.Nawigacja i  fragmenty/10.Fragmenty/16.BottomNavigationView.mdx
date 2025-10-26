@@ -1,0 +1,470 @@
+---
+title: Bottom NavigationView
+---
+
+# BottomNavigationView
+
+:::note Czym jest `BottomNavigationView`?
+- to dolny pasek nawigacyjny (zazwyczaj 3–5 ikon),
+- pozwala użytkownikowi szybko przełączać się między głównymi sekcjami aplikacji.
+
+:::
+
+
+## Utworzenie i konfiguracja projektu
+- *Empty Views Activity* (API 30)
+- włączamy `binding`
+
+`build.gradle.kts` (Module)
+```kts
+   buildFeatures{
+        viewBinding = true
+    }
+```
+
+`MainActivity.kt`
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
+
+//...
+```
+Uruchom projekt, aby sprawdzić, czy wszystko działa.
+
+
+- instalujemy paczki do nawigacji (dodajemy)
+`libs.versins.toml`
+```toml
+[versions]
+navigation = "2.9.5" # najnowsze stabilne Jetpack Navigation
+
+[libraries]
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+androidx-navigation-ui-ktx       = { group = "androidx.navigation", name = "navigation-ui-ktx",       version.ref = "navigation" }
+
+[plugins]
+androidx-navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }
+
+```
+
+`build.gradle.kts` (Module)
+```kts
+plugins {
+    // ...
+    alias(libs.plugins.androidx.navigation.safeargs)
+}
+
+//...
+
+dependencies {
+//...
+
+    // Navigation - ten fragment dodajesz
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+
+//...
+```
+
+`build.gradle.kts` (Project)
+```kts
+plugins {
+    //...
+    alias(libs.plugins.androidx.navigation.safeargs) apply false
+}
+
+
+```
+
+Zrób synchronizację projektu i uruchom ponownie, aby sprawdzić, czy wszystko działa.
+
+## Konfiguracja `activity_main.xml`
+
+:::info LinearLayout
+- to prosty układ liniowy (poziomy lub pionowy),
+- nie „wie”, że coś jest nad czymś lub reaguje na przewijanie,
+- nie potrafi zarządzać interakcjami między dziećmi.
+- Działa dobrze, jeśli masz **statyczne elementy** ustawione pod sobą, np. TextView + Button.
+
+
+:::
+
+
+:::note `CoordinatorLayout`
+- to zaawansowany kontener nadrzędny z biblioteki *Material Design*,
+- umożliwia stosowanie *Behaviorów* (np. „`BottomNavigation` chowa się przy *scrollu*”),
+- jest zalecany przez Google jako główny kontener, gdy używasz elementów Material (`AppBar`, `Snackbar`, `BottomNavigation`, ...),
+- działa trochę jak `FrameLayout`, czyli nakłada na siebie kolejne elementy (sic!)
+
+
+:::
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:padding="5dp"
+    >
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="BottomNavigationView Example App"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:background="#112112"
+        android:textColor="#eeeccc"
+        />
+
+  <androidx.fragment.app.FragmentContainerView
+      android:id="@+id/navHostFragmentContainer"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:name="androidx.navigation.fragment.NavHostFragment"
+      app:defaultNavHost="true"
+      app:navGraph="@navigation/nav_graph"
+       />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:menu="@menu/bootom_nav_menu"/>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+```
+
+- `FragmentContainerView` jest do wyświetlania różnych fragmentów
+- `BottomNavigationView` to pasek nawigacyjny:
+    - we właściwości `menu` odwołujemy się do pliku `menu/bootom_nav_menu.xml`
+    - takiego pliku jeszcze nie mamy,
+    - będą w nim zdefiniowane elementy menu
+
+
+## Tworzenie i konfiguracja `bootom_nav_menu.xml`
+- kliknij prawym przyciskiem myszki na podkreślony napis `app:menu="@menu/bootom_nav_menu"/>`
+- pozwól środowisku stworzyć odpowiedni plik `bootom_nav_menu.xml`
+- zajrzyj do folderu `res` tam powinien być nowy plik `menu/bootom_nav_menu.xml`
+
+### Dodanie ikonek
+- na folderze `res` prawy przycisk myszy *New*->*Vector Assets*
+- można "zaciągnąć" różne ikony
+- w naszej szkole nie zawsze to działa, więc:
+    - ściągnij ikonki dla:
+        - `home`
+        - `search`
+        - `profile`
+        - np:
+            - https://fonts.google.com/icons
+            - https://github.com/google/material-design-icons/tree/master/android
+    - ściągnij lokalnie jakieś ikonki `.svg`
+    - zaimportuj je zmieniając nazwy tych ikon na:
+        - `ic_home`
+        - `ic_search`
+        - `ic_profile`
+
+- do pliku `bootom_nav_menu.xml` dodaj:
+```xml
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/ic_home"
+        android:title="Home"
+    />
+    <item
+        android:id="@+id/searchFragment"
+        android:icon="@drawable/ic_search"
+        android:title="Search"
+    />
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@drawable/ic_profile"
+        android:title="Profile"
+    />
+
+
+
+</menu>
+```
+- tworzymy trzy elementy menu
+- będą to kolejno: `Home`, `Search`, `Profile`
+
+
+
+## Tworzenie i konfiguracja `nav_graph.xml`
+- na folderze `res` prawy klawisz myszy
+    - *New -> Adroid Resource File*
+    - typ to `navigation`
+    - nazwa `nav_graph`
+- dodaj:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.bottomnavapp.HomeFragment"
+        android:label="Home" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.bottomnavapp.SearchFragment"
+        android:label="Search" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.bottomnavapp.ProfileFragment"
+        android:label="Profile" />
+</navigation>
+
+```
+- w/w fragmenty można utworzyć wyklikując odpowiednie ikony w `nav_graph.xml`
+- nie tworzymy żadnych `action`, ponieważ nasz nowy widżet będzie zarządzał przejściami między fragmentami
+
+:::danger Sprawdź identyczność id
+- `id` fragmentów w `nav_graph.xml` powinno być odpowiednio takie same w `bootom_nav_menu.xml`
+- czyli:
+```
+<fragment
+    android:id="@+id/homeFragment"
+<item
+    android:id="@+id/homeFragment"
+
+--------------
+
+<fragment
+    android:id="@+id/searchFragment"
+<item
+    android:id="@+id/searchFragment"
+
+--------------
+
+<fragment
+    android:id="@+id/profileFragment"
+<item
+    android:id="@+id/profileFragment"
+
+```
+
+:::
+
+
+## Konfiguracja fragmentów
+
+### xml
+Nie ma żadnych nowych informacji, więc bez wyjaśnień piszemy:
+
+`fragment_home.xml`
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeFragment"
+    android:background="#00BCD4"
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Home screen"
+        android:textColor="@color/white"
+        android:padding="10dp"
+        android:textSize="40dp"
+        />
+
+</LinearLayout>
+```
+
+`fragment_search.xml`
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SearchFragment"
+    android:background="#E59CE3"
+
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Do you search something"
+        android:padding="20dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:textSize="24sp"
+        />
+
+</LinearLayout>
+```
+
+`fragment_profile.xml`
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProfileFragment"
+    android:background="#141015"
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="PROFILE"
+        android:padding="20dp"
+        android:textColor="@color/white"
+        />
+
+</LinearLayout>
+```
+
+### Kotlin
+Niczego nie zmieniamy.
+
+## Uruchomienie nawigacji w `MainActivity.kt`
+
+```
+class MainActivity : AppCompatActivity() {
+//...
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+//...
+
+    val navHostFragment = supportFragmentManager
+          .findFragmentById(R.id.navHostFragmentContainer) as NavHostFragment
+
+    val navController = navHostFragment.navController
+    binding.bottomNavigationView.setupWithNavController(navController)
+
+//..
+
+```
+:::tip `navHostFragment`
+Ten fragment kodu przetłumaczony na język ludzki:
+- idź do listy wszystkich fragmentów w tej aktywności,
+- znajdź ten, który ma identyfikator `navHostFragmentContainer`,
+- potraktuj go jako `NavHostFragment`
+
+:::
+
+- `supportFragmentManager`:
+    - to jest menedżer wszystkich fragmentów, które „żyją” w danej aktywności.
+    - mMożna powiedzieć, że to taki zeszyt z listą wszystkich fragmentów, które ta aktywność obsługuje.
+- `as NavHostFragment`
+    - słowo `as` to rzutowanie (*cast*).
+        - `findFragmentById()` zwraca ogólny typ `Fragmen()?`
+        - my wiemy, że to fragment typu `NavHostFragment`, więc zamieniamy `Fragment` na `NavHostFragment`
+    - w ludzkiej mowie: „Traktuj to, co znalazłeś, nie jako zwykły `Fragment`, tylko jako `NavHostFragment`”.
+
+
+:::info `NavHostFragment`
+- to specjalny fragment, który jest naczyniem dla innych fragmentów.
+- zarządza ekranami (`HomeFragment`, `SearchFragment`, `ProfileFragment`),
+- wie, jak nawigować między nimi (zgodnie z `nav_graph.xml`),
+- ma w sobie `NavController`, czyli „dyrygenta nawigacji”.
+
+:::
+
+
+- `val navController = navHostFragment.navController`
+    - `navHostFragment` to pojemnik na ekrany (czyli fragmenty: Home, Search, Profile),
+    - każdy taki pojemnik ma w sobie nawigatora, czyli `NavController`,
+    - to ten nawigator przełącza fragmenty
+    - czyli ten fragment w ludzkiej mowie: „Z naszego pojemnika (`NavHostFragment`) weź pilota, który steruje ekranami”
+    - mała metafora:
+        - `NavHostFragment` jest jak telewizor,
+        - `navController` jest jak pilot (dzięki niemu możesz) to pilot, którym zmieniasz kanały (fragmenty).
+
+- `binding.bottomNavigationView.setupWithNavController(navController)`
+    - nasz widżet nawigacyjny *BottomNavigation* podłączamy do `navController`a
+    - w ludzkiej mowie: „Hej, menu, współpracuj z tym pilotem, więc gdy ktoś kliknie przycisk, zmień kanał na odpowiedni ekran”
+
+
+:::tip  `setupWithNavController()`
+- ta metoda nie pochodzi z `BottomNavigationView` bezpośrednio,
+- jest dostarczana przez bibliotekę *Navigation UI*, czyli część Android Jetpack Navigation.
+- jest ona **funkcją rozszerzającą**:
+    - funkcja rozszerzająca pozwala „dodać” metodę do istniejącej klasy,
+    - nawet jeśli nie masz do niej dostępu.
+
+:::
+
+
+## Zagadka znikniętego tytułu
+
+### Problem
+- w `activity_main.xml` umieściliśmy tytuł aplikacji jako `TextView`
+```xml
+ <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="BottomNavigationView Example App"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:background="#112112"
+        android:textColor="#eeeccc"
+        />
+```
+- niestety nasz tytuł nie wyświetla się, bo jest przykryty przez `FragmentContainerView`
+
+### Rozwiązanie
+Rozwiązanie polega na użyciu `AppBarLayout`
+
+```xml
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BottomNavigationView Example App"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:background="#112112"
+            android:textColor="#eeeccc"
+            android:padding="10dp"
+            />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+```
+
+### Wyjaśnienie
+Dlaczego rozwiązanie działa?
+:::info `AppBarLayout`
+To specjalny pojemnik z *Material Design*, stworzony po to, żeby trzymać:
+    - tytuł aplikacji (Toolbar),
+    - przyciski akcji (np. `szukaj`),
+    - np. prosty `TextView` jako nagłówek.
+
+- mała metafora - `AppBarLayout` jest jak „belka u góry ekranu”
+
+:::

@@ -1,0 +1,82 @@
+---
+title: Panele w JC - wprowadzenie
+----
+
+
+# Wprowadzenie do paneli w JC
+
+- „Panelach” w Compose to pewne struktury  ekranu (`layout`).
+- Panel w sensie Compose to po prostu część ekranu, której pozycję i zachowanie definiuje layout.
+
+:::note Podstawowe rodzaje paneli w Jetpack Compose
+
+| Rodzaj panelu | Typowy komponent Compose | Opis |
+|----------------|--------------------------|------|
+| **Górny panel** | `TopAppBar` | Pasek tytułu, menu, przyciski akcji |
+| **Dolny panel** | `BottomAppBar`, `NavigationBar` | Pasek dolnej nawigacji lub akcji |
+| **Boczny panel** | `ModalNavigationDrawer`, `DismissibleNavigationDrawer` | Menu wysuwane z boku |
+| **Centralny panel** | `Box`, `Column`, `LazyColumn` | Główna treść ekranu |
+
+:::
+
+
+:::info `Scaffold` (czyli rusztowanie, szkielet)
+- to gotowy układ ekranu, który zapewnia standardowy układ aplikacji:
+    -górny pasek (`TopAppBar`),
+    - dolny pasek (`BottomAppBar` lub `NavigationBar`),
+    - wysuwane menu (`Drawer`),
+    - główną treść (`content`),
+    - opcjonalnie przycisk akcji (`FloatingActionButton`).
+
+- `Scaffold` jest częścią pakietu *Material Design 3* (`androidx.compose.material3`)
+- stanowi bazowy kontener dla całych ekranów.
+- dzięki niemu interfejs aplikacji zachowuje:
+    - odpowiedni kontrast kolorów,
+    - efekty cienia (`elevation`),
+    - automatyczne marginesy (`WindowInsets`),
+    = integrację z motywem (`MaterialTheme`).
+
+- podstawowa struktura `Scaffold` to:
+```kotlin
+Scaffold(
+    topBar = { /* Górny panel */ },
+    bottomBar = { /* Dolny panel */ },
+    floatingActionButton = { /* Przycisk akcji */ },
+    content = { innerPadding ->
+        /* Główna treść ekranu */
+    }
+)
+```
+
+:::
+
+
+:::tip `innerPadding`
+Każdy `Scaffold` automatycznie dodaje marginesy wokół głównej treści, aby:
+- nie zasłaniały jej panele (`topBar`, `bottomBar`)
+- zachować spólny wygląd *Material Design*
+- dlatego najczęsciej piszemy
+```kotlin
+Scaffold(
+    topBar = { TopAppBar(title = { Text("Moja aplikacja") }) }
+) { innerPadding ->
+    Box(
+        modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+    ) {
+        Text("Treść ekranu")
+    }
+}
+```
+
+
+:::
+
+
+
+
+
+
+
+

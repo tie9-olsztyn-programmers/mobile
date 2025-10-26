@@ -1,0 +1,56 @@
+---
+title: Podstawowe komponenty aplikacji Androida
+---
+
+# Podstawowe komponenty aplikacji Androida
+Główne komponenty Androida:
+- **Activity** – odpowiada za ekran interfejsu użytkownika.
+- **Fragment** – część Activity modułowa i łatwo zarządzalna.
+- **Service** – działa w tle, wykonując zadania bez interakcji użytkownika.
+- **Broadcast Receiver** – nasłuchuje ogłoszeń (broadcastów) i reaguje na zdarzenia systemowe lub aplikacyjne.
+- **Content Provider** – udostępnia dane innym aplikacjom, zapewniając dostęp do wspólnych zasobów danych.
+
+:::important
+- Te pięć komponentów to fundamenty,
+- na których opiera się funkcjonalność aplikacji Android,
+- umożliwiając tworzenie dynamicznych, interaktywnych i wielofunkcyjnych aplikacji.
+
+:::
+
+
+## Activity
+- reprezentuje pojedynczy ekran aplikacji.
+- jest to komponent, który zapewnia użytkownikowi interfejs do interakcji.
+
+## Fragment
+- działa jako mniejsza, bardziej modułowa część interfejsu,
+- można go łatwo wielokrotnie wykorzystać
+
+## Service
+- to komponent używany do wykonywania długotrwałych operacji w tle,
+które nie wymagają interakcji z użytkownikiem-np:
+    - odtwarzanie muzyki w tle,
+    - pobieranie danych z internetu,
+    - wykonywanie operacji synchronizacji z serwerem
+    - ... .
+- ma cykl życia różny od `Activity` – może działać w tle nawet po zamknięciu danej Aktywności.
+- rodzaje Service:
+    - `Started Service` – uruchamiany przez `startService()` i działa aż do jego zatrzymania.
+    - `Bound Service` – powiązany z komponentem aplikacji (np. Activity) i działa tylko wtedy, gdy jest związany z tym komponentem.
+
+## Broadcast Receiver
+- to komponent, który pozwala aplikacji nasłuchiwać na ogłoszenia (*broadcasts*)
+systemowe lub aplikacyjne-np:
+    - zmianę statusu baterii,
+    - połączenie z internetem
+    - ... .
+np. reagowanie na zakończenie pobierania pliku, nasłuchiwanie na przychodzące wiadomości SMS, monitorowanie połączeń sieciowych.
+działa krótko – kiedy zostaje aktywowany, wykonuje swoją akcję i kończy działanie. Często używa się go do uruchomienia Service lub powiadomienia użytkownika.
+
+## Content Provider
+- umożliwia aplikacjom zarządzanie i udostępnianie danych innym aplikacjom,
+- działa jako swego rodzaju interfejs do przechowywania danych i zarządzania nimi,
+- np. Androidowe kontakty, zdjęcia i inne aplikacje korzystają z Content Provider, aby udostępniać swoje dane innym aplikacjom,
+- jest używany głównie do obsługi bazy danych `SQLite` i udostępniania danych przez różne aplikacje na urządzeniu.
+- pozwala na czytanie, zapisywanie, usuwanie i aktualizowanie danych.
+

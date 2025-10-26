@@ -1,0 +1,55 @@
+---
+title: Wprowadzenie
+---
+
+
+# Wprowadzenie
+
+## Czym jest nawigacja w Compose?
+- Nawigacja w **Jetpack Compose**
+-to sposób na przechodzenie między różnymi **ekranami** aplikacji.
+- W przeciwieństwie do klasycznego Androida (gdzie używaliśmy `Activity` i `Fragmentów`),
+- w Compose każdy ekran to **funkcja `@Composable`**, a za przejścia odpowiada **`NavController`**.
+
+## Podstawowe pojęcia metaforycznie
+- `NavController`
+    - jest jak pilot (steruje przejściami),
+    - steruje, który film (ekran) ma być aktualnie wyświetlany.
+- `NavHost`
+    - jest jak kino z salami/ekranami (miejsce, gdzie pokazujesz różne sceny),
+    - w środku mam mapę wszystkich filmów/ekranów, które możńa pokazać
+- `composable("...")`
+    - to jak poszczególne filmy/ekrany,
+    - każdy ma swoją nazwę i treść
+- `navigate("...")`
+    - to jak zmiana filmu,
+    - pilot wybiera nową salę i zaczyna odtwarzać kolejny film.
+- `popBackStack()`
+    - to jak powrót do poprzedniego filmu,
+    - widz wychodzi z aktualnej sali/ekranu i wraca do poprzedniej sali/ekranu.
+
+- `rememberNavController()` to jak reżyser i pamięć kina:
+    - tworzy plikota (`NavController`) i sprawia, że ten pilot **pamięta** w jakiej sali (ekranie) aktualnie jesteś
+
+    - zwraca ten plikota (`NavController`).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

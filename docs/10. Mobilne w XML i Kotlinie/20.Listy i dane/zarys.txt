@@ -1,0 +1,9 @@
+Listy i adaptery (4 tygodnie)
+
+ListView z własnym adapterem – wyświetlanie listy obiektów.
+
+RecyclerView – podstawy – ViewHolder, Adapter.
+
+RecyclerView z własnym układem – lista z obrazkiem i tekstem.
+
+Ćwiczenie praktyczne – aplikacja ToDo list / lista zakupów.

@@ -1,0 +1,98 @@
+---
+title: TimePicker
+---
+
+# TimePicker
+:::note TimePicker
+- to komponent, który pozwala użytkownikowi wybrać godzinę i minuty.
+- może działać w dwóch trybach:
+    - Jako osadzony widżet w XML (widoczny cały czas)
+    - Jako `TimePickerDialog` (okno dialogowe, które pojawia się po kliknięciu)
+:::
+
+:::tip opcje dodatkowe
+- `android:timePickerMode="spinner"`    – pokazuje tryb przewijania
+- `android:timePickerMode="clock"`      – pokazuje zegar (domyślnie)
+- `android:is24HourView="true"`         – wymusza 24-godzinny format
+:::
+
+## TimePicker w XML
+
+```xml
+<TimePicker
+    android:id="@+id/spinner_timepicker"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:timePickerMode="spinner"
+/>
+```
+
+## TimePicker w `onCreate`
+```kotlin
+val timePicker = findViewById<TimePicker>(R.id.spinner_timepicker)
+timePicker.setIs24HourView(true) // Ustawienie trybu 24-godzinnego
+
+timePicker.setOnTimeChangedListener { view, hour, minute ->
+val selectedTime = "$hour:$minute"
+view.setBackgroundColor(Color.CYAN)// przykład użyciea argumentu view
+Toast.makeText(this, "Wybrana godzina: $selectedTime", Toast.LENGTH_SHORT).show()
+}
+```
+
+# TimePickerDialog
+
+## TimePickerDialog w XML
+```xml
+<Button
+    android:id="@+id/pickTimeBtn"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Pick Time"
+    android:layout_margin="20dp"
+    android:layout_gravity="center_horizontal"
+/>
+
+<TextView
+    android:id="@+id/selectedTimeTextView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Selected Time: -- : --"
+    android:layout_margin="20dp"
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:textSize="30sp"
+/>
+```
+
+## TimePickerDialog w `onCreate`
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var myBtn: Button
+    private lateinit var myTextView: TextView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+       //...
+
+        myBtn = findViewById(R.id.pickTimeBtn)
+        myTextView = findViewById(R.id.selectedTimeTextView)
+
+        myBtn.setOnClickListener {
+            showTimePickerDialog()
+        }
+
+    }
+
+    private fun showTimePickerDialog() {
+        val calender = Calendar.getInstance()
+        val hour = calender.get(Calendar.HOUR_OF_DAY)
+        val minute = calender.get(Calendar.MINUTE)
+
+        val timePickerDialog = TimePickerDialog(this, {
+            _ : TimePicker, selectedHour: Int, selectedMinute: Int ->
+                myTextView.text = "Selected Time: $selectedHour : $selectedMinute "
+        }, hour, minute, true)
+
+        timePickerDialog.show()
+    }
+}
+```

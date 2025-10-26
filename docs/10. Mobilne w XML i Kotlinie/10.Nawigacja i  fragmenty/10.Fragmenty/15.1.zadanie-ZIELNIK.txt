@@ -1,0 +1,43 @@
+ZIELNIK - PLANT JOURNAL
+
+Stwórz aplikację Zielnik (Plant Journal)
+    - w architekturze MVVM,
+    - składającą się z:
+        -jednej aktywności,
+        - czterech fragmentów
+        - jednego ViewModel.
+
+Aplikacja powinna umożliwiać:
+- wprowadzenie danych o roślinie,
+- dodanie notatki o pielęgnacji,
+- wyświetlenie podsumowania.
+
+
+Aplikacja Zielnik pozwala użytkownikowi:
+- powitać się i rozpocząć pracę z zielnikiem,
+- dodać nową roślinę:
+    - nazwa,
+    - gatunek,
+    - wybrać rodzaj stanowiska (cień, półcień, pełne słońce),
+- dopisać notatkę pielęgnacyjną
+    - np. podlewanie, nawożenie, przesadzanie
+    - do notatki dodawana jest automatycznie data jej stworzenia
+- obejrzeć podsumowanie z informacją o roślinie i jej notatkach.
+    - przykładowa notatka
+    "Bazylia (Ocimum basilicum) – pełne słońce
+     Notatka z 05.10.2025: Podlewać co 2 dni"
+    - do podsumowania niech jest dodawany obrazek wybierany losowo z 3 różnych
+
+
+Wymaganie:
+- jedna aktywność z tytułem i tłem
+- fragment powitalny
+- fragment dodawania informacji roślinie
+- fragment dodawania notatki pielęgnacyjnej
+- fragment podsumowania
+- jeden ViewModel
+- dwa modele (Plant, Note)
+- do przechodzenia między fragmentami wykorzystaj Navigation Component.
+- dane są przechowywane w jednym wspólnym ViewModelu
+- pamiętaj o poprawnej strukturze projektu
+

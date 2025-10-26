@@ -1,0 +1,268 @@
+---
+title: Prosta aplikacja z nawigacją
+---
+
+
+# Prosta aplikacja z nawigacją
+
+## Założenia aplikacji
+- będziemy mieli komponent odpowiedzialny za nawigację
+- będziemy mieli dwa komponenty `Home` oraz `Details`
+- będziemy mogli przejść z `Home` do `Details` oraz z `Details` do `Home`
+
+## Jakich bibliotek potrzebujemy?
+
+### Dodajemy w pliku `libs.versions.toml`
+
+```toml
+[version]
+//...
+navigation = "2.9.5"
+
+[libraries]
+//...
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
+
+
+[plugins
+```
+
+SYNCHRONIZUJ PROJEKT!!
+
+### Teraz zmieniamy w pliku `build.gradle.kts`
+```kotlin
+//...
+dependencies {
+    //...
+    implementation(libs.navigation.compose)
+}
+//...
+
+```
+SYNCHRONIZUJ PROJEKT!!
+
+
+## Aplikacja z ekranami `Home` i `Details`
+### Przygotowanie
+- nowy projekt,
+- doinstalujmy bibliotekę `navigation-compose` (j/w),
+- w pliku `MainActivity.kt`:
+  - usuń istniejącą funkcję `Composable`
+  - w metodzie `onCreate` użyj komponentu `AppNavigation`, którego jeszcze nie ma.
+- w folderze, w którym jest `MainActivity` utwórz nowy folder/*package* `navigation`
+- w tym nowym folderze/*package* utwórz zwykły plik `AppNavigation.kt` z zawartością:
+
+```kotliin
+class MainActivity : ComponentActivity() {
+            //...
+
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    AppNavigation(
+
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AppNavigation(modifier: Modifier = Modifier){
+    Text(text="hejka", modifier=modifier)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AppNavigationPreview() {
+    SpacerModifierJCTheme {
+        AppNavigation()
+    }
+}
+
+```
+W emulatorze powinien wyświetlić się napis `hejka`.
+
+### Definiujemy komponent nawigacji
+```kotlin
+fun AppNavigation(modifier: Modifier = Modifier){
+    val navController = rememberNavController()
+
+    NavHost(
+       navController =navController,
+       startDestination = "home"
+    ){
+        composable(route = "home"){ HomeScreen(navController) }
+        composable (route = "details" ){ DetailsScreen(navController) }
+
+    }
+}
+```
+Wyjaśniania kork po kroczku:
+- `val navController = rememberNavController()`
+  - Tworzy kontroler nawigacji i zapamiętuje go w pamięci Composa,
+  - Będzie zarządzał historią ekranów (`stackiem`).
+
+- `NavHost(...)`
+  - To centralny „host” wszystkich ekranów.
+  - `startDestination` określa, który ekran jest wyświetlany jako pierwszy.
+  - `navController` mówi, kto steruje przejściami.
+
+- `composable(route = "home") { HomeScreen(navController) }`
+  - Definiuje ekran o nazwie „home”, który wywoła funkcję `HomeScreen`.
+- `composable(route = "details") { DetailsScreen(navController) }`
+  - Drugi ekran, wywoływany przez `navigate("details")`.
+
+### Dodajemy ekrany `Home` i `Details`
+- W folderze `ui` zrób dwa dodatkowe podfoldery `home` oraz `details`
+- W środku tych folderów zrób odpowiednie pliki `HomeScreen.kt` oraz `DetailsScreen.kt`
+```
+
+ ├── MainActivity.kt
+ ├── navigation/
+ │    └── AppNavigation.kt
+ └── ui/
+      ├── home/
+      │    └── HomeScreen.kt
+      ├── details/
+      │    └── DetailsScreen.kt
+      └── theme/
+           ├──
+           ├──
+           ├──
+           └──
+```
+:::tip Po co foldery na pojedyncze pliki?
+- Folder np. `ui/home` to jak pudełko na wszystkie elementy ekranu `Home`.
+- Na początku jest tam tylko „instrukcja” (czyli `HomeScreen.kt`),
+- Z czasem będą tam dołożone:
+  - przyciski,
+  - `ViewModel`,
+  - `podgląd
+  - dane
+  - ...
+i dzięki temu wszystko masz w jednym miejscu.
+
+
+:::
+
+
+
+#### `HomeScreen`
+```kotlin
+@Composable
+fun HomeScreen(navController: NavController) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+
+        ){
+        Text("Home Screen")
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(onClick = {navController.navigate("details")}){
+            Text("Go to Details")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreePreview(){
+    HomeScreen(rememberNavController())
+}
+```
+
+#### `DetailsScreen`
+```kotlin
+@Composable
+fun DetailsScreen(navController: NavController){
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Details Screen")
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(onClick = { navController.popBackStack()}) {
+            Text("Go Back")
+        }
+
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DetailsScreenPreview(){
+    DetailsScreen(navController = rememberNavController())
+}
+```
+
+
+
+---
+# Na koniec obiekt ze ścieżkami
+
+### Wersja uproszczona - nieduże aplikacje
+- w folderze `navigation` dodamy nowy plik `Routes.kt`:
+```kotlin
+object Routes {
+    const val Home = "home"
+    const val Details = "details"
+}
+
+```
+
+:::tip stała kompilacyjna (*compile-time constant*) - `const val`
+- „Wartość jest stała i znana w czasie kompilacji, nie zmieni się nigdy”
+- musi być prymitywem lub Stringiem,
+- kompilator wstawia tę wartość „na sztywno” w kod bajtowy (jak #define w C),
+- nie wymaga dostępu do obiektu Routes w czasie uruchomienia.
+
+
+:::
+
+
+- teraz w `AppNavigation.kt` zmienimy sposób definiowania ścieżek
+```kotlin
+//...
+     NavHost(
+            navController =navController,
+            startDestination = Routes.Home
+        ){
+            composable(route = Routes.Home){ HomeScreen(navController) }
+            composable (route = Routes.Details ){ DetailsScreen(navController) }
+//...
+```
+oraz w `HomeScreen.kt` :
+```kotlin
+    Button(onClick = {navController.navigate(Routes.Details)}){
+        Text("Go to Details")
+    }
+```
+:::note Wady tego podejścia
+- nie obsługuje tras z argumentami (np. `details/{id}`),
+- brak typowania – argumenty przekazujesz ręcznie jako stringi,
+- trudniejsze skalowanie (duże aplikacje = duży chaos).
+
+
+:::
+
+
+### Wersja rozbudowana - duże aplikacje
+- zamiast używania `Singletona` jak w wersji uproszczonej,
+- będziemy używali obiektów specjalnej klasy `Screen`
+```kotlin
+sealed class Screen(val route: String) {
+    object Home: Screen("home")
+    object Details: Screen("details")
+}
+```
+
+:::note Zalety tego podejścia
+- typowany i bezpieczny (łatwo rozszerzyć),
+- obsługuje argumenty, dynamiczne trasy,
+- kompilator sprawdza poprawność tras,
+- idealny do dużych projektów i MVVM.
+
+:::

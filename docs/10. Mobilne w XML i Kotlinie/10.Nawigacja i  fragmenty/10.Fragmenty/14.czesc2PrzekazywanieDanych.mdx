@@ -1,0 +1,254 @@
+---
+title: cz. 2 Przekazywanie argumentów w Navigation Component
+---
+
+# Komunikacja dwukierunkowa - Mój własny potwór
+## Przypomnienie
+- kontynuujemy projekt z poprzedniej lekcji
+    - pierwszy fragment pobierał imię
+    - wysyłeł dane do drugiego fragmentu
+    - drugi fragment dane te wyświetlał
+
+## Założenia
+- W pierwszym fragmencie wpisujemy imię potwora
+- W drugim wybieramy jego charakter, kolor skóry i ilość oczu
+- Dane wracają do pierwszego fragmentu i wyświetlamy opis gotowego potwora
+
+## Zmiany w kodach XML
+- zmieniamy nazwę argumentu w `nav_graph.xml` na `monsterName`
+```xml
+    <fragment
+        android:id="@+id/secondFragment"
+        android:name="com.example.navcompsafeargs.SecondFragment"
+        android:label="fragment_second"
+        tools:layout="@layout/fragment_second" >
+
+        <argument
+            android:name="mosterName"
+            app:argType="string"
+            android:defaultValue="Godzilla" />
+    </fragment>
+```
+
+- dodajemy w `fragment_first.xml` widżet do wyświetlania wszystkich danych o potworze (po `Button`)
+```xml
+<!-- ... -->
+
+  <TextView
+        android:id="@+id/resultText"
+        android:text=""
+        android:textSize="18sp"
+        android:layout_marginTop="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Tu będzie imię potwora"
+        />
+
+<!-- ... -->
+
+```
+
+:::tip
+- `android:text` ustawia tekst w czasie działania aplikacji (*runtime*).
+- `tools:text`  ustawia tekst tylko w edytorze layoutu (*preview*) - trzeba doimportować
+
+
+:::
+
+- dodajemy odpowiednie widżety w `fragment_second.xml`
+```xml
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#9C27B0"
+
+    >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <TextView
+                android:id="@+id/monsterLabel"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:text="Konfiguruj swojego potwora!"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#e1e1e1"
+                android:layout_marginBottom="8dp"
+                />
+
+            <CheckBox
+                android:id="@+id/scaryCheckBox"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:text="Straszny potwór "
+                android:textColor="#e1e1e1"
+                android:layout_marginTop="8dp"/>
+
+            <RadioGroup
+                android:id="@+id/colorGroup"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                >
+                <RadioButton
+                    android:id="@+id/greenRadio"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Zielony"
+                    android:textColor="#AFFF4F"
+                    />
+                <RadioButton
+                    android:id="@+id/blueRadio"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Niebieski"
+                    android:textColor="#92CBDA"
+                    />
+                <RadioButton
+                    android:id="@+id/redRadio"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:text="Czerwony"
+                    android:textColor="#E7C1C9"
+                    />
+            </RadioGroup>
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:text="Ile oczu ma twój potwór?"
+                android:textColor="#e1e1e1"
+                android:layout_marginTop="8dp" />
+
+            <NumberPicker
+                android:id="@+id/eyesPicker"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"/>
+
+            <Button
+                android:id="@+id/confirmButton"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:text="Gotowe!"
+                android:backgroundTint="@color/black"
+                android:layout_marginTop="16dp"/>
+
+        </LinearLayout>
+
+</ScrollView>
+```
+
+## Zmiany w kodach Kotlina
+### `FirstFragment.kt`
+```kotlin
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+       binding.sendButton.setOnClickListener {
+           val name = binding.lastNameEditText.text.toString()
+           val action = FirstFragmentDirections
+               .actionFirstFragmentToSecondFragment(name)
+
+           findNavController().navigate(action)
+       }
+
+        // odbieranie danych z powrotu
+        findNavController().currentBackStackEntry
+            ?.savedStateHandle
+            ?.getLiveData<String>("monsterDescription")
+            ?.observe(viewLifecycleOwner) { description ->
+                binding.resultText.text = description
+            }
+
+    }
+```
+**WYJAŚNIENIA**
+```
+ findNavController().currentBackStackEntry
+            ?.savedStateHandle
+            ?.getLiveData<String>("monsterDescription")
+            ?.observe(viewLifecycleOwner) { description ->
+                binding.resultText.text = description
+            }
+
+```
+- Ten kod nasłuchuje (obserwuje), czy do bieżącego fragmentu (`FirstFragment`)
+nie wróciła jakaś nowa wartość o kluczu `monsterDescription`.
+- Gdy `SecondFragment` zapisze coś pod tym kluczem (np. opis potwora):
+    - to `FirstFragment` automatycznie otrzyma tę wartość
+    - `FirstFragment` wykona blok `{ description -> ... }`.
+
+
+- `currentBackStackEntry` zwraca bieżący wpis na stosie nawigacji, czyli aktualny fragment
+
+:::tip Co to jest `savedStateHandle`?
+- To specjalny obiekt przechowujący dane w obrębie `NavBackStackEntry`.
+- Można o nim myśleć jak o:
+    - „mini-pamięci” do przekazywania danych między ekranami,
+    - albo „skrzynce pocztowej” przypisanej do konkretnego fragmentu.
+
+- Zapis do `savedStateHandle.set("klucz", wartość)`
+- Odczyt przez `getLiveData("klucz")`
+    - `getLiveData()` automatycznie powiadamia, gdy ktoś coś tam włoży (czyli zaktualizuje wartość).
+
+:::
+
+:::tip Co to jest `viewLifecycleOwner`?
+- To obiekt, który wie, kiedy widok fragmentu (czyli jego `layout` z ``onCreateView) jest tworzony i niszczony.
+- Fragment może:
+    - istnieć w pamięci (np. w `FragmentManagerze`),
+    - ale jego widok (`layout`) może zostać zniszczony i utworzony ponownie (np. po rotacji ekranu).
+
+- `viewLifecycleOwner oznacza:
+    - „Obserwuj dane tylko wtedy, gdy widok fragmentu jest aktywny (widoczny, nie zniszczony)”
+    - Jeśli użytkownik np. obróci ekran, widok się odtworzy, i `LiveData` znowu się podłączy automatycznie do nowego binding.
+
+
+:::
+
+### `SecondFragment.kt`
+```kotlin
+ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.monsterLabel.text = "Twój potwórz: ${args.monsterName}"
+
+        binding.eyesPicker.minValue = 1
+        binding.eyesPicker.maxValue = 10
+
+        binding.confirmButton.setOnClickListener {
+            val scary = if (binding.scaryCheckBox.isChecked) "straszny" else "uroczy"
+            val color = when(binding.colorGroup.checkedRadioButtonId){
+                binding.redRadio.id -> "czerwony"
+                binding.greenRadio.id -> "zielony"
+                binding.blueRadio.id -> "niebieski"
+                else -> ""
+
+            }
+            val eyes = binding.eyesPicker.value
+
+            val description =  "Twój potwór ${args.monsterName} jest $scary," +
+                    " ma kolor $color i $eyes ${if (eyes == 1) "oko" else "ok"}"
+
+            findNavController()
+                .previousBackStackEntry
+                ?.savedStateHandle
+                ?.set("monsterDescription", description)
+
+            findNavController().popBackStack()
+
+        }
+    }
+````
+
+

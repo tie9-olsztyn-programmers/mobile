@@ -1,0 +1,127 @@
+---
+title: ListView - wprowadzenie
+---
+
+# Co to jest ListView?
+
+- `ListView` to widżet w Androidzie, który służy do wyświetlania listy elementów w formie przewijalnej kolumny.
+- Każdy element listy to osobny wiersz (ang. row), który możemy zaprojektować własnym layoutem w XML.
+- Cechy ListView:
+    - Pokazuje dużą liczbę elementów w przewijalnej liście (nie trzeba robić 1000 TextView ręcznie).
+    - Wykorzystuje Adapter (np. ArrayAdapter, BaseAdapter) – adapter tłumaczy dane (np. lista stringów) na widoki.
+    - Każdy wiersz może być klikany (`setOnItemClickListener`).
+    - Domyślnie przewijanie pionowe.
+    - To starsze rozwiązanie – w nowych aplikacjach zwykle używa się RecyclerView, bo jest bardziej wydajny i elastyczny.
+- Schemat działania
+    - Dane (np. `List<String>` albo `List<Student>`).
+    - Adapter – zamienia dane na widoki.
+    - `ListView` – wyświetla wiersze na ekranie.
+
+# Prosta lista z `ListView`
+- tworzymy nowy projekt w Android Studio *Empty Views Activity*,
+- zmieniamy `MainActivity.xml`
+z *ConstraintLayout*
+```xml
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools
+...
+```
+
+na LinearLayout:
+```xml
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+...
+```
+
+i wprowadzamy `ListView`
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ListView"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:gravity="center"
+        android:textSize="20sp"
+        />
+
+    <ListView
+        android:id="@+id/myListView"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        />
+
+</LinearLayout>
+```
+
+
+Zmieniamy w `MainActivity.kt` zawartość ciała funkcji `onCreate`:
+
+```kotlin
+ override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+
+
+       val listView = findViewById<ListView>((R.id.myListView))
+
+        val student = listOf("Anna", "Bartek", "Celina", "Damian")
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, student)
+        listView.adapter = adapter
+
+        listView.setOnItemClickListener { parent, view, position, id ->
+            Toast.makeText(this, "Wybrałeś: ${student[position]}", Toast.LENGTH_SHORT).show()
+        }
+
+    }
+```
+
+**wyjaśnienie**
+- `ListView` jest jak pudełko (lista).
+- `Adapter` jest jak tłumacz (zamienia dane → widoki).
+- *Dane*  jest jak źródło (np. tablica imion).
+- *Kliknięcie* jest jak  reakcja (np. komunikat Toast)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

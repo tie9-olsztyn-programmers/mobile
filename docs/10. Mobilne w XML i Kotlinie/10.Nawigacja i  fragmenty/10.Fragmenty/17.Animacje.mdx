@@ -1,0 +1,210 @@
+---
+title: Animacje
+---
+
+# Animacje przejść
+Pracujemy na projekcie z poprzedniej lekcji!!!.
+
+:::note linki do różnych animacji
+- strona z definicjami animacji:
+    - https://www.tutlane.com/tutorial/android/android-animations-with-examples
+- inne:
+    - https://github.com/lgvalle/Material-Animations
+    - https://developer.android.com/guide/fragments/animate
+
+:::
+
+## Dodajemy animacje
+:::info 4 typy animacji
+Android Navigation pozwala przypisać do każdego przejścia między fragmentami cztery typy animacji:
+- `enterAnim` fragment wchodzi na ekran
+- `exitAnim`  fragment znika (bo inny fragment wchodzi)
+- `popEnterAnim` fragment wraca (np. po Back)
+- `popExitAnim` fragment opuszcza aktywność, bo inny wraca (np. wstecz)
+
+:::
+
+### Definicja animacji
+- prawy klawisz myszy na `res` -> *New -> Android Resource File*:
+  - type `Animationa`
+  - nazwa pliku np. `slide_in_right`
+  - powstanie nowy folder `res/anim` z plikiem `slide_in_right.xml`
+`slide_in_right.xml`
+```xml
+<translate
+        android:fromXDelta="100%"
+        android:toXDelta="0%"
+        android:duration="300"/>
+```
+- w tym folderze `anim` dodajemy inne animacje, np.:
+
+`slide_out_right.xml`
+```xml
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+        android:fromXDelta="0%"
+        android:toXDelta="100%"
+        android:duration="300"/>
+</set>
+```
+
+`slide_left_in.xml`
+```xml
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+        android:fromXDelta="-100%"
+        android:toXDelta="0%"
+        android:duration="300"/>
+</set>
+
+```
+
+
+
+`slide_out_left.xml`
+```xml
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <translate
+        android:fromXDelta="0%"
+        android:toXDelta="-100%"
+        android:duration="300"/>
+</set>
+```
+
+### Użycie animacji
+- przejdźmy do pliku `nav_graph.xml`, w którym dodamy globalne nawigacje
+```xml
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment"
+
+    app:enterAnim="@anim/slide_in_right"
+    app:exitAnim="@anim/slide_out_left"
+    app:popEnterAnim="@anim/slide_in_left"
+    app:popExitAnim="@anim/slide_out_right"
+
+    >
+```
+#### Niestety nie działa
+- uruchom aplikację,
+- żadnych animacji nie będzie !!!! :), bo `BottomNavigationView` nie używa `action` w `nav_graph.xml`
+
+#### "Stety" zadziała
+
+#### Dodajemy nowy fragment i `action` (z `Home` do `Details`)
+- aby zobaczyć animacje w akcji, utworzymy nowy fragment nie zarządzany przez `BottomNavigationView`
+- będąc w pliku `nav_graph.xml`:
+  - utwórz fragment `DetailsFragment`
+  - do fragmentu `HomeFragment` dodaj akcję przejścia do fragmentu `DetailsFragment`
+```xml
+ <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.mybottomnavigationview.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_detailsFragment"
+            app:destination="@id/detailsFragment" />
+    </fragment>
+
+//...
+
+    <fragment
+        android:id="@+id/detailsFragment"
+        android:name="com.example.mybottomnavigationview.DetailsFragment"
+        android:label="fragment_details"
+        tools:layout="@layout/fragment_details" />
+
+```
+
+#### Definiujemy wygląd `fragment_details.xml`
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DetailsFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="JESTEŚ W SZEGÓŁACH"
+        android:gravity="center_horizontal|center_vertical"
+        android:textSize="20sp"
+        android:background="#112233"
+        android:textColor="#aaafff"
+        />
+
+</LinearLayout>
+```
+
+#### Włączamy binding w `HomeFragment.kt`
+- w pliku `fragment_home.xml` dodaj `id` (`homeTextView`) to `TextView`
+
+```kotlin
+class HomeFragment : Fragment() {
+
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+// ....
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.homeTextView.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_detailsFragment)
+        }
+    }
+
+//...
+```
+
+URUCHAMIAMY i, po kliknięciu na `TextView` w `HomeFragment`, NIE zobaczysz animacji.
+
+Musisz przenieść animacje z ustawień globalnych do konkretnego `action` (błąd frameworku;).
+
+`nav_graph.xml`
+```xml
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment"
+    >
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.mybottomnavigationview.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_detailsFragment"
+            app:destination="@id/detailsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+    </fragment>
+
+<!-- ... -->
+```
+
+

@@ -1,0 +1,66 @@
+---
+title: Prosta aplikacja z fragmentem
+---
+
+
+# Prosta aplikacja z fragmentem
+- utwórz projekt `Empty Views Activity`
+- w folderze, w którym jest `MainActivity.kt` utwórz fragment `FirstFragment.kt` (`New->Fragment->Blank Fragment`)
+- w "activity_main.xml" dodaj:
+```xml
+
+  <TextView
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="Main Activity"
+       android:textSize="20sp"
+       android:textColor="#abc123"
+       android:gravity="center"
+       android:background="#123abc"
+       android:padding="10dp"
+       />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentContainerView"
+        android:background="#F5f565"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.example.fragmentsfirst.FirstFragment"/>
+```
+- `FragmentContainerView` specjalny kontener dla fragmentów
+- `android:name` dzięki tej właściwości:
+    - Android automatycznie utworzy obiekt klasy `FirstFragment`
+    - obiekt ten umieści w kontenerze `FragmentContainerView` w momencie wczytywania layout(`setContentView`)
+
+- w `layoucie` fragmentu dodaj:
+```xml
+  <TextView
+        android:id="@+id/textViewHello"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello from FirstFragment!"
+        android:textSize="20sp" />
+
+```
+
+- oraz wprowadzimy zmiany w `FirstFragment.kt`
+- dopiszemy metode `onViewCreated`
+```kotlin
+ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val textView = view.findViewById<TextView>(R.id.textViewHello)
+        textView.setOnClickListener {
+            Toast.makeText(requireContext(), "Kliknięto tekst!", Toast.LENGTH_SHORT).show()
+        }
+    }
+```
+
+
+
+
+
+
+
+
+
+
+

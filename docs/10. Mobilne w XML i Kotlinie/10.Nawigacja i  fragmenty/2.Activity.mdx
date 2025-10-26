@@ -1,0 +1,355 @@
+---
+title: Activity
+---
+
+
+# Activity
+
+## Sprawdzanie cyklu życia aktywności
+- utwórz projekt `Empty Views Activity`
+- dodaj poniższy kod (jako prywantą właściwość zdefiniowaliśmy zmienną `tag=mainalc`)
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private val tag = "mainalc" // !!!!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        Log.d(tag, "onCreate: Activity is being created")
+    }
+
+
+
+
+override fun onStart(){
+    super.onStart()
+    Log.d(tag, "onStart: Activity is becoming visible")
+}
+
+override fun onResume(){
+    super.onResume()
+    Log.d(tag, "onResume: Activity is now interacting with the user")
+}
+
+override fun onPause() {
+    super.onPause()
+    Log.d(tag, "onPause: Activity is pausing (another Activity is coming in front")
+}
+
+override fun onStop(){
+    super.onStop()
+    Log.d(tag, "onStop: Activity is no longer visible to the user")
+}
+
+override fun onDestroy() {
+    super.onDestroy()
+    Log.d(tag, "onDestroy: Activity is being destroyed")
+}
+
+override fun onRestart() {
+    super.onRestart()
+    Log.d(tag, "onRestart: Activity is restarting after being stopped")
+}
+}
+
+```
+
+
+## Explicit Intent
+
+# Przykład 1. - uruchomienie drugiej aktywności
+- zrób nowy projekt w Android Studio
+- w folderze, w którym jest MainActivity.kt zrób nowy plik `SecondActivity`: `New>Activity>Empty Views Activity`
+
+
+
+`activity_main.xml`
+- zmieniamy na `LinearLayout`
+- dodajemy przycisk
+```xml
+    <Button
+        android:id="@+id/open_second_activity_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Open Second Activity" />
+```
+
+
+`activity_second.xml`
+- dodajemy `TextView`
+```xml
+<TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:text="To jest druga aktywność"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+```
+
+`MainActivity.kt`
+- obsługa kliknięcia, która otwiera nową aktywność
+- `SecondActivity::class.java`:
+    - `::class` operator, który pozwala uzyskać referencję do klasy
+    - `SecondActivity::class` przekazujemy referencję do klasy `SecondActivity`
+    - `.java` konwertuje obiekt-klasę z Kotlina na na obiekt-klasę z Javy, bo tego wymaga konstruktor `Intent`
+```kotlin
+val button = findViewById<Button>(R.id.open_second_activity_btn)
+button.setOnClickListener{
+    val intent = Intent(this, SecondActivity::class.java)
+    startActivity(intent)
+}
+```
+
+## Przykład 2. - przekazanie danych (string) do  drugiej aktywności
+
+`activity_main.xml`:
+- dodamy pole do wprowadzania tekstu
+```xml
+  <EditText
+        android:id="@+id/name_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Enter a message"
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"/>
+
+```
+
+`MainActivity.kt`
+- podłączymy się do `EditText`
+- użyjemy `Intent`, aby przekazać dane z `EditText` do drugiej aktywności
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var editText: EditText
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+//...
+
+        editText = findViewById(R.id.name_edittext)
+        val btnOpenNewActivity: Button = findViewById(R.id.open_second_activity_btn)
+        btnOpenNewActivity.setOnClickListener {
+            val message = editText.text.toString()
+            val intent = Intent(this, SecondActivity::class.java)
+            intent.putExtra("EXTRA_MESSAGE", message)
+            startActivity(intent)
+        }
+//...
+
+```
+
+`SecondActivity.kt`
+- otrzymujemy dane z `Intent`
+- do pobrania danych użyjemy metody `getStringExtra` z kluczem `EXTRA_MESSAGE`
+- w metodzie `onCreate` wprowadzimy zmiany:
+```kotlin
+val textViewMessage =findViewById<TextView>(R.id.message_textview)
+val message = intent.getStringExtra("EXTRA_MESSAGE")
+textViewMessage.text = if (message.isNullOrEmpty()) {
+    "Mo message received"
+} else {
+    message
+}
+
+```
+wyjaśnienie dla zmiennej `intent`:
+- Kiedy Android uruchamia Activity, przypisuje jej obiekt Intent, z którego można pobierać dane lub akcje.
+- Jest to część konstrukcji każdej Activity, dlatego nie musimy jawnie przekazywać obiektu Intent ani go tworzyć w SecondActivity – jest on dostępny od momentu uruchomienia aktywności.
+
+
+
+## Jak przesyłać dane między aktywnościami w Androidzie (`Intent` + `putExtra` / `getExtra`)
+- Pojedyncze wartości (typy proste i String)
+    - `putExtra("EXTRA_INT", 123)` → `getIntExtra("EXTRA_INT", 0)`
+    - `putExtra("EXTRA_FLOAT", 3.14f)` → `getFloatExtra("EXTRA_FLOAT", 0.0f)`
+    - `putExtra("EXTRA_BOOLEAN", true)` → `getBooleanExtra("EXTRA_BOOLEAN", false)`
+    - `putExtra("EXTRA_STRING", "Hello")` → `getStringExtra("EXTRA_STRING")`
+- Tablice prymitywne (int[], float[], boolean[] …)
+    - `putExtra("EXTRA_INTS", intArrayOf(1, 2, 3))`
+    - `getIntArrayExtra("EXTRA_INTS")`
+- Tablice obiektów (np. `String[]`)
+    - `putExtra("EXTRA_NAMES", arrayOf("Ala", "Ola", "Ela"))`
+    - `getStringArrayExtra("EXTRA_NAMES")`
+    - Działa tylko dla tablic Stringów, bo Android wspiera je wprost.
+- ArrayList
+    - `putStringArrayListExtra("EXTRA_LIST", arrayListOf("Ala", "Ola"))`
+    - `getStringArrayListExtra("EXTRA_LIST")`
+    - Obsługiwane są ArrayListy typów: String, Integer, CharSequence, Parcelable.
+- Obiekty Parcelable / Serializable
+    - Jeśli mamy własną klasę, trzeba ją oznaczyć jako Parcelable (zalecane) lub Serializable.
+    - `putExtra("EXTRA_USER", user)`
+    - `getParcelableExtra<User>("EXTRA_USER")`
+    - To sposób na przesyłanie całych obiektów (np. użytkownika z imieniem i wiekiem).
+- Bundle (zestaw danych)
+    - Można zapakować wiele wartości do jednego obiektu Bundle.
+    - `val bundle = Bundle().apply { putInt("score", 99); putString("name", "Ala") }`
+    - `intent.putExtras(bundle)`
+    - `val score = intent.extras?.getInt("score")`
+
+
+
+## Implicit Intent
+### Co to jest implicit Intent?
+- (intencje niejawne) są używane w Androidzie, gdy chcesz zainicjować działanie, ale nie określasz bezpośrednio komponentu, który ma je obsłuży,
+- zamiast tego opisujesz czynność, którą chcesz wykonać (np. otworzyć przeglądarkę, wysłać e-mail, wyświetlić mapę), a system Android decyduje, który komponent najlepiej pasuje do tego zadania, w oparciu o zarejestrowane Intent Filters w pliku manifestu aplikacji.
+
+### Jak to działa od strony systemu?
+- Android sprawdza w systemie wszystkie aplikacje, które zadeklarowały w `AndroidManifest.xml` zdolność do obsłużenia danej akcji.
+- Jeśli jest więcej niż jedna aplikacja – użytkownik dostaje okno wyboru („Otwórz za pomocą…”).
+- Dzięki temu aplikacje mogą współpracować między sobą (np. każda przeglądarka może otworzyć link).
+
+:::tip Metafora
+- *Explicit Intent* - „Idę konkretnie do Hermenegildy” (znasz adresata i kierujesz się do niego).
+- *Implicit Intent* - „Chcę porozmawiać z kimś, kto zna się na matematyce” → Android wybiera, kto w systemie może to zrobić (np. różne aplikacje: kalkulator, Excel, notatki).
+
+:::
+
+### Najczęściej używane *implicit intents*
+- Uruchomienie przeglądarki, aby otworzyć stronę www `Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))`,
+- Uruchomienie aplikacji telefon `Intent(Intent.ACTION_DIAL, Uri.parse("tel:123456789"))`
+- Uruchomienie aplikacji wysyłających SMS
+```kotlin
+Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:123456789"))
+    .apply { putExtra("sms_body", "Cześć!") }`
+```
+- Uruchomienie aplikacji do wysyłania emaili:
+```kotlin
+Intent(Intent.ACTION_SEND).apply {
+    type = "text/plain";
+    putExtra(Intent.EXTRA_EMAIL, arrayOf("adres@example.com"));
+    putExtra(Intent.EXTRA_SUBJECT, "Temat"); putExtra(Intent.EXTRA_TEXT, "Treść")
+}
+```
+- Uruchomienie aplikacji do zdjęć `Intent(MediaStore.ACTION_IMAGE_CAPTURE)`
+- Pokazanie lokalizacji na mapie `Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=Warszawa"))`
+- Udostępnianie tekstu:
+```kotlin
+Intent(Intent.ACTION_SEND).apply {
+    type = "text/plain";
+    putExtra(Intent.EXTRA_TEXT, "Tekst do udostępnienia")
+}
+```
+- Otwieranie aplikacji Kontakty `Intent(Intent.ACTION_VIEW, ContactsContract.Contacts.CONTENT_URI)`
+
+
+### Prosty przykład
+#### „Intent.ACTION_VIEW otwiera zawartość w aplikacji, która potrafi ją obsłużyć”.
+- utwórz projekt `Empty Views Activity` w Android Studio
+- jak zawsze główny `layout` zmieniamy na `LinearLayout`
+- utworzymy przycisk, który otworzy przeglądarkę
+
+`activity_main.xml`
+```xml
+ <TextView
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="Implicit Intent"
+       android:textSize="20sp"
+       android:gravity="center"
+       android:padding="10dp"
+       />
+
+    <Button
+        android:id="@+id/openBrowserButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open a browser"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+    />
+
+```
+
+`MainActivity.kt` (w metodzie `onCreate`)
+```kotlin
+ val openBrowserButton = findViewById<Button>(R.id.openBrowserButton)
+
+        openBrowserButton.setOnClickListener {
+            // Tworzymy implicit intent
+            val intent = Intent(Intent.ACTION_VIEW, "https://www.wp.pl".toUri())
+
+            // Uruchamiamy przeglądarkę
+            startActivity(intent)
+        }
+```
+
+#### Intent.ACTION_DIAL – otwiera aplikację Telefon z wpisanym numerem, ale nie wykonuje automatycznie połączenia.
+- dodajemy przycisk do dzwonienia
+```xml
+
+    <Button
+        android:id="@+id/callButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Call 123 123"
+        android:backgroundTint="#abc123"
+        />
+
+```
+
+- dopisujemy logikę działania w `onCreate`
+```kotlin
+ val callButton = findViewById<Button>(R.id.callButton)
+
+ callButton.setOnClickListener {
+     // Tworzymy implicit intent dla numeru telefonu
+     val intent = Intent(Intent.ACTION_DIAL, "tel:123123".toUri())
+     startActivity(intent)
+ }
+
+```
+
+
+#### Intent.ACTION_SEND – służy do udostępniania danych (np. tekstu, obrazu, pliku) w innych aplikacjach
+
+- dodajemy przycisk do wysłania tekstu
+```xml
+ <Button
+        android:id="@+id/shareTextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Share text"
+        android:layout_gravity="center"
+        android:backgroundTint="#123abc"
+        />
+
+```
+- dodajemy logikę obsługi w metodzie `onCreate`
+```kotlin
+val shareButton = findViewById<Button>(R.id.shareTextButton)
+
+shareButton.setOnClickListener {
+    // Tworzymy implicit intent do udostępnienia tekstu
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, "Hello from my app!")
+    }
+
+    // createChooser → wymusza pytanie o aplikację
+        val chooser = Intent.createChooser(intent, "Choose app to share:")
+        startActivity(chooser)
+    }
+
+```
+
+
+
+
+
+
+
+

@@ -1,0 +1,368 @@
+---
+title: cz. 1 Przekazywanie argumentów w Navigation Component
+---
+
+
+
+
+# Przekazywanie argumentów w Navigation Component
+## Przygotowanie projektu
+- `Empty Views Activity`
+
+### `binding`
+    - w `build.gradle.kts (module)`
+```kts
+ buildFeatures {
+        viewBinding=true
+    }
+```
+Pamiętaj o synchronizacji projektu!
+
+
+`MainActivity.kt`
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
+//...
+```
+
+### Biblioteki NavComponents
+#### `libs.versions.toml` dodajemy
+
+```toml
+[versions]
+navigation = "2.9.5" # najnowsze stabilne Jetpack Navigation
+
+[libraries]
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+androidx-navigation-ui-ktx       = { group = "androidx.navigation", name = "navigation-ui-ktx",       version.ref = "navigation" }
+
+# (opcjonalnie, rzadziej potrzebne)
+androidx-navigation-runtime-ktx  = { group = "androidx.navigation", name = "navigation-runtime-ktx",  version.ref = "navigation" }
+
+[plugins]
+androidx-navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }
+```
+:::tip
+- `libs.version.toml` plik konfiguracji Gradle Version Catalog, który pozwala centralnie zarządzać wersjami zależności w projekcie Android.
+- `[versions]` definiuje wersje używanych bibliotek
+- `[libraries]` definiuje aliasy dla zależności
+- `[plugins]`definiuje aliasy dla pluginów Gradle
+
+
+- `androidx` to zestaw bibliotek Jetpack, które rozszerzają funkcje Androida
+:::
+
+### `build.gradle.kts` (Module: app) dodajemy
+```kts
+plugins {
+    // ...
+    alias(libs.plugins.androidx.navigation.safeargs)
+}
+
+//...
+
+dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
+
+    // Navigation - ten fragment dodajesz
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+
+//...
+
+```
+
+### `build.gradle.kts` (Project)
+- te pluginy nie będą używane na poziomie projektu, ale w modułach
+- w tym miejscu tylko definiujemy pluginy, ale ich nie używamy
+```kts
+plugins {
+    //...
+    alias(libs.plugins.androidx.navigation.safeargs) apply false
+}
+
+```
+
+
+## Co już wiemy?
+Do tej pory potrafimy:
+- Przejść z `FirstFragment` do `SecondFragment`,
+- Używać `findNavController().navigate()`.
+
+Ale często chcemy przekazać dane, np.:
+- Użytkownik wpisuje imię w `EditText`, a w drugim fragmencie wyświetlamy komunikat „Witaj, Jan!”
+- `Navigation Component` pozwala to zrobić bezpiecznie – dzięki `Safe Args`.
+
+
+:::note Czym są `Safe Args`?
+Safe Args to plugin, który:
+- generuje klasy do przekazywania danych między fragmentami,
+- gwarantuje bezpieczeństwo typów (np. jeśli przekazujesz Int, nie możesz przypadkiem odebrać String).
+
+
+:::
+
+## Praktyczny przykład - prosty
+### Założenia:
+- `FirstFragment` użytkownik wpisuje imię w `EditText`
+- `SecondFragment` wyświetla tekst `Witaj, [imię]!`
+
+
+### Przygotowanie NavGrapha:
+- dodaj fragment `FirstFragment.kt`
+- dodaj fragment `SecondFragment.kt`
+- dodaj `nav_graph.xml` w `res/navigation`
+    - Na folderze `res` Klikamy prawym  *New → Android Resource File*
+        - nazywamy `Name: navigation.xml`
+        - ustawiamy `Resource type: Navigation`.
+    - w `secondFragment` dodaj (wyklikanie) argument (`userName`, `init name`)
+```xml
+    <fragment
+        android:id="@+id/firstFragment"
+        android:name="com.example.navcompsafeargs.FirstFragment"
+        android:label="fragment_first"
+        tools:layout="@layout/fragment_first" >
+        <action
+            android:id="@+id/action_firstFragment_to_secondFragment"
+            app:destination="@id/secondFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/secondFragment"
+        android:name="com.example.navcompsafeargs.SecondFragment"
+        android:label="fragment_second"
+        tools:layout="@layout/fragment_second" >
+
+        <argument
+            android:name="userName"
+            app:argType="string"
+            android:defaultValue="init name" />
+    </fragment>
+```
+
+### Główna aktywność
+```xml
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Simple Fragment Communication App"
+      android:textSize="18sp"
+      android:gravity="center"
+      android:padding="5dp"
+      android:background="#471966"
+      android:textColor="#e8e8e8"      />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/navHostFragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        app:navGraph="@navigation/nav_graph"
+        app:defaultNavHost="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        />
+```
+
+### Pierwszy fragment
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#def123"
+    >
+
+    <EditText
+        android:id="@+id/lastNameEditText"
+        android:hint="Wpisz nazwisko"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/sendButton"
+        android:text="Wyślij"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>
+```
+
+```kotlin
+class FirstFragment : Fragment() {
+
+// dodanie mechanizmu binding do klasy
+    private var _binding: FragmentFirstBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
+//...
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentFirstBinding.inflate(inflater,
+            container,
+            false)
+
+
+        // Inflate the layout for this fragment
+        return binding.root
+    }
+
+// WYSYŁANIE DANYCH DO DRUGIEJ AKTYWNOŚCI
+ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+       binding.sendButton.setOnClickListener {
+           val name = binding.lastNameEditText.text.toString()
+           val action = FirstFragmentDirections
+               .actionFirstFragmentToSecondFragment(name)
+
+           findNavController().navigate(action)
+       }
+
+```
+- `action` to obiekt przechowujący informację o trasie i danych
+- `FirstFragmentDirections`
+    - to klasa generowana automatycznie przez `Safe Args`
+    - każdy fragment w grafie dostaje swoją klasę `NazwaFragmentuDirections`,
+      która zawiera metody reprezentujące akcje z tego fragmentu.
+- `val action = FirstFragmentDirections.actionFirstFragmentToSecondFragment(name)`
+    - "Stwórz obiekt polecenia przejścia z `FirstFragment` do `SecondFragment`
+  i dołącz do niego argument name".
+- `findNavController()`:
+    - to funkja znajdująca i zwracająca obiekt klasu `NavController`
+    - obiekt ten zarządza nawigacją w obrębie `NavHostaFragment` - to nawigator:
+        - wie, jaki fragment jest aktualnie aktywny,
+        - zna mapę przejść (nav_graph.xml),
+        - potrafi przechodzić między ekranami (`navigate()`),
+        - potrafi wracać (`popBackStack()`).
+
+
+### Drugi fragment
+```xml
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#9C27B0"
+    >
+
+    <TextView
+        android:id="@+id/lastNameTextView"
+        android:text="Nazwisko użytkownika:"
+        android:textSize="22sp"
+        android:textColor="#fffeee"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>
+```
+
+```kotlin
+class SecondFragment : Fragment() {
+
+    private var _binding: FragmentSecondBinding? = null
+    private val binding get() = _binding!!
+    private val args: SecondFragmentArgs by navArgs()
+
+//...
+    override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            _binding = FragmentSecondBinding.inflate(inflater,
+                container,
+                false)
+
+            // Inflate the layout for this fragment
+            return binding.root
+        }
+
+     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+
+            val userName = args.userName
+            binding.lastNameTextView.text = userName
+
+        }
+
+```
+- `SecondFragmentArgs` typ wygenerowany automatycznie przez `Safe Args`
+     - w `nav_graph.xml` mamy
+```xml
+<fragment
+    android:id="@+id/secondFragment"
+    android:name="com.example.app.SecondFragment"
+    android:label="SecondFragment">
+    <argument
+        android:name="userLastName"
+        app:argType="string" />
+</fragment>
+```
+więc `Safe Args` automatycznie generuje klasę:
+```kotlin
+class SecondFragmentArgs(
+    val userLastName: String
+)
+```
+
+- `navArgs()`
+    - odczytuje argumenty przekazane przez `NavController`
+    - automatycznie tworzy odpowiedni obiekt `SecondFragmentArgs`
+- `by navArgs()` delegacja właściwości system sam wypełni args odpowiednim obiektem z danymi
+
+:::note Podsumowanie
+1. `FirstFragmentDirections.actionFirstFragmentToSecondFragment("Kowalski")` -
+tworzy obiekt z argumentem `userLastName = "Kowalski"`.
+2. `findNavController().navigate(action)` wysyła dane w pakiecie (`Bundle`) do `SecondFragment`.
+3.  W `SecondFragment`:
+    - `private val args: SecondFragmentArgs by navArgs()`
+    - system odczytuje z dane `Bundle` i tworzy obiekt `SecondFragmentArgs`
+    - i teraz `args.userLastName` to `"Kowalski"`.
+
+
+
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

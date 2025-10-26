@@ -1,0 +1,119 @@
+---
+title: Navigation Component - teoria
+---
+
+# Navigation Component
+
+## Definicja - skrót
+
+- Navigation Component – biblioteka Jetpack, która:
+    - pozwala łatwo definiować przejścia w jednym pliku `XML`,
+    - automatycznie obsługuje `backstack`,
+    - działa z fragmentami i aktywnościami,
+    - daje wsparcie dla `Safe Args` (przekazywanie danych).
+
+- Pojęcia:
+    - `NavHostFragment` – kontener w `Activity`, gdzie wstawiane są fragmenty z grafu.
+    - `NavController` – obiekt sterujący przejściami (np. `navigate(...)`).
+    - `navigation.xml` – wizualna mapa przejść.
+
+
+## Navigation Component - definicja rozbudowana
+
+## Definicja
+https://developer.android.com/jetpack/androidx/releases/navigation
+- Navigation is a framework for navigating between 'destinations' within an Android application that
+- provides a consistent API whether destinations are implemented as Fragments, Activities, or other components.
+
+
+- Navigation Component to narzędzie, które upraszcza zarządzanie nawigacją w aplikacji Android.
+- Dzięki niemu nie musisz ręcznie zarządzać `FragmentTransaction`, a przejścia między ekranami
+- są bardziej czytelne i zorganizowane.
+
+**Navigation Component to cały system do zarządzania nawigacją w Androidzie.**
+
+## Podstawowe elementy
+
+### NavController
+:::note NavController
+- Jest odpowiedzialny za:
+  - zarządzanie stosami nawigacji i
+  - obsługę przejść między fragmentami.
+- `val navController = findNavController()`
+- `navController.navigate(R.id.action_home_to_details)`
+
+:::note NavHostFragment
+- Kontener dla *Nav Graph* – to tutaj będą wyświetlane kolejne fragmenty.
+- Dodajesz go w `activity_main.xml`:
+
+:::example
+```xml
+<androidx.fragment.app.FragmentContainerView
+
+android:id="@+id/nav_host_fragment"
+android:name="androidx.navigation.fragment.NavHostFragment"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+    app:navGraph="@navigation/nav_graph" />
+```
+- `app:navGraph` – określa, który *Nav Graph* jest używany.
+- `android:name` – określa klasę, której instancja automatycznie zostanie utworzona,
+a następnie przypisana do tego kontenera.
+
+
+Gdy system Android ładuje aktywność i inflatuje `layout`, spotykając się
+z elementem `FragmentContainerView` posiadającym `android:name`, automatycznie:
+- Tworzy instancję fragmentu klasy określonej w `android:name`.
+- Umieszcza tę instancję fragmentu wewnątrz tego kontenera (`FragmentContainerView`).
+- W efekcie pod ID widoku nav_host_fragment masz już gotową instancję klasy `NavHostFragment`.
+
+:::
+
+
+:::
+
+
+
+
+### Safe Args
+:::note Safe Args
+- Ułatwia bezpieczne przekazywanie danych między fragmentami.
+- Generuje klasy `Directions`, więc nie trzeba przekazywać `Bundle` ręcznie.
+- Przykład przekazywania danych z `HomeFragment` do `DetailsFragment`:
+```kotlin
+val action = HomeFragmentDirections.actionHomeToDetails("Hello, Details!")
+findNavController().navigate(action)
+```
+- odbieranie w `DetailsFragment`
+```kotlin
+val message = arguments?.let { DetailsFragmentArgs.fromBundle(it).message }
+```
+
+:::
+
+
+
+### Nav Graph
+:::note Nav Graph
+- Określa, jakie ekrany są w aplikacji i jak można między nimi przechodzić.
+- `Navigation Graph` (`nav_graph.xml`) łączy fragmenty i definiuje przejścia (`action`).
+
+:::
+
+## Procedura pracy z Navigation Component
+1. konfiguracja projektu (dodanie bibliotek związanych z nawigacją)
+2. utworzenie fragmentów (xml+kotlin)
+3. utworzenie pliku nav_grav.xml w res/navigation
+4. dodanie NavHostFragment do activity_main.xml
+5. konfiguracja MainActivity.kt, aby aktywność używała NavController
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,252 @@
+---
+title: Obsługa zdarzeń i binding
+---
+
+# Obsługa zdarzeń i binding
+
+## Obsługa zdarzeń
+- **Kontynuacja projektu z poprzedniej lekcji.**
+- dołączymy do fragmentu przycisk, który będzie zmieniał tekst w `TextView`
+
+- `activity_main.xml` bez zmian,
+- `MainActivity.kt` bez zmian
+
+
+### W `fragment_first.xml` dodaj przycisk
+```xml
+    <Button
+        android:id="@+id/clickMeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Click me!"/>
+
+```
+
+### Napisz logikę kliknięcia w `FirstFragment.kt` w metodzie `onViewCreated`
+```kotlin
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val textView = view.findViewById<TextView>(R.id.textViewHello)
+        val btn: Button = view.findViewById(R.id.clickMeButton)
+
+        textView.setOnClickListener {
+            Toast.makeText(requireContext(), "Kliknięto tekst!", Toast.LENGTH_SHORT).show()
+        }
+
+        btn.setOnClickListener {
+            val currentTime = LocalTime
+                .now().
+                format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+
+            Toast.makeText(requireContext(),
+                "Kliknięto przycisk! ",
+                Toast.LENGTH_SHORT).show()
+            textView.text = "Kliknięto przycisk! Aktualna godzina: $currentTime"
+        }
+    }
+```
+**wyjaśnienia**
+- `@RequiresApi(Build.VERSION_CODES.O)`
+    - to adnotacja z biblioteki Androida ("Ten kod działa poprawnie dopiero od wersji Oreo(API 26)")
+    - chodzi o klasę `LocalTime` z pakietu `java.time`
+- `requireContext()`
+    - To metoda dostępna w klasie `Fragment`.
+    - Zwraca `Context` (kontekst aplikacji/aktywności), który jest gwarantowanie nie-nullowy.
+    - Fragment zawsze „żyje” wewnątrz aktywności, więc żeby wywołać rzeczy,
+  które potrzebują kontekstu (np. `Toast`, `AlertDialog`, `SharedPreferences`), musisz podać `Context`.
+
+
+
+## ViewBinding w Fragmentach
+### Definicja
+
+:::note ViewBinding
+- To mechanizm w Androidzie, który automatycznie generuje klasy powiązane
+z każdym plikiem XML w katalogu `res/layout`.
+- Dla pliku `fragment_first.xml` Android wygeneruje klasę `FragmentFirstBinding`.
+- Ta klasa zawiera bezpośrednie odwołania do wszystkich widoków w tym layoucie
+(np. `binding.textViewHello`, `binding.buttonClickMe`).
+- Dzięki temu nie musimy używać `findViewById()`, które jest dłuższe i bardziej podatne na błędy.
+- `binding.root` to główny widok `layoutu`, który fragment lub aktywność ustawia jako zawartość ekranu.
+
+:::
+
+### Metafora
+:::tip Metafora ViewBindingu
+- `Layout XML` to plan budynku (rysunek z opisanymi pokojami: kuchnia, salon, łazienka).
+- `findViewById()` to tak, jakbyś za każdym razem wchodził do budynku i pytał:
+„Hej, gdzie jest kuchnia? Gdzie jest salon?” – i musiał szukać po numerkach.
+- `ViewBinding` to przewodnik budynku, który dostajesz od razu przy wejściu.
+    - Na pierwszej stronie jest: „Kuchnia = drzwi nr 1, Salon = drzwi nr 2”.
+    - Nie musisz już pytać ani szukać – wystarczy zajrzeć do przewodnika (binding).
+
+:::
+
+### Użycie niekanoniczne - `onViewCreated()`
+Metoda `onViewCreated()`:
+- wywoływana jest po utworzeniu widoku
+- służy do konfiguracji widoku
+:::tip `View` / Widok
+- Widok w tym kontekście to drzewo elementów interfejsu (TextView, Button, Layouty) utworzone z pliku XML fragmentu,
+czyli to, co faktycznie pojawia się na ekranie i z czym użytkownik wchodzi w interakcję.
+
+- metaforycznie:
+    - plik XML to projekt domu na papierze,
+    - widok to już zbudowany dom, w którym możesz otworzyć drzwi albo zapalić światło.
+
+:::
+
+- `build.gradle.kts` (modułu) dopisz:
+```kts
+android{
+    buildFeatures {
+            viewBinding = true
+    }
+
+//...
+```
+- w pliku `FirstFragment.kt`
+```kotlin
+class FirstFragment : Fragment() {
+
+    private var _binding: FragmentFirstBinding? = null
+    private val binding get() = _binding!!
+//...
+ @RequiresApi(Build.VERSION_CODES.O)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        _binding = FragmentFirstBinding.bind(view)
+
+        binding.textViewHello.setOnClickListener {
+            Toast.makeText(requireContext(), "Kliknięto tekst!", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.clickMeButton.setOnClickListener {
+            val currentTime = LocalTime
+                .now().
+                format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+
+            Toast.makeText(requireContext(),
+                "Kliknięto przycisk! ",
+                Toast.LENGTH_SHORT).show()
+            binding.textViewHello.text = "Kliknięto przycisk! Aktualna godzina: $currentTime"
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+//..
+```
+**wyjaśnienie**
+- `FragmentFirstBinding` to automatycznie wygenerowana klasa dla layoutu `fragment_first.xml`.
+- `private var _binding: FragmentFirstBinding? = null` właściwość `_binding` przechowuje obiekt bindingu.
+    - przy niszczeniu `onDestroy()` zerujemy zmienną
+        - nie będzie trzymana referencja do zniszczonego widoku
+        - pamięć nie będzie wyciekać
+
+:::tip *memory leak*
+Wyciek pamięci to sytuacja, gdy:
+- aplikacja nadal trzyma w pamięci obiekty, które nie są już potrzebne, więc
+- system nie może ich usunąć (odzyskać pamięci przez GC).
+
+
+metaforycznie
+Wyobraź sobie, że wynajmujesz pokój w hotelu:
+- po wyjeździe nie oddajesz klucza,
+- pokój stoi pusty, ale system nadal go „rezerwuje”, bo myśli, że go potrzebujesz,
+- z czasem wszystkie pokoje się zapełniają – i hotel nie ma już miejsca dla nowych gości
+
+:::
+
+-  `_binding = FragmentFirstBinding.bind(view)` podpinamy się do istniejącego widoku
+
+
+### Użycie kanoniczne - `onCreateView()`
+- `onCreateView` tworzy i zwraca widok fragmentu
+- zmieniamy ten sam plik co poprzednio `FirstFragment.kt`
+```kotlin
+class FirstFragment : Fragment() {
+
+    // tu bez zmian
+    private var _binding: FragmentFirstBinding? = null
+    private val binding get() = _binding!!
+
+    // zmieniamy ciało tej metody
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentFirstBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+    }
+//...
+```
+- usuń z `onCreateView()` ` _binding = FragmentFirstBinding.bind(view)`, bo już nie potrzebujesz
+
+**wyjaśnienie**
+- nadmuchiwać ("inflatować", *inflate*) to zamienić plik `XML layout` na obiekty w pamięci, które potem są wyświetlane na ekranie.
+    - Plik XML (`fragment_first.xml`) to tylko opis wyglądu.
+    - Metoda `inflate()` „czyta” ten plik i tworzy z niego prawdziwe obiekty: `LinearLayout`, `TextView`, `Button` itd.
+
+:::note Metafory
+- XML to przepis na ciasto (zapisane składniki i instrukcje).
+- `Inflate` to upieczenie ciasta, czyli dopiero wtedy masz coś, co możesz zjeść.
+
+albo
+- XML to plan mebla IKEA na papierze.
+- `Inflate` to złożenie mebla z desek i śrubek, więc dopiero wtedy możesz z niego korzystać.
+
+:::
+
+---
+
+:::tip `onCreateView()`  vs `onViewCreate()`
+- `onCreateView + inflate()` = składamy mebel z pudełka (tworzymy widok).
+- `onViewCreated` = wkładamy książki do szafki i ustawiamy dekoracje (konfigurujemy widok).
+
+:::
+
+## Binding w Aktywnościach
+- w `activity_main.xml` do `TextView` dodajmy `android:id="@+id/titleTextView"`
+- uruchommy *binding* w `MainActivity.kt`
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root) // uwaga!!!!
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        binding.titleTextView.setOnClickListener {
+            binding.titleTextView.text = "No i nowy tytuł"
+        }
+    }
+}
+
+```
+:::note layoutInflater
+- layoutInflater to właściwość klasy Activity (dokładnie AppCompatActivity → Activity).
+- Jest to gotowy obiekt klasy LayoutInflater, który wie, jak „nadmuchać” (inflate) layout XML w kontekście tej aktywności.
+
+
+metafora:
+- `activity_main.xml` jest jak plan budynku,
+- `LayoutInflater` jest jak ekipa budowlana, która bierze plan i buduje prawdziły dom.
+- w aktywności masz zawsze pod ręką taką „ekipę” i to jest właśnie `layoutInflater`.
+
+
+:::

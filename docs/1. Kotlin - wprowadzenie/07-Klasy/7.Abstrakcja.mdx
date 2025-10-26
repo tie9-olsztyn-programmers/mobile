@@ -1,0 +1,111 @@
+---
+title: Abstrakcja
+---
+# Abstrakcja
+
+
+:::info Co to jest abstrakcja?
+- Abstrakcja to zasada OOP polegająca na tworzeniu ogólnego opisu rzeczy lub zachowań, bez wdawania się w szczegóły techniczne.
+- Abstrakcja pozwala zdefiniować „szkielet” obiektu: co on może robić lub jakie ma cechy — ale nie mówi, jak to robi.
+- Szczegóły są ustalane dopiero w klasach dziedziczących.
+
+
+:::
+
+
+:::note Metafora: UFO jako koncept
+Wyobraź sobie, że naukowcy projektują ogólny model UFO:
+    - Wiedzą, że UFO może latać i się maskować, ale nie mają pojęcia, jak dokładnie to się dzieje w różnych typach UFO.
+    - Mówią: „Każde UFO musi umieć latać i może się maskować, ale każdy producent niech wymyśli własny sposób na realizację tych funkcji.”
+
+Takim ogólnym modelem jest klasa abstrakcyjna lub interfejs.
+
+:::
+
+# Klasa abstrakcyjna
+```kotlin
+
+// Słowo `abstract` przy klasie oznacza, że nie możesz utworzyć obiektu tej klasy bezpośrednio.
+abstract class UFO(val shape: String = "kuleczka") {
+
+    // to „wymuszony kontrakt” na każdą klasę potomną: musisz mieć metodę fly()!
+    abstract fun fly()     // każda klasa potomna musi to zaimplementować
+
+    open fun cloak() {     // klasa potomna MOŻE nadpisać, ale nie musi
+        println("UFO w kształcie $shape próbuje się ukryć...")
+    }
+}
+
+class NormalUFO: UFO(){
+    override fun fly(){
+        println("Normalne ufo ma kształ $shape i teraz leci")
+    }
+}
+
+class SilverUFO : UFO("dysk") {
+    override fun fly() {
+        println("Srebrne UFO  śmiga w zawrotnym tempie!")
+    }
+
+    override fun cloak() {
+        println("Srebrne UFO (ma kształ $shape) znika, stając się całkiem niewidzialne!")
+    }
+}
+
+class GoldenUFO(shape: String) : UFO(shape) {
+    override fun fly() {
+        println("Złote UFO unosi się majestatycznie ponad ziemią!")
+    }
+    // nie musimy nadpisywać cloak(), jeśli nam nie zależy
+}
+
+
+
+
+
+fun main() {
+    // val ufo = UFO("trójkąt") // BŁĄD! Nie można utworzyć obiektu klasy abstrakcyjnej
+
+    val normalne = NormalUFO()
+    val srebrne = SilverUFO()
+    val zloty = GoldenUFO("Super KULA")
+
+    normalne.fly()	// Normalne ufo ma kształ kuleczka i teraz leci
+    normalne.cloak()// UFO w kształcie kuleczka próbuje się ukryć.
+    srebrne.fly()   // Srebrne UFO  śmiga w zawrotnym tempie!
+    srebrne.cloak() // Srebrne UFO (ma kształ dysk) znika, stając się całkiem niewidzialne!
+    zloty.fly()     // Złote UFO unosi się majestatycznie ponad ziemią!
+    zloty.cloak()   // UFO w kształcie Super KULA próbuje się ukryć...
+
+
+}
+```
+
+
+
+
+
+
+
+
+
+# Interfejs
+- Interfejs w Kotlinie to kontrakt: mówi, jakie metody/cechy **MUSZĄ** być zaimplementowane przez klasę, która go „wdraża” (: InterfaceName).
+- Interfejs:
+    - nie może mieć konstruktora,
+    - nie trzyma stanu (nie ma np. własnych pól typu `val shape` przechowywanych w obiekcie).
+- Może mieć własności (val, var) i domyślne implementacje metod (z ciałem).
+
+Każda klasa może implementować wiele interfejsów.
+
+
+
+
+
+
+
+
+
+
+
+

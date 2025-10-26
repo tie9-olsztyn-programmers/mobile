@@ -1,0 +1,226 @@
+---
+title: Modifier, Spacer
+---
+
+# Modifier i Spacer
+
+
+## Modifier
+Metafora - Wyobraź sobie:
+- Masz pudełko i chcesz je pomalować, powiększyć, przesunąć, dodać ramkę.
+- Samo pudełko nie ma tych właściwości — robisz to za pomocą naklejek (`Modifier`).
+    - Każda naklejka coś zmienia:
+        - rozmiar,
+        - kolor,
+        - pozycj
+        - ...
+
+Możesz ich nakleić kilka, jedna po drugiej.
+
+:::tip Modifier:
+- nie jest obowiązkowy,
+- zawsze występuje jako pierwszy argument po `text` lub `onClick`,
+- można łączyć (`.`) wiele efektów.
+
+:::
+
+### Najczęściej używane modyfikatoru
+:::tip
+
+| Cel | Przykład | Opis |
+|-----|-----------|------|
+| Odstęp wewnętrzny | `.padding(8.dp)` | Dodaje margines **wewnątrz** elementu (tekst nie dotyka krawędzi). |
+| Odstęp zewnętrzny | `.padding(start = 8.dp)` | Odstęp **między elementami**, wpływa na rozmieszczenie. |
+| Wypełnienie szerokości | `.fillMaxWidth()` | Wypełnia **całą dostępną szerokość** kontenera. |
+| Wypełnienie wysokości | `.fillMaxHeight()` | Wypełnia **całą wysokość** kontenera. |
+| Rozmiar stały | `.size(100.dp)` | Ustawia **stały rozmiar** elementu. |
+| Kolor tła | `.background(Color.Cyan)` | Nadaje **kolor tła**. |
+| Obramowanie | `.border(2.dp, Color.Black)` | Dodaje **ramkę** wokół elementu. |
+| Wyrównanie | `.align(Alignment.Center)` | Pozycjonuje element. |
+| Zaokrąglenie rogów | `.clip(RoundedCornerShape(8.dp))` | Zaokrągla rogi elementu. |
+| Klikalność | `.clickable { ... }` | Dodaje **obsługę kliknięcia**. |
+| Marginesy tylko z jednej strony | `.padding(horizontal = 8.dp, vertical = 4.dp)` | Umożliwia precyzyjne ustawienie marginesów. |
+| Maksymalna szerokość | `.widthIn(max = 300.dp)` | Ogranicza maksymalną szerokość. |
+| Przezroczystość | `.alpha(0.5f)` | Ustawia przezroczystość (0 – niewidoczny, 1 – pełna widoczność). |
+| Obrót | `.rotate(15f)` | Obraca element o zadany kąt. |
+
+💡 `Modifier` działa **łańcuchowo** — możesz połączyć wiele modyfikatorów:
+```kotlin
+Text(
+    text = "Compose is fun!",
+    modifier = Modifier
+        .padding(16.dp)
+        .background(Color.Yellow)
+        .border(2.dp, Color.Black)
+        .clip(RoundedCornerShape(8.dp))
+)
+```
+
+
+## Spacer
+Metafora:
+- Spacer to niewidzialna cegiełka, która tworzy przerwę między elementami.
+
+```kotlin
+Column(
+    modifier = Modifier.padding(16.dp)
+) {
+    Text("First line")
+    Spacer(modifier = Modifier.height(16.dp))
+    Text("Second line")
+}
+
+```
+
+```kotlin
+Row(
+    modifier = Modifier.padding(16.dp)
+) {
+    Text("Left")
+    Spacer(modifier = Modifier.width(32.dp))
+    Text("Right")
+}
+
+```
+
+## Przykłady kwadratami
+- nowy projekt
+- będziemy pracować w domyślnej funkcji `Greeting`
+
+### Prosty kwadrat
+```kotlin
+  Box(
+       modifier = Modifier
+           .size(100.dp)
+           .background(Color.Magenta)
+           .border(3.dp, Color.Green)
+
+   )
+
+```
+
+### Spacer w poziomie
+- Najlepiej pisać kod po kolei i sprawdzać co się dzieje.
+- `Spacer` dodać dopiero, gdy będą się wyświetlały 3 kwadraty
+- Poniższy kod należy umieścić w funkcji `Greeting`
+
+```kotlin
+  Row(
+        modifier=Modifier
+            .fillMaxWidth()
+            .padding(6.dp)
+
+
+    ){
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .background(Color.Green)
+                .border(2.dp, Color.Black)
+        )
+
+        Spacer(modifier=Modifier.width(40.dp))
+
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .background(Color.Blue)
+                .border(2.dp, Color.Black)
+        )
+
+        Spacer(modifier=Modifier.width(40.dp))
+
+        Box(
+        modifier = Modifier
+            .size(60.dp)
+            .background(Color.Red)
+            .border(2.dp, Color.Black)
+        )
+
+
+    }
+
+
+```
+
+### Kwadraty w poziomie bez `Spacer` - `horizontalArrangement`
+```kotlin
+        Row(
+        modifier=Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .background(Color.LightGray),
+        horizontalArrangement = Arrangement.SpaceEvenly
+
+    ){
+
+        Box(modifier.size(50.dp).background(Color.Red))
+        Box(modifier.size(50.dp).background(Color.Yellow))
+        Box(modifier.size(50.dp).background(Color.Green))
+    }
+
+
+
+}
+```
+Wypróbuj inne właściwości parametru `horizontalArrangement`
+
+### "Ważone" kwadraty w poziomie - `weight`
+```kotlin
+         Row(
+        modifier=Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+
+            .background(Color.LightGray),
+        horizontalArrangement = Arrangement.spacedBy(8.dp) //będą równe odstępy
+
+    ){
+
+        Box(modifier = Modifier
+            .weight(1f)
+            .aspectRatio(1f)
+            .background(Color.Red))
+        Box(modifier = Modifier
+            .weight(2f)
+            .aspectRatio(1f)
+            .background(Color.Yellow)
+
+        )
+        Box(modifier = Modifier
+            .weight(3f)
+            .aspectRatio(1f)
+            .background(Color.Green))
+    }
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

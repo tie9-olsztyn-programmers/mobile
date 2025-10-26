@@ -1,0 +1,115 @@
+---
+title: Przkazywanie danych między komponentami
+---
+
+# Przekazywanie danych między komponentami
+## Założenia aplikacji
+Będą dwa ekrany:
+- na pierwszym umieścimy formularz, w którym przekażemy różne dane (`InputScreen`)
+- na drugim dane z formularza wyświetlimy (`DisplayScreen`)
+
+## Przygotowanie projektu
+- tworzymy nowy projekt `Empty Activity`
+- dodajemy niebędne biblioteki:
+    - przejdź do pliku `buld.gradle.kts`(Module)
+    - w `dependencies` dodajemy `implementation("androidx.navigation:navigation-compose:2.8.3")`
+    - ten kod będzie podkreślony na czerwono
+    - wystarczy kliknąć nim, wybrać `Show more actions` i wybrać dopisanie odpowiednich zależności
+    - automatycznie będą zrobione wpisy w pliku `.toml`
+    - zsynchronizować projekt
+
+Zainstalowana biblioteka `navigation-compose` da nam dostęp do m.in:
+- `NavHost`
+    - kontener, który wyświetla odpowiedni ekran (`composable`) w zależności od aktualnej trasy w `NavController`.
+    - jest jak kino, w którym na ekranie wyświetlany jest aktualny „film” (ekran).
+- `NavController`
+    - Steruje nawigacją między ekranami – decyduje, który `composable` ma się pojawić.
+    - jest jak pilot lub reżyser, który mówi „teraz pokaż scenę 2”.
+- `rememberNavController()`
+    - Tworzy i zapamiętuje `NavController`, żeby nie tworzyć go od nowa przy każdym odrysowaniu ekranu.
+    - jest jak pamięć reżysera – trzyma scenariusz w głowie, żeby nie zaczynać od zera.
+- `composable(route: String, ...)`
+    - Definiuje pojedynczą trasę – mówi, jaki ekran (`Composable`) ma być wyświetlany, gdy użytkownik tam przejdzie.
+    - jest jak jedna konkretna scena w naszym kinie (taka klatka/ujęcie w filmie).
+- `navArgument(...)`
+    - Określa, jakie dane (argumenty) można przekazać do danej trasy.
+    - jest jak paczka z rekwizytami, którą przekazujesz do sceny, żeby aktorzy mieli dane do zagrania.
+- `NavType.StringType`, `NavType.IntType`
+    - Mówią `Compose`, jakiego rodzaju danych spodziewa się w `navArgument`.
+    - jest jak etykieta na paczce – informacja „tu jest tekst” albo „tu jest liczba”.
+- ...
+
+
+## Tworzenie nowych folderów i plików
+- w folderze, w którym jest `MainActivity.kt` utworzymy:
+    - folder `navigation` -> wewnątrz
+        - plik `AppNavigation.kt` (komponent nawigacyjny)
+        - plik `Routes.kt` (definicja tras/ścieżek nawigacji)
+    - w folderze `ui` utworzymy:
+        - plik `InputScreen.kt` ekran wyświetlany na początki (formularz)
+        - plik `DisplayScreen.kt` ekran wyświetlający dane z formularza z ekranu `IntputScreen`
+
+
+## Wstępna definicja `composable`ów
+
+`InputScreen.kt`
+```kotlin
+@Composable
+fun InputScreen(navController: NavController) {
+    TODO("Not yet implemented")
+}
+```
+
+`DisplayScreen.kt`
+```kotlin
+@Composable
+fun DisplayScreen(navController: NavController) {
+    TODO("Not yet implemented")
+}
+```
+:::tip Dlaczego przekazujemy `navController` jako parametr
+- Każdy ekran (`Composable`) w *Compose* jest niezależną funkcją
+  - nie ma globalnego dostępu do `navController`.
+- Aby ekran mógł:
+  - przejść na inny ekran,
+  - wrócić do poprzedniego,
+  - pobrać dane o bieżącej trasie,
+- musimy mu podać `navController` w parametrze.
+
+:::
+
+
+## Konfiguracja nawigacji
+- w pliku `Routes.kt` zdefiniujemy trasy jako właściwości Singletona
+```kotlin
+object Routes {
+    const val Input = "input"
+    const val Display = "display"
+}
+
+```
+
+- w pliku `AppNavigation.kt` zdefiniujemy komponent nawigacyjny
+```kotlin
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

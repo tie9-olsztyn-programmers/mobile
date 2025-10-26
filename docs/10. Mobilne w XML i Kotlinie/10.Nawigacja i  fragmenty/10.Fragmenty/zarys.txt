@@ -1,0 +1,105 @@
+Lekcja 1 – Wprowadzenie do fragmentów
+
+Cel: Zrozumienie, czym jest fragment i jak działa jego cykl życia.
+
+Teoria:
+
+Fragment = modułowa część interfejsu użytkownika, osadzana w aktywności.
+
+Różnica między Activity a Fragmentem.
+
+Cykl życia fragmentu (onAttach, onCreate, onCreateView, onViewCreated, onDestroyView, onDestroy, onDetach).
+
+Praktyka:
+
+Utworzenie prostego fragmentu (np. FirstFragment).
+
+Dodanie go do MainActivity w pliku XML (<fragment> albo FragmentContainerView).
+
+Wyświetlenie prostego TextView.
+
+
+Lekcja 2 – Komunikacja i obsługa zdarzeń
+
+Cel: Nauczyć się dodawać logikę do fragmentów.
+
+Praktyka:
+
+Dodanie przycisku w FirstFragment.
+
+Obsłużenie kliknięcia (setOnClickListener).
+
+Wyświetlenie Toast albo zmiana tekstu w TextView.
+
+
+
+Lekcja 3 – Przechodzenie między fragmentami (manualnie)
+
+Cel: Pokazać wymianę fragmentów w jednej aktywności.
+
+Praktyka:
+
+Utworzenie SecondFragment.
+
+W MainActivity użycie supportFragmentManager.beginTransaction() → replace → addToBackStack.
+
+Na kliknięcie przycisku w FirstFragment przejście do SecondFragment.
+
+Lekcja 4 – Przekazywanie danych między fragmentami
+
+Cel: Zrozumieć, jak przekazywać informacje.
+
+Praktyka:
+
+W FirstFragment dodać EditText do wpisania imienia.
+
+Po kliknięciu przycisku → wysłać dane do SecondFragment (np. przez arguments + Bundle).
+
+SecondFragment wyświetla imię w TextView.
+
+
+
+
+Lekcja 5 – Navigation Component (podstawy)
+
+Cel: Nauczyć się korzystać z nowoczesnej nawigacji.
+
+Teoria:
+
+NavHostFragment, NavController.
+
+navigation.xml jako mapa przejść.
+
+Praktyka:
+
+Utworzenie grafu nawigacji z FirstFragment → SecondFragment.
+
+Obsłużenie przycisku navigate(R.id.action_firstFragment_to_secondFragment).
+
+
+
+Lekcja 6 – Przekazywanie argumentów w Navigation Component
+
+Cel: Praktyczne użycie Safe Args.
+
+Praktyka:
+
+Konfiguracja pluginu safe-args.
+
+FirstFragment → wysłanie tekstu z EditText.
+
+SecondFragment → odebranie przez val args: SecondFragmentArgs by navArgs().
+
+
+
+Lekcja 7 – Nawigacja z elementami UI
+
+Cel: Połączyć fragmenty z BottomNavigationView lub DrawerLayout.
+
+Praktyka:
+
+Stworzenie aplikacji z 3 zakładkami (np. Home, Profile, Settings).
+
+Każda zakładka = osobny fragment.
+
+Użycie BottomNavigationView + Navigation Component.

@@ -1,0 +1,583 @@
+---
+title: ViewModel - przekazywanie danych
+---
+
+
+# Mój własny potwór - `ViewModelu`
+Kontynuujemy projekt z poprzedniej lekcji.
+
+
+## Zmiana wymagań
+- `SecondFragment` wysyła dane do `FirstFragment`
+- `FirstFragment` od razu reaguje i wyświetla je
+- wszystko w ramach jednej aktywności, bez `popBackStack()` i bez użycia `savedStateHandle`
+
+## `ViewModel`
+### Konfiguracja projektu
+`lib.versions.toml` dodajemy potrzebne biblioteki
+```toml
+[versions]
+...
+
+androidx-fragment = "1.7.1"
+androidx-lifecycle = "2.8.0"
+
+
+[libraries]
+...
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
+
+...
+
+```
+
+`build.gradle.kts` (module)
+```kts
+...
+dependencies {
+
+    //viewmodel
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+
+...
+
+
+```
+Pamiętaj o synchronizacji projektu!!!!
+
+
+### Teoria
+
+Założone cele osiągniemy przez **użycie wspólnego dla fragmentów `ViewModelu`.**
+
+:::note Co to jest `ViewModel`?
+- `ViewModel` to specjalna klasa, która:
+  - przechowuje dane i logikę ekranu (fragmentu lub aktywności),
+  - przetrwa rotację ekranu (czyli nie ginie przy `onDestroyView()`),
+  - i umożliwia wymianę danych między fragmentami w tej samej aktywności.
+
+- Cykl życia
+    - Zwykły Fragment ma bardzo krótki cykl życia:
+        - jego widok jest niszczony np. przy rotacji ekranu,
+        - przez to tracisz wszystkie dane z `EditText`, `CheckBox`, itp.
+    - A `ViewModel`:
+        - przetrwa rotację,
+        - zachowa stan,
+        - i zostanie zniszczony, dopiero gdy Activity zostanie zamknięta.
+
+- Jak działa w tle
+  1. Android ma specjalny magazyn `ViewModeli` przypisany do każdej `Activity`.
+  2. Gdy pierwszy raz poprosisz o `ViewModel`, Android tworzy go i zapisuje w tym magazynie.
+  3. Przy rotacji ekranu Android niszczy widoki, ale nie magazyn, więc Twój `ViewModel` zostaje.
+  4. Nowy Fragment po rotacji dostaje ten sam obiekt `ViewModel`, a nie nowy.
+
+- Powiązane elementy:
+  - `ViewModel` przechowuje dane i logikę UI
+  - `LiveData` pozwala fragmentowi obserwować zmiany danych w `ViewModel`u
+  - `activityViewModels()` umożliwia fragmentom w tej samej aktywności współdzielić jeden `ViewModel`
+
+:::
+
+:::tip `LiveData` metaforycznie
+- jest jak radio
+- Gdy tylko ktoś coś zmieni (np. opis potwora), to
+- radio natychmiast powiadamia wszystkich, którzy nasłuchują
+- nie musisz pytać co chwilę „czy coś się zmieniło?” – radio samo Ci to powie.
+
+:::
+
+:::tip `ViewModel` metaforycznie
+- jeżeli `Acitvity` to mieszkanie, a fragmenty to pokoje
+- `ViewModel` jest jak
+  - szafka na przedpokoju
+  - każdy fragment (pokój) ma do niej dostęp
+  - w jej szufladach są różne dane, które fragmenty mogą:
+    - odczytywać
+    - zmieniać
+  - a `LiveData` powiadamia wszystkie fragmenty o zmianach w szufladach
+
+
+:::
+
+### Praktyka
+Napiszmy własny `ViewModel` dla potwora.
+
+#### `MonsterViewModel.kt`
+```kotlin
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+
+class MonsterViewModel: ViewModel() {
+    private val _monsterDescription = MutableLiveData<String>()
+    val monsterDescription: LiveData<String> get() = _monsterDescription
+
+    fun sendMonsterDescription(description: String) {
+        _monsterDescription.value = description
+    }
+
+}
+```
+
+- Chcemy, żeby oba fragmenty miały ten sam `ViewModel` (nieosobne kopie).
+- Dlatego pobierzemy go z poziomu `Activity` (czyli wspólnego właściciela).
+
+#### `MainAcitivity.kt`
+```kotlin
+// właściwość obiektu MainAcitivity
+
+//...
+  private val sharedViewModel: MonsterViewModel by viewModels()
+
+//...
+```
+- `MonsterViewModel by viewModels`:
+    - ten kod tworzy obiekt klasy `MonsterViewModel`,
+    - obiekt ten będzie przypisany do cyklu życia tej aktywności (`MainActivity`):
+        - jest tworzony tylko raz,
+        - nie znika przy zmianie fragmentów,
+        - ale zostanie zniszczony, gdy zamkniesz całą aktywność (np. wyjdziesz z aplikacji).
+
+- `by viewModels()`:
+    - Android sam utworzy `MonsterViewModel`, jeśli jeszcze go nie ma,
+    - przechowa go w specjalnym `ViewModelStore`,
+    - a przy każdym kolejnym wywołaniu `by viewModels()` w tej samej aktywności:
+        - zwróci ten sam obiekt.
+
+
+:::tip
+- `by viewModels()` - tworzy nowy obiekt `ViewModel` i zapisuje go w magazynie `Activity`
+- `by activityViewModels()` - pobiera obiekt `ViewModel` z magazynu `Activity`
+
+:::
+
+#### `FirstFragment.kt`
+```kotlin
+//..
+
+class FirstFragment : Fragment() {
+
+    private var _binding: FragmentFirstBinding? = null
+    private val binding get() = _binding!!
+
+// POBIERAMY VIEWMODEL Z MAGAZYNU ANDROIDAl!!!
+    private val sharedViewModel: MonsterViewModel by activityViewModels()
+
+    override fun onDestroy() { //...
+
+
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Obserwujemy dane z ViewModelu!!!
+        sharedViewModel.monsterDescription.observe(viewLifecycleOwner) { description ->
+            binding.resultText.text = description
+        }
+
+//...
+
+```
+
+
+**Wyjaśnienie**
+```
+sharedViewModel.monsterDescription.observe(viewLifecycleOwner) { description ->
+binding.resultText.text = description
+}
+```
+- `sharedViewModel` to połączenie z viewModelem z aktywności
+- `monsterDescritpion` to właściwość z klasy `MonsterViewModel`
+    - ta właściwość zwraca specjalny obiekt `MutableLiveData<String>`
+    - na tej liście ustawiasz nasłuchiwacza/obserwatora:
+        - gdy wartość tego obiektu się zmieni (`monsterDescription.value`),
+        - wykonuje się funkcja strzałkowa `{description -> ...}`
+
+:::note `viewLifecycleOwner`
+Metoda `observer` z `LiveData` przyjmuje dwa argumenty:
+- *owner* czyli kto kontroluje cykl życia obserwacji
+    - to jest `viewLifecycleOwner`, a gwarantuje on, że:
+        - gdy **widok** fragmentu zostanie zniszczony (`onDestroyView()`)
+        - to `LiveData` automatycznie przestanie nasłuchiwać
+- *observer* funkcja, która wykona się przy zmianie danych
+    - to jest `{description -> ...}`
+
+:::
+
+
+:::danger Fragment istnieje dłużej niż jego widok (*UI*)
+- `Fragment`:
+    - obiekt Kotlina
+    - zawiera logikę, zmienna, metody
+    - powstaje `onAttach()`, `onCreate()`
+    - ginie `onDestroy()`
+- `View`/Widok fragmentu:
+    - hierarchia widoków (powstaje po `inflate()`)
+    - powstaje `onCreateView()`
+    - ginie `onDestroyView()`
+
+
+WIELKA ZAMIANA
+- kasujemy we fragmentach metodę `onDestroy()`
+    - niszczenie fragmentu i tak będzie wywoływana na mocy dziedziczenia
+- dopisujemy metodę `onDestroyView()`
+```kotlin
+ override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+```
+
+- w `onDestroyView()` zniszczymuy **widok** fragmentu
+- w `onDestroy()` zniszczymy **fragment**
+
+:::
+
+
+## `SecondFragment.kt`
+- zamieniamy metodę `onDestory()` na `onDestroyView()`
+```
+  override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+```
+
+:::important
+
+- w `nav_graph.xml` dodajemy akcję przejścia od `SecondFragment` do `FirstFragment`
+
+
+:::
+
+- pobieramy `ViewModel` z `Activity` używając `by activityViewModels()`
+```kotlin
+
+   // to właściwość obiektu SecondFragment
+    private val sharedViewModel: MonsterViewModel by activityViewModels()
+```
+
+- nasłuchiwaczu na przycisku
+    - dodajemy wysłanie danych do `ViewModelu`
+    - tworzymy akcję przejścia
+    - nawigujemy do `FirstFragment` na podstawie obiekt `action`
+```kotlin
+  binding.confirmButton.setOnClickListener {
+           //..
+
+            // Wysyłamy dane do wspólnego ViewModelu
+            sharedViewModel.sendMonsterDescription(description)
+
+            val action = SecondFragmentDirections.actionSecondFragmentToFirstFragment()
+
+            findNavController().navigate(action)
+
+
+```
+
+
+## Nazwa potwora przez `MonsterViewModel`
+### Podsumowanie aktualnego stanu
+- aktualnie nazwę potwora wysyłamy do drugiej aktywności:
+    - przez `argument` zdefiniowany w `nav_graph.xml`
+to element fragmentu drugiego z `nav_graph.xml`
+```xml
+ <argument
+            android:name="monsterName"
+            app:argType="string"
+            android:defaultValue="Godzilla" />
+```
+- w `FirstFragment.kt` wysyłamy dane do drugiej aktywności przez
+```kotlin
+//...
+    binding.sendButton.setOnClickListener {
+           val name = binding.lastNameEditText.text.toString()
+           val action = FirstFragmentDirections
+               .actionFirstFragmentToSecondFragment(name)
+
+           findNavController().navigate(action)
+       }
+//...
+```
+- dane odbieramy w `SecondFragment.kt` przez
+```kotlin
+//...
+     private val args: SecondFragmentArgs by navArgs()
+//...
+ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.monsterLabel.text = "Twój potwórz: ${args.monsterName}"
+///
+```
+
+### Zmiany
+- zamiast `.actionFirstFragmentToSecondFragment(name)`
+- będziemy chcieli, aby
+    - `FirstFragment` zapisywał `name` do `MonsterViewModel`
+    - `SecondFragment` obserwował `MonsterViewModel` i wyświetla imię potwora.
+
+
+#### Dodanie setter w `MonsterViewModel`
+```kotlin
+class MonsterViewModel: ViewModel() {
+    private val _monsterDescription = MutableLiveData<String>()
+    val monsterDescription: LiveData<String> get() = _monsterDescription
+
+    fun setMonsterName(name: String) {
+            _monsterName.value = name
+        }
+}
+```
+
+#### Użycie settera w `FirstFragment`
+```kotlin
+//...
+        binding.sendButton.setOnClickListener {
+           val name = binding.lastNameEditText.text.toString()
+
+           //wyłączamy Safe Args
+           // val action = FirstFragmentDirections
+               // .actionFirstFragmentToSecondFragment(name)
+
+           //używamy settera
+           sharedViewModel.sendMonsterName(name)
+
+
+           findNavController().navigate(action)
+       }
+```
+
+#### Obserwowanie `MonsterViewModel` w `SecondFragment`
+```kotlin
+binding.confirmButton.setOnClickListener {
+//...
+ sharedViewModel.monsterName.observe(viewLifecycleOwner){ name ->
+            binding.monsterLabel.text = "Twój potwór nazywa się: $name"
+        }
+//...
+
+// ustawiamy nową wartość dla desktypcji
+ val name = sharedViewModel.monsterName.value.takeUnless { it.isNullOrEmpty() } ?: "Stracił imię"
+ val description =  "Twój potwór $name  jest $scary," +
+                    " ma kolor $color i $eyes ${if (eyes == 1) "oko" else "oka"}"
+```
+
+## Gdy dekskrypcja i imię stały się jednym obiektem
+- opis/deskrypcja potwora był stringiem
+- przekształcimy ten string w obiekt klasy Monster
+- i taki obiekt będziemy przesyłać
+
+### Dodajemy dataclass `Monster.kt`
+```kotlin
+data class Monster(
+    val name: String,
+    val color: String,
+    val eyes: Int,
+    val scary: Boolean
+)
+
+```
+
+### Zmiany w `MonsterViewModel.kt`
+- Zamiast dwóch osobnych `LiveData` (`name` i `description`),
+- użyjemy jednej dla całego obiektu Monster:
+
+```kotlin
+class MonsterViewModel: ViewModel() {
+
+    private val _monster = MutableLiveData<Monster>()
+    val monster: LiveData<Monster> get() = _monster
+
+    fun setMonster(
+        name: String = "brak imienia",
+        color: String = "brak koloru",
+        eyes: Int = 0,
+        scary: Boolean = false) {
+            _monster.value = Monster(name, color, eyes, scary)
+    }
+
+}
+```
+
+### Zmiany w `FirstFragment.kt`
+- współdzielimy `MonsterViewModel` "pracuje" na obiekcie `Monster`
+- niczego nie wysyłamy, tylko zmieniamy obiekt `Monster` w `MonsterViewModel`
+- i obserwujemy ten obiekt w `SecondFragment`
+```kotlin
+//...
+    // Obserwujemy dane z ViewModelu
+sharedViewModel.monster.observe(viewLifecycleOwner) { monster ->
+    monster?.let {
+        binding.resultText.text = """Twoj potowór nazywa się ${it.name},
+        ma kolor ${it.color},
+        ma ${it.eyes} oczu ,
+        jest ${if (it.scary) "straszny" else "uroczy"}""".trimIndent()
+    }
+
+}
+ binding.sendButton.setOnClickListener {
+           val name = binding.lastNameEditText.text.toString()
+
+           sharedViewModel.setMonster(name)
+
+           findNavController().navigate(
+               FirstFragmentDirections.actionFirstFragmentToSecondFragment()
+           )
+
+
+       }
+```
+
+:::important `let`
+```
+zmienna?.let { kod_wewnątrz }
+```
+czyli:
+- Jeśli zmienna **nie jest** `null`, to
+  - wykonaj kod w `let { ... }`
+  - i udostępnij mi tę zmienną jako `it`.
+- Jeśli zmienna jest `null`, to pomiń cały blok i nic nie rób.
+
+
+:::
+
+
+### Zmiany w `SecondFragment.kt`
+```kotlin
+//...
+    sharedViewModel.monster.observe(viewLifecycleOwner){ monster ->
+        binding.monsterLabel.text = "Twój potwór nazywa się: ${monster.name}"
+        }
+//...
+    val name = sharedViewModel.monster.value?.name?.takeUnless { it.isEmpty() } ?: "Stracił imię"
+                sharedViewModel.setMonster(name, color, eyes, scary == "straszny")
+
+```
+---
+# Zmiana struktury projektu - ostatnie prządki
+- pliki należy uporządkować,
+- my na razie wszysktie mamy w jednym folderze
+- poprawna struktura projektu:
+```
+com.example.monstersapp/
+│
+├── ui/
+│   ├── MainActivity.kt
+│   └── fragments/
+│       ├── FirstFragment.kt
+│       └── SecondFragment.kt
+│
+├── viewmodel/
+│   └── MonsterViewModel.kt
+│
+└── model/
+    └── Monster.kt
+
+```
+- prawy klawisz `New->Package` - tak dodajemy nowy pakiet/folder do projektu
+- utwórz package/folder `viewmodel` i przenieś do niego `MonsterViewModel.kt`
+- utwórz package/folder `model` i przenieś do niego `Monster.kt`
+- utwórz `ui` package i przenieś do niego `MainActivity`
+- wewnątrz tego folderu `ui` zrób nowy `fragments` i przenieś do niego fragmenty
+
+
+---
+## Już absolutny koniec — MVVM
+
+:::note Zacznijmy od metafory
+- `.value` (obektu `LiveData`) jest jak czytanie kartki z notatką
+    - patrzysz raz i widzisz, co tam jest.
+- `.observe()` jest jak subskrypcja wiadomości
+    - ktoś Ci powie, jeśli się coś zmieni
+
+
+:::
+
+- w stworzonej aplikacji do przekazywania danych używaliśmy `.observer()`
+- takie podejście jest zdecydowanie zbyt skomplikowane do tak prostej aplikacji
+- wystarczyłoby po prostu używać `.value`, bo i tak, gdy na nowo tworzyony jest fragment, dane wczytywane są z obiektu `MonsterViewModel`
+- `.observer()` wprowadza automatyczną reakcję na zmiany
+
+### Uproszczona wersja aplikacji `Monster`:
+`FirstFragment.kt`
+```kotlin
+//...
+binding.sendButton.setOnClickListener {
+    val name = binding.nameEditText.text.toString()
+    sharedViewModel.monster.value = Monster(name, "zielony", 3, true)
+    findNavController().navigate(R.id.action_firstFragment_to_secondFragment)
+}
+//...
+```
+
+`SecondFragment.kt`
+```kotlin
+//...
+val monster = sharedViewModel.monster.value
+if (monster != null) {
+    binding.monsterLabel.text =
+        "Twój potwór ${monster.name} ma kolor ${monster.color} i ${monster.eyes} oczu"
+}
+```
+
+### MVVM
+
+JEDNAK `.observe()` to fundament MVVM.
+
+:::important MVVM
+MVVM (Model–View–ViewModel) to architektoniczny wzorzec projektowy,
+który oddziela:
+- logikę aplikacji (`ViewModel` i `Model`) od
+- interfejsu użytkownika (`View`).
+
+- struktura:
+    - `Model` przechowuje dane i logikę
+    - `ViewModel`
+        - pośredniczy między danymi a widokiem
+        - trzyma stan
+        - udostępia dane przez `LiveData`
+    - `View`
+        - wyświetla dane
+        - reaguje na interakcje użytkownika
+        - aktywności, fragmenty
+
+:::
+
+:::tip MVVM jak restauracja
+- `Model` jest jak **kuchnia**
+    - przechowuje przepisy
+    - przygotowuje dania (dane, logika)
+- `ViewModel` jest jak **kelner**
+    - odbiera zamówienia,
+    - komunikuje się z kuchnią
+    - przekazuje gotowe dania do sali
+- `View` jest jak **sala restauracyjna**
+    - pokazuje dania klientowi
+    - reaguje, gdy klient coś wybiera
+
+:::danger Krótko
+- `View` pokazuje
+- `ViewModel` myśli
+- `Model` pamięta
+
+:::
+
+:::warning `.observer()`
+- w architekturze MVVM zawsze stosujemy `.observe()`,
+- to właśnie on"
+    - czyni aplikację **reaktywną**,
+    - rozdziela logikę od interfejsu,
+    - sprawia, że UI „żyje” razem ze stanem `ViewModelu`.
+
+
+:::
+
+
+
+
+
+

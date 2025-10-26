@@ -1,0 +1,423 @@
+---
+title: Komunikacja
+---
+
+
+# Komunikacja we fragmentach
+
+## Przygotowanie projektu
+- utwórz nowy projekt (wybierz API 26 Oreo)
+- utwórz dwa fragmenty `FirstFragment` i `SecondFragment`
+- uruchom aplikację, aby sprawdzić, czy wszystko działa
+
+- włącz binding
+```kts
+ buildFeatures {
+        viewBinding = true
+    }
+```
+
+
+`MainActivity.kt`
+```kotlin
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+
+        enableEdgeToEdge()
+        setContentView(binding.root)
+//...
+```
+
+`FirstFragment.kt`
+```kotlin
+class FirstFragment : Fragment() {
+    private var _binding: FragmentFirstBinding? = null
+    private val binding get() = _binding!!
+
+//...
+
+     override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            // Inflate the layout for this fragment
+            _binding = FragmentFirstBinding.inflate(inflater, container, false)
+            return binding.root
+        }
+//...
+
+
+    override fun onDestroyView() {
+            super.onDestroyView()
+            _binding = null
+        }
+```
+
+`SecondFragment.kt`
+```kotlin
+class SecondFragment : Fragment() {
+
+    private var _binding: FragmentSecondBinding? = null
+    private val binding get() = _binding!!
+
+//...
+     override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            // Inflate the layou
+            _binding = FragmentSecondBinding.inflate(inflater, container, false)
+            return binding.root
+        }
+//...
+
+    override fun onDestroyView() {
+                super.onDestroyView()
+                _binding = null
+            }
+```
+
+
+
+- sprawdź, czy wszystko działa
+
+
+
+## Konfiguracja `MainActivity`
+### xml
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    >
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Fragments Communication"
+    android:textSize="20sp"
+    android:padding="20dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp"
+        android:orientation="vertical"
+
+        >
+        <androidx.fragment.app.FragmentContainerView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/fragmentShowMessageContainer"
+            android:background="#6EB995"
+            android:layout_marginBottom="5dp"
+            />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/fragmentSendMessageContainer"
+            android:background="#03A9F4"/>
+
+    </LinearLayout>
+
+
+
+</LinearLayout>
+```
+
+### Kolin
+W ciele metody `onCreate()` dodaj kod:
+```
+  if(savedInstanceState == null){
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentShowMessageContainer, FirstFragment())
+                .replace(R.id.fragmentSendMessageContainer, SecondFragment())
+                .commit()
+
+        }
+```
+**Co tu się dzieje?**
+- `supportFragmentManager` to narzędzie do zarządzania fragmentami w `AppCompatActivity`:
+  - Jest częścią AndroidX i zapewnia kompatybilność z różnymi wersjami Androida.
+  - Używamy go do
+      - dodawania,
+      - podmieniania
+      - usuwania fragmentów w kontenerach (`FragmentContainerView`).
+
+- `replace(R.id.fragmentShowMessageContainer, ShowMessageFragment())`
+  - wkłada `ShowMessageFragment` do kontenera `fragmentShowMessageContainer`,
+- `replace(R.id.fragmentSendMessageContainer, SendMessageFragment())`
+  - wkłada `SendMessageFragment` do `fragmentSendMessageContainer`,
+- `commit()` zatwierdza transakcję.
+
+:::tip `savedInstanceState`
+- To obiekt typu `Bundle`, który Android przekazuje do metod cyklu życia (`onCreate`, `onCreateView`, `onViewCreated`,
+`onSaveInstanceState`).
+- Ten obiekt przechowuje zapisany stan interfejsu (np. dane w polach tekstowych, pozycje listy, które fragmenty były dodane).
+
+:::
+
+
+## Konfiguracja `FirstFragment`
+### xml
+- zmień layout na `LinearLayout`
+- dodaj `TextView`
+```xml
+
+    <TextView
+        android:id="@+id/messageTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tu będzie info z SecondFragment"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        />
+```
+
+### Kotlin-wyświetlanie anych
+```kotlin
+override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val message =arguments?.getString("msg_key").takeUnless{it.isNullOrEmpty()} ?: "Brak wiadomości"
+
+        binding.messageTextView.text = message
+
+    }
+```
+
+**wyjaśnienie**
+- `takeUnless` „weź, chyba że…”:
+    - „weź tę wartość, chyba że spełnia dany warunek – wtedy oddaj null”.
+```kotlin
+val text = "Hello"
+val result = text.takeUnless { it.isBlank() }  // "Hello"
+val result2 = "".takeUnless { it.isBlank() }   // null
+```
+- `arguments`:
+    - to właściwość klasy Fragment typu `Bundle?`,
+    - służy do przekazywania danych do fragmentu w momencie jego tworzenia,
+    - `Bundle` to po prostu mapa (`key → value`), gdzie możesz włożyć różne typy danych (String, Int, Boolean itd.).
+
+:::tip `Bundle`
+- `Bundle` to specjalna klasa w Androidzie, która działa jak mapa (słownik) przechowująca dane w parach `klucz → wartość`.
+- Klucz zawsze jest `String`, a wartość może być różnego typu: `String`, `Int`, `Boolean`,  itd.
+- Najczęściej używa się go do:
+    - przekazywania danych między `Activity ↔ Activity`,
+    - przekazywania danych między `Fragment ↔ Fragment`,
+    - zapisywania i odtwarzania stanu `UI` (np. przy obrocie ekranu).
+
+
+- dodawanie danych
+   - `bundle.putString("key", "tekst")`
+   - `bundle.putInt("key", 123)`
+   - `bundle.putBoolean("key", true)`
+   - `bundle.putFloat("key", 3.14f)`
+   - `bundle.putDouble("key", 3.14159)`
+   - `bundle.putLong("key", 999999L)`
+- pobieranie danych
+    - `val text = bundle.getString("key")`
+    - `val number = bundle.getInt("key")`
+    - `val flag = bundle.getBoolean("key")`
+    - `val pi = bundle.getFloat("key")`
+    - `val precisePi = bundle.getDouble("key")`
+    - `val bigNumber = bundle.getLong("key")`
+
+:::
+
+
+## Konfiguracja `SecondFragment`
+### xml
+- zmień layout na `LinearLayout`
+- dodaj `EditText` i `Button`
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SecondFragment"
+    android:orientation="vertical"
+    android:padding="30dp"
+    >
+
+    <EditText
+        android:id="@+id/messageEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints=""
+        android:hint="Wpisz wiadomość do FirstFragment"
+        android:inputType="text"
+
+        />
+
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send msg"
+        android:layout_gravity="center_vertical"/>
+
+
+
+</LinearLayout>
+```
+### Kotlin-pobieranie danych
+```kotlin
+override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.sendButton.setOnClickListener {
+            val msg = binding.messageEditText.text.toString()
+
+            val bundle = Bundle().apply{
+                putString("msg_key", msg)
+            }
+
+            val fragment = FirstFragment().apply {
+                arguments = bundle
+
+            }
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentShowMessageContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+
+
+        }
+```
+
+## Pierwszy fragment też będzie wysyłać dane do drugiego
+- do `fragment_first.xml` dodamy pole do wpisywania wiadomości oraz przycisk do wysyłania wiadomości
+```xml
+   android:layout_margin="10dp"
+    >
+
+
+    <TextView
+        android:id="@+id/messageTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tu będzie info z SecondFragment"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"
+        />
+
+    <EditText
+        android:id="@+id/msgToSecondFragmentEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Wpisz wiadomość do dolnego fragmentu"
+        android:inputType="text"
+        android:layout_marginBottom="10dp"
+        />
+
+    <Button
+        android:id="@+id/sendMsgToSecondFragmentButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Send msg to SecondFragment"
+        android:padding="10dp"
+        />
+
+</LinearLayout>
+```
+
+- do `FirstFragment.kt` dodaj kod obsługujący pobieranie danych i wysyłenie ich do drugiego fragmentu:
+```kotlin
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val message =arguments?.getString("msg_key").takeUnless{it.isNullOrEmpty()
+        } ?: "Brak wiadomości F1"
+        binding.messageTextView.text = message
+
+        binding.sendMsgToSecondFragmentButton.setOnClickListener {
+            val msgToSecondFragment = binding.msgToSecondFragmentEditText.text.toString()
+
+            val bundle = Bundle().apply {
+                putString("msg_key_from_first_fragment", msgToSecondFragment)
+            }
+
+            val secFragment = SecondFragment().apply {
+                arguments = bundle
+            }
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentSendMessageContainer, secFragment)
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+```
+
+- w `fragment_second.xml` dodamy pole do wyświetlania wiadomości
+```xml
+<!-- -->
+    android:orientation="vertical"
+    android:padding="30dp"
+    >
+
+    <TextView
+        android:id="@+id/showMsgFromFirstFragmentTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tu będzie info z FirstFragment"
+        android:layout_marginBottom="10dp"
+        />
+
+    <EditText
+        android:id="@+id/messageEditText"
+        android:layout_width="matc
+<!-- -->
+```
+- w `SecondFragment.kt` dodamy obsługę wyświetlania danych
+```kotlin
+ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val newMsg = arguments?.getString("msg_key_from_first_fragment").takeUnless {
+            it.isNullOrEmpty() } ?: "Brak wiadomości w F2"
+        binding.showMsgFromFirstFragmentTextView.text = newMsg
+
+        binding.sendButton.setOnClickListener {
+            val msg = binding.messageEditText.text.toString()
+
+            val bundle = Bundle().apply{
+                putString("msg_key", msg)
+            }
+
+            val fragment = FirstFragment().apply {
+                arguments = bundle
+
+            }
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentShowMessageContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+
+
+        }
+    }
+
+```
+
+
+

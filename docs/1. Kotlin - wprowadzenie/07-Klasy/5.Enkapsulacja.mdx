@@ -1,0 +1,69 @@
+---
+title: Enkapsulacja
+---
+# Enkapsulacja
+
+:::info Enkapsulacja (*encapsulation*)
+- to jedna z kluczowych zasad programowania obiektowego.
+- oznacza ukrywanie szczegółów działania obiektu i ograniczanie bezpośredniego dostępu do jego wewnętrznych danych,
+- zamiast manipulować wszystkimi elementami klasy „z zewnątrz”, korzystasz z „kontrolowanych drzwi”, które udostępnia sama klasa — czyli przez metody i właściwości.
+
+
+:::
+
+
+
+:::note Metafora
+- Wyobraź sobie, że jesteś pilotem UFO.
+    - Wewnątrz pojazdu znajdują się bardzo zaawansowane tajne technologie (silnik warp, generator pola maskującego itd.).
+    - Nie masz bezpośredniego dostępu do wnętrza tych urządzeń — nie możesz sam ich rozkręcać ani naprawiać, żeby niczego nie popsuć.
+    - Zamiast tego masz na pulpicie przyciski i wskaźniki – np. „Włącz maskowanie”, „Sprawdź poziom energii”.
+- To właśnie jest enkapsulacja:
+    - Szczegóły działania są ukryte wewnątrz klasy (tajna technologia w UFO).
+    -Na zewnątrz możesz korzystać tylko z udostępnionych „przycisków” (metod i właściwości publicznych).
+
+:::
+
+```kotlin
+/**
+ * You can edit, run, and share this code.
+ * play.kotlinlang.org
+ */
+
+class UfoEngine {
+    // To jest pole prywatne (tajna technologia):
+    private var warpCoreTemperature: Int = 121
+
+    // To jest publiczna metoda – przycisk na pulpicie:
+    fun checkStatus(): String {
+        return if (warpCoreTemperature < 120) "Warp core stabilny" else "Uwaga: przegrzanie!"
+    }
+
+    // Publiczna metoda do bezpiecznego schłodzenia rdzenia
+    fun coolDown() {
+        warpCoreTemperature -= 10
+    }
+
+    fun showWarpCoreTemperature(): Int{
+        return this.warpCoreTemperature
+    }
+}
+
+fun main() {
+
+    val ufoEngine = UfoEngine()
+    println(" ${ufoEngine.checkStatus()}") // Uwaga: przegrzanie!
+    ufoEngine.coolDown()
+    println(" ${ufoEngine.checkStatus()}") // Warp core stabilny
+
+    //println("warpCoreTemperature: ${ufoEngine.warpCoreTemperature}") // Cannot access 'var warpCoreTemperature: Int': it is private in '/UfoEngine'.
+	println("warpCoreTemperature: ${ufoEngine.showWarpCoreTemperature()}") //
+
+
+}
+
+```
+
+
+
+

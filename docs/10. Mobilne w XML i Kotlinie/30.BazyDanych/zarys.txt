@@ -1,0 +1,24 @@
+Wprowadzenie do baz danych (5 tygodni)
+
+SQLite w Androidzie – podstawy SQL, prosta baza lokalna.
+
+SQLiteOpenHelper – tworzenie, aktualizacja i obsługa bazy.
+
+Operacje CRUD – dodawanie, usuwanie, edytowanie rekordów.
+
+Połączenie RecyclerView z bazą danych – odczyt danych i aktualizacja listy.
+
+Ćwiczenie praktyczne – aplikacja notatnik (SQLite + RecyclerView).
+----------
+
+Nowoczesny dostęp do bazy – Room (5 tygodni)
+
+Wprowadzenie do Room – entity, dao, database.
+
+Operacje CRUD z Room – prosty przykład.
+
+Room + RecyclerView + LiveData – automatyczne odświeżanie listy.
+
+Ćwiczenie praktyczne – aplikacja do śledzenia wydatków.
+
+Ćwiczenie projektowe – aplikacja planer zajęć szkolnych z bazą Room.

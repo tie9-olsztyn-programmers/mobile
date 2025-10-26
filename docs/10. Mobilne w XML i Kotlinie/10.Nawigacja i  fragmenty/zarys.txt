@@ -1,0 +1,23 @@
+Lekcja A – Intenty i przechodzenie między dwiema aktywnościami.
+
+Lekcja B – Fragmenty i ich cykl życia.
+
+Lekcja C – Toolbar + Menu (opcje w górnym pasku).
+
+Lekcja D – BottomNavigation / Navigation Drawer → spójny projekt z kilkoma fragmentami.
+
+🔹 Przykładowa mini-aplikacja na ten blok
+
+Aplikacja „Planner ucznia”:
+
+Fragment 1: Lista zadań (na razie w pamięci, bez bazy).
+
+Fragment 2: Kalendarz (DatePicker/TimePicker).
+
+Fragment 3: Statystyki (ProgressBar / RatingBar).
+
+Na górze Toolbar z przyciskiem „Ustawienia”.
+
+Na dole BottomNavigation do zmiany fragmentów.
+
+

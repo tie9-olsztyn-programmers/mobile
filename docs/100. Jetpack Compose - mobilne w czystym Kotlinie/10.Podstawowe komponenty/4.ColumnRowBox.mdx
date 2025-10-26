@@ -1,0 +1,372 @@
+---
+title: Column, Row, Box
+---
+
+# Layouts: Column, Row, Box
+
+## Mała teoria
+
+:::info Layouts
+- `Column`  układa dzieci pionowo (jak `LinearLayout` `vertical` w XML).
+- `Row`     układa dzieci poziomo (jak `LinearLayout horizontal`).
+- `Box`     nakłada dzieci jedno na drugie (jak `FrameLayout`), plus pozwala łatwo kotwiczyć elementy (np. badge w rogu).
+
+:::note Dwie osie:
+- *Main axis* – kierunek układania (w Column: pion, w Row: poziom).
+- *Cross axis* – prostopadła do *main axis*.
+
+:::
+
+:::note Trzy klucze ustawień:
+- `Arrangement` rozkład wzdłuż osi głównej (odstępy):
+    - zawsze dotyczy osi głównej
+    - w `Column` to pion (góra–dół), czyli `verticalArrangement`
+        ustawia odstępy i rozmieszczenie pionowo.
+    - w `Row` to poziom (lewo–prawo), czyli `horizontalArrangement`
+        ustawia odstępy i rozmieszczenie poziomo.
+- `Alignment`   wyrównanie w poprzek (na osi poprzecznej):
+    - zawsze dotyczy osi poprzecznej
+    - w `Column` to poziom (lewo-prawo), czyli `horizontalAlignment`
+  ustawia wyrównanie elementów w poziomie — np. do lewej, środka lub prawej krawędzi.
+    -w `Row` to pion (góra-dół), czyli `verticalAlignment`
+  ustawia wyrównanie elementów w pionie — np. do góry, środka lub dołu.
+- `Modifier`    rozmiar, marginesy, waga, pozycja itd.
+
+:::
+
+
+
+## Column
+
+### Pierwszy prosty przykład
+- tworzymy nowy projekt `Empty View`.
+- tworzymy własną funkcję compose:
+`ColumnBasics.kt` (w tym samym folderze co `MainActivity.kt` )
+```kotlin
+@Composable
+fun ColumnBasics() {
+    Text("Column - podstawy", style = MaterialTheme.typography.titleMedium)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFE8F5E9))
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp), //odstępyu między dziećmi w pionie
+        horizontalAlignment = Alignment.CenterHorizontally // wyrównanie WSZYSTKICH dzieci w poprzek (poziomo)
+
+    ) {
+        Text("Item A")
+        Text("Item B (center horizontally)")
+        Text(
+            "Item c (align start)",
+            modifier = Modifier.align(Alignment.Start)
+        )
+
+
+    }
+}
+```
+Dopiszmy do niej funkcję `Preview`, pod i poza naszą funkcją Compose:
+```kotlin
+@Preview(showBackground = true)
+@Composable
+fun ColumnBasicsPreview() {
+    MaterialTheme {
+        ColumnBasics()
+    }
+}
+```
+- `@Preview`                mówi Android Studio, że to funkcja podglądu
+- `showBackground = true`   dodaje szare tło w oknie podglądu
+- `MaterialTheme { ... }`   otacza Twoją funkcję motywem, żeby czcionki i kolory były zgodne z Material Design
+- `ColumnBasics()`          tu po prostu wywołujesz Twój komponent, który chcesz podejrzeć
+
+
+
+Przekształćmy `MainActivity.kt`
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            ColumnRowBoxJCTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Main(
+
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Main(modifier: Modifier = Modifier) {
+    Text(
+        text = "Main App",
+        modifier = modifier
+    )
+
+    ColumnBasics()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainPreview() {
+    ColumnRowBoxJCTheme {
+        Main()
+    }
+}
+```
+- jak zauważyłeś tekst `Main App` nie wyświetla się,
+- `Text` i `ColumnBasics` nie są dwoma osobnymi elementami na ekranie
+    - druga funkcja (`ColumnBasics`) „zastępuje” pierwszą,
+    - jeśli nie mają wspólnego kontenera układu (np. `Column`, `Box` lub `Row`).
+- czyli, jeżeli chcemy te dwa elementy wyświetlać, musimy zamknąć je w jakimś layoutcie
+
+```kotlin
+fun Main(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.padding(20.dp)){
+        Text(
+            text = "Main App",
+            modifier = modifier,
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        ColumnBasics()
+    }
+
+
+}
+```
+
+
+:::tip Mała metafora
+Wyobraź sobie kolumnę ludzi stojących jeden nad drugim — np. jakby tworzyli ludzką wieżę (`Column`).
+- `horizontalAlignment = Alignment.Start` wszyscy ustawiają się ramieniem do lewej ściany, tworząc prostą linię z lewej strony.
+- `Alignment.CenterHorizontally` wszyscy starają się stanąć dokładnie w osi środkowej wieży, żeby była idealnie wyważona.
+- `Alignment.End` wszyscy przyklejają się do prawej ściany, więc tworzą równą krawędź po prawej stronie.
+- `verticalArrangement = Arrangement.spacedBy(8.dp)` to jak odstęp między piętrami wieży, każda osoba ma trochę miejsca nad głową 😉.
+
+:::
+
+--------
+## Row – poziome układanie
+Zróbmy własny komponent `RowBasics.kt`
+```kotlin
+@Composable
+fun RowBasics(){
+    Column()
+    {
+        Text("Row - podstawy", style = MaterialTheme.typography.titleLarge)
+
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .background(Color(0xFFE3F2FD))
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,// rozmieszczenie dzieci w poziomie,
+            verticalAlignment = Alignment.CenterVertically  // wyrównanie w pionie
+
+        ){
+            Text("Left")
+            Text("Center")
+            Text("Right")
+        }
+
+        // indywidualne wyrównanie elementu w Row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFFFF3E0))
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(40.dp),
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text("A (align.Top)", modifier = Modifier.align(Alignment.Top)) // indywidualne ustawienia
+            Text( "B", fontSize = 30.sp)
+            Text("C")
+        }
+    }
+
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RowBasicsPreview() {
+    MaterialTheme {
+        RowBasics()
+    }
+}
+
+
+```
+Oczekiwany efekt:
+- Litera `A` wyrównana do góry `B`
+    - bo indywidualnie ustawiliśmy `Text("A (align.Top)", modifier = Modifier.align(Alignment.Top))`
+- litera `C` wyrównana na dołu litery `B`, bo
+    - `Row` ma ustawione `verticalAlignment = Alignment.Bottom`
+
+OCZYWIŚCIE NALEŻY TEN KOMPONENT UŻYĆ W GŁÓWNYM KOMPONENCIE!!!!
+```kotlin
+@Composable
+fun Main(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.padding(20.dp)){
+        Text(
+            text = "Main App",
+            modifier = modifier,
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        ColumnBasics()
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        RowBasics()
+    }
+}
+```
+
+:::tip Mała metafora
+- Wyobraź sobie rząd ludzi różnego wzrostu stojących obok siebie (to `Row`).
+- `verticalAlignment = Alignment.Top` wszyscy stają na stołkach, by zrównać głowy na górze
+- `Alignment.CenterVertically` wszyscy środkami ciała są w jednej linii
+- `Alignment.Bottom` wszyscy stoją nogami na tej samej podłodze
+
+:::
+
+
+---
+## Box
+
+
+
+:::tip `Box` - godne zapamiętania
+- Dzieci są rysowane w kolejności: późniejsze przykryją wcześniejsze (Z-order).
+- `contentAlignment` ustawia kotwicę „domyślną”, a `Modifier.align(...)` nadpisuje ją dla dziecka.
+- Idealne do *badge*’y, *overlay*ów, przycisków w rogu itp.
+
+:::
+
+### Badge
+:::note Badge
+- it is a small indicator placed near an icon or element
+- it shows additional information — like a notification count or status.
+
+```kotlin
+
+        Box {
+            Icon(Icons.Default.Email, contentDescription = "Messages")
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(Color.Red, CircleShape)
+                    .align(Alignment.TopEnd)
+            )
+        }
+```
+
+:::tip dodatkowe biblioteki
+- potrzebujemy dodatkowych bibliotek:
+    - `libs.versions.toml`:
+```toml
+[verions]
+composeBom = "2025.10.00"
+material3 = "1.4.0"
+material-icons = "1.7.4"
+
+[libraries]
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }  # też pod BOM
+```
+
+`build.gradle.kts`
+```kts
+implementation(libs.androidx.material3)
+implementation(platform(libs.androidx.compose.bom))
+implementation(libs.material.icons.extended)
+```
+
+:::
+
+
+
+### Overlay
+
+:::note Overlay
+- it is a transparent layer that covers the entire screen
+- it is used to display a dialog, a snackbar, a menu, etc.
+
+:::
+
+```kotlin
+Box {
+    Image(painter = painterResource(R.drawable.overlay), contentDescription = "Photo")
+
+    // overlay z napisem w prawym dolnym rogu
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.4f))
+    )
+
+    Text(
+        "Loading...",
+        color = Color.White,
+        modifier = Modifier.align(Alignment.Center)
+    )
+}
+
+
+```
+- w `res/drawable` musisz mieć zdjęcie `overlay.png` ([pobierz](/myImages/overlay.png))
+
+
+### Box
+- zrób nowy komponent `BoxBasics.kt`
+```kotlin
+
+@Composable
+fun BoxBasics(){
+    Text("Box – nakładanie i kotwiczenie", style = MaterialTheme.typography.titleMedium)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .background(Color(0xFFF3E5F5)),
+        contentAlignment = Alignment.Center //domyślna kotwica
+
+){
+            Text(text = "Center text")
+
+            Text(text = "TopStart",
+                 modifier = Modifier.align(Alignment.TopStart)) //indywidualne ustawienia
+            Text(text="BottomEnd",
+                modifier = Modifier.align(Alignment.BottomEnd) // indywidualne ustawienia
+            )
+
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun BoxBasicsPreview() {
+    MaterialTheme {
+        BoxBasics()
+    }
+}
+
+```
+- pamiętaj o importach
+- użyj tego komponentu w `Main`
+
+:::note Zapamiętaj
+- Dzieci są rysowane w kolejności: późniejsze przykryją wcześniejsze (Z-order).
+- `contentAlignment` ustawia kotwicę „domyślną”,
+- `Modifier.align(...)` nadpisuje domyślne ustawienia.
