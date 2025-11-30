@@ -1,0 +1,120 @@
+---
+title: Klasy abstrakcyjne
+---
+
+# Klasy abstrakcyjne
+
+:::tip Po co klasa abstrakcyjna
+Służy do tworzenia wspólnego szablonu dla klas pochodnych.
+
+:::
+
+
+Klasa abstrakcyjna (`abstract class`) jest klasą, która:
+- nie może być bezpośrednio instancjonowana,
+- służy jako klasa bazowa,
+- definiuje wspólne zachowania i właściwości, ale nie implementuje ich całkowicie.
+- **Klasy pochodne muszą implementować metody abstrakcyjne**.
+
+
+## Klasa pojazd
+```kotlin
+// Klasa abstrakcyjna definiująca ogólny kształt dla pojazdów
+abstract class Pojazd(val marka: String) {
+
+    abstract fun uruchomSilnik() // Abstrakcyjna metoda do implementacji w klasach pochodnych
+
+    fun pokazMarke() {
+        println("Marka pojazdu to: $marka")
+    }
+}
+
+
+// Klasa pochodna implementująca abstrakcyjną metodę `uruchomSilnik`
+class Samochod(marka: String) : Pojazd(marka) {
+
+    override fun uruchomSilnik() {
+        println("Silnik samochodu $marka został uruchomiony.")
+    }
+}
+
+
+// testujemy klasy
+fun main() {
+    val samochod = Samochod("Toyota")
+    samochod.uruchomSilnik() // Wypisze: Silnik samochodu Toyota został uruchomiony.
+    samochod.pokazMarke() // Wypisze: Marka pojazdu to: Toyota
+}
+```
+
+
+
+### Klasa Ufo
+
+
+```kotlin
+
+// Słowo `abstract` przy klasie oznacza, że nie możesz utworzyć obiektu tej klasy bezpośrednio.
+abstract class UFO(val shape: String = "kuleczka") {
+
+    // to „wymuszony kontrakt” na każdą klasę potomną: musisz mieć metodę fly()!
+    abstract fun fly()     // każda klasa potomna musi to zaimplementować
+
+    open fun cloak() {     // klasa potomna MOŻE nadpisać, ale nie musi
+        println("UFO w kształcie $shape próbuje się ukryć...")
+    }
+}
+
+class NormalUFO: UFO(){
+    override fun fly(){
+        println("Normalne ufo ma kształ $shape i teraz leci")
+    }
+}
+
+class SilverUFO : UFO("dysk") {
+    override fun fly() {
+        println("Srebrne UFO  śmiga w zawrotnym tempie!")
+    }
+
+    override fun cloak() {
+        println("Srebrne UFO (ma kształ $shape) znika, stając się całkiem niewidzialne!")
+    }
+}
+
+class GoldenUFO(shape: String) : UFO(shape) {
+    override fun fly() {
+        println("Złote UFO unosi się majestatycznie ponad ziemią!")
+    }
+    // nie musimy nadpisywać cloak(), jeśli nam nie zależy
+}
+
+
+
+
+
+fun main() {
+    // val ufo = UFO("trójkąt") // BŁĄD! Nie można utworzyć obiektu klasy abstrakcyjnej
+
+    val normalne = NormalUFO()
+    val srebrne = SilverUFO()
+    val zloty = GoldenUFO("Super KULA")
+
+    normalne.fly()	// Normalne ufo ma kształ kuleczka i teraz leci
+    normalne.cloak()// UFO w kształcie kuleczka próbuje się ukryć.
+    srebrne.fly()   // Srebrne UFO  śmiga w zawrotnym tempie!
+    srebrne.cloak() // Srebrne UFO (ma kształ dysk) znika, stając się całkiem niewidzialne!
+    zloty.fly()     // Złote UFO unosi się majestatycznie ponad ziemią!
+    zloty.cloak()   // UFO w kształcie Super KULA próbuje się ukryć...
+
+
+}
+```
+
+
+
+
+
+
+
+
+

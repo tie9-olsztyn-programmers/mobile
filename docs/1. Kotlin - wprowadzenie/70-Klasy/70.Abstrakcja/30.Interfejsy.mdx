@@ -1,0 +1,146 @@
+---
+title: Interfejsy
+---
+
+# Interfejs
+
+:::tip Po co interfejs?
+Służy do definiowania wspólnego zachowania obiektów.
+
+:::
+
+
+Interfejs definiuje
+- zbiór metod i
+- właściwości,
+które **muszą** być zaimplementowane przez klasy, które go implementują.
+
+Interfejsy:
+- nie mogą zawierać kodu do przechowywania stanu, takiego jak pola (`field`), ale
+- mogą mieć metody z domyślną implementacją.
+
+## Przykłady
+
+### Interfejs `Pojazd`
+```kotlin
+
+// Definicja interfejsu `Pojazd`
+interface Pojazd {
+    val typ: String // Abstrakcyjna właściwość (musi być zaimplementowana w klasie)
+    fun uruchom() // Abstrakcyjna metoda (musi być zaimplementowana w klasie)
+
+    fun zatrzymaj() { // Metoda z domyślną implementacją
+        println("Pojazd się zatrzymuje.")
+    }
+}
+
+// Implementacja interfejsu `Pojazd` w klasie `Samochod`
+class Samochod : Pojazd {
+
+    override val typ = "Samochód" // Implementacja abstrakcyjnej właściwości
+
+    override fun uruchom() { // Implementacja abstrakcyjnej metody
+        println("Silnik samochodu został uruchomiony.")
+    }
+}
+
+
+// testowanie
+fun main() {
+    val auto = Samochod()   // tworzymy obiekt klasy Samochod
+    auto.uruchom()          // Wypisze: Silnik samochodu został uruchomiony.
+    auto.zatrzymaj()        // Wypisze: Pojazd się zatrzymuje.
+    println(auto.typ)       // Wypisze: Samochód
+}
+```
+
+### Intefejs `Narzedzia` z domyślną implementacją metod
+
+```kotllin
+interface Narzedzie {
+    fun uzyj() { // Domyślna implementacja metody
+        println("Używanie narzędzia.")
+    }
+
+
+    fun zakoncz() { // Domyślna implementacja metody
+        println("Zakończenie używania narzędzia.")
+    }
+}
+
+
+class Mlotek : Narzedzie {
+
+    override fun uzyj() { // Nadpisanie metody `uzyj`
+        println("Uderzanie młotkiem.")
+    }
+}
+
+// testujemy
+fun main() {
+    val mlotek = Mlotek()   // tworzymy obiekt klasy Mlotek
+    mlotek.uzyj()           // Wypisze: Uderzanie młotkiem.
+    mlotek.zakoncz()        // Wypisze: Zakończenie używania narzędzia.
+}
+```
+
+### Wielokrotna implementacja interfejsów i konflikt metod
+```kotlin
+interface A {
+
+    fun powitanie() {
+        println("Witaj z A!")
+    }
+}
+
+
+interface B {
+
+    fun powitanie() {
+        println("Witaj z B!")
+    }
+}
+
+class C : A, B {
+
+    override fun powitanie() {
+        super<B>.powitanie() // Wywołanie metody `powitanie` z interfejsu B
+    }
+}
+
+
+class D : A, B {
+
+    override fun powitanie() {
+        super<A>.powitanie() // Wywołanie metody `powitanie` z interfejsu A
+        super<B>.powitanie() // Wywołanie metody `powitanie` z interfejsu B
+    }
+}
+
+
+
+// testujemy
+fun main() {
+
+    val c = C()
+    c.powitanie() // Wypisze: Witaj z B!
+
+    println("---------")
+
+    val d = D()
+    d.powitanie()   // Wypisze: Witaj z A!
+                    // Wypisze: Witaj z B!
+
+}
+```
+
+
+
+
+
+
+
+
+
+
+

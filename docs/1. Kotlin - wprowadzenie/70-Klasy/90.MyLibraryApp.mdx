@@ -1,0 +1,139 @@
+---
+title: MyLibrary App
+---
+
+# Aplikacja Biblioteczka *MyLibrary*
+Napiszemy prostą aplikację niedużej biblioteki.
+
+Aplikacja będzie miała następującą strukturą:
+```
+library/
+ ├── LibraryItem.kt           klasa abstrakcyjna
+ ├── Borrowable.kt            interfejs
+ ├── Book.kt                  data class
+ ├── Magazine.kt              zwykła klasa
+ └── Main.kt                  funkcja main()
+```
+
+## `LirbraryItem`
+Reprezentuje każdy element biblioteki (książkę, czasopismo itp.).
+Każdy element musi mieć tytuł, rok i metodę `info()`
+– ale jej treść będzie różna w podklasach.
+
+```kotlin
+abstract class LibraryItem(
+    val title: String,
+    val year: Int
+) {
+    abstract fun info(): String
+}
+
+```
+
+
+## `Borrowable`
+Definiuje zachowanie przedmiotów, które można wypożyczyć i zwrócić.
+Nie każdy `LibraryItem` musi być wypożyczalny (np. czasopismo archiwalne może nie być).
+```kotlin
+interface Borrowable {
+    fun borrow()
+    fun returnItem()
+}
+```
+
+
+## `Book`
+```kotlin
+
+data class Book(
+    val author: String,
+    val pages: Int,
+    val genre: String,
+    var available: Boolean = true,
+    val libraryTitle: String,
+    val libraryYear: Int
+) : LibraryItem(libraryTitle, libraryYear), Borrowable {
+
+    override fun borrow() {
+        println("Wypożyczono książkę: \"$title\" (${year})")
+    }
+
+    override fun returnItem() {
+        println("Zwrócono książkę: \"$title\"")
+    }
+
+    override fun info(): String =
+        "Książka: \"$title\" - $author ($year), gatunek: $genre, stron: $pages"
+}
+```
+
+## `Magazine`
+```kotlin
+class Magazine(
+    title: String,
+    year: Int,
+    val issue: Int
+) : LibraryItem(title, year) {
+
+    override fun info(): String = "Czasopismo \"$title\", numer $issue z roku $year"
+}
+```
+
+## `Main`
+```kotlin
+
+fun main() {
+    val items = listOf(
+        Book("Adam Mickiewicz", 320, "Poemat", libraryTitle = "Pan Tadeusz", libraryYear = 1834),
+        Book("Henryk Sienkiewicz", 400, "Powieść", libraryTitle = "Krzyżacy", libraryYear = 1900),
+        Magazine("National Geographic", 2023, 9)
+    )
+
+    println("=== 📚 Moja Biblioteczka ===\n")
+
+    for (item in items) {
+        println(item.info())
+
+        if (item is Borrowable) {
+            item.borrow()
+            item.returnItem()
+        }
+
+        println()
+    }
+
+    // Przykład użycia copy()
+    val modifiedBook = (items[0] as Book).copy(author = "A. Mickiewicz (wyd. szkolne)")
+    println("Kopia książki: $modifiedBook")
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

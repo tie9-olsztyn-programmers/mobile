@@ -1,0 +1,153 @@
+---
+title: Dziedziczenie (Inheritance)
+---
+
+# Dziedziczenie
+:::info Dziedziczenie (*inheritance*)
+- to jedna z podstawowych zasad programowania obiektowego (OOP).
+- Pozwala stworzyć nową klasę na podstawie już istniejącej klasy bazowej,
+    - nowa klasa przejmuje jej:
+        - właściwości (*properties*) i
+        - funkcje (*metody*),
+    - nowa klasa może też dodawać własne lub modyfikować te odziedziczone.
+
+
+:::
+
+:::note Metafora dziedziczenia
+- Wyobraź sobie klasę Pojazd jako ogólny przepis na pojazdy: wszystkie mają koła, mogą jechać, mają prędkość.
+- Tworząc klasę Samochód, mówisz: "To pojazd, ale dodatkowo ma radio i bagażnik". Samochód dziedziczy cechy pojazdu, ale ma też swoje własne.
+
+
+## Dziedziczenie w Kotlinie
+Kotlin wprowadza kilka specyficznych cech w kontekście dziedziczenia, które różnią się od np. Javy:
+- Klasy są domyślnie final, co oznacza, że nie można po nich dziedziczyć,
+    chyba że zostaną oznaczone jako `open`.
+- Aby po danej klasie można byłoby dziedziczyć, musi być oznaczona słowem kluczowym `open`.
+- W Kotlinie, aby dostosować działanie klasy pochodnej, możemy korzystać z nadpisywania (`override`):
+    - metod i
+    - właściwości,
+- Kotlin obsługuje:
+    - klasy abstrakcyjne (`abstract`) i
+    - interfejsy (`interface`),
+- Nie można utworzyć instancji klasy abstrakcyjnej czy interfejsu.
+
+:::danger Nie ma wielokrotnego dziedziczenia!
+Klasa może dziedziczyć tylko po jednej klasie
+
+:::
+
+:::tip Interfejs - wielokrona implementacja
+Klasa może implementować WIELE interfejsów
+
+
+:::
+
+
+
+---
+# Przykłady
+
+## Klasa Ufo
+
+- domyślnie klasy i metody są `final`, czyli zamknięte na dziedziczenie,
+- `open` otwiera klasę lub metodę na dziedziczenie
+
+### Klasa bazowa
+```kotlin
+open class UFO(val shape: String) {
+    open fun fly() {
+        println("UFO o kształcie $shape leci przez niebo.")
+    }
+}
+
+```
+
+### Klasa dziedzicząca po bazowej
+```kotlin
+class SilverUFO : UFO("dysk") {
+    fun cloak() {
+        println("Srebrne UFO włączyło niewidzialność!")
+    }
+
+    override fun fly() {
+        println("Srebrne UFO śmiga przez chmury z prędkością światła!")
+    }
+}
+```
+- `SilverUFO` dziedziczy po `UFO`.
+- Dodaje nową funkcję `cloak()`.
+- `override` powoduje nadpisanie metody odziedziczonej `fly()`.
+
+### Użycie w programie
+```kotlin
+fun main() {
+    val zwykleUfo = UFO("kula")
+    zwykleUfo.fly()      // UFO o kształcie kula leci przez niebo.
+
+    val srebrneUfo = SilverUFO()
+    srebrneUfo.fly()     // Srebrne UFO śmiga przez chmury z prędkością światła!
+    srebrneUfo.cloak()   // Srebrne UFO włączyło niewidzialność!
+}
+
+```
+---
+## Klasa Zwierze
+```kotlin
+// Klasa bazowa (rodzic) musi być oznaczona jako `open`, aby po niej dziedziczyć.
+open class Zwierze(val gatunek: String) {
+
+    // Otwarta właściwość, którą można nadpisać
+    open val dzwiek: String = "Ogólny dźwięk"
+
+    // Otwarta metoda, którą można nadpisać
+    open fun wydajDzwiek() {
+        println("$gatunek wydaje dźwięk: $dzwiek")
+    }
+}
+
+
+// Klasa pochodna (dziecko) dziedziczy po klasie `Zwierze`
+class Pies(gatunek: String) : Zwierze(gatunek) {// Pies(gatunek: String) wartość gatunek zostanie przekazana do konstruktora klasy bazowej
+
+    // Nadpisanie właściwości `dzwiek`
+    override val dzwiek: String = "Szczekanie"
+
+    // Nadpisanie metody `wydajDzwiek`
+    override fun wydajDzwiek() {
+        println("$gatunek szczeka: $dzwiek")
+    }
+
+    // Metoda specyficzna dla klasy Pies
+    fun machajOgonem() {
+        println("Pies macha ogonem.")
+    }
+}
+
+
+// Testujemy klasy
+fun main() {
+    val zwierze = Zwierze("Ssaki")
+    zwierze.wydajDzwiek() // Wypisze: Ssaki wydaje dźwięk: Ogólny dźwięk
+
+    val pies = Pies("Pies domowy")
+    pies.wydajDzwiek() // Wypisze: Pies domowy szczeka: Szczekanie
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

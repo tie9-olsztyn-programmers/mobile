@@ -1,0 +1,76 @@
+---
+title: Polimorfizm
+---
+
+# Polimorfizm
+
+:::info Co to jest polimorfizm?
+- Polimorfizm (z greckiego: „wiele form”) to zasada OOP, która pozwala traktować różne obiekty w ten sam sposób, jeśli mają wspólny interfejs (bazową klasę lub interfejs).
+- Metoda wywołana na takim obiekcie zachowuje się różnie w zależności od faktycznego typu obiektu.
+
+:::
+
+
+:::note Metafora: Pilotowanie różnych UFO
+- Wyobraź sobie, że jesteś pilotem i masz panel sterowania do UFO.
+- Nie wiesz, czy dziś polecisz zwykłym UFO, srebrnym, złotym, czy niewidzialnym.
+- Za każdym razem używasz tego samego przycisku „Lecimy!”,
+- ale każde UFO reaguje nieco inaczej:
+    - jedno zostawia smugi światła,
+    - drugie uruchamia maskowanie, a
+    - trzecie porusza się bezszelestnie.
+
+To jest polimorfizm:
+- Używasz jednej metody (`fly()`) na różnych obiektach (UFO, SilverUFO, GoldenUFO, ...),
+- Każdy obiekt realizuje ją „po swojemu”.
+
+:::
+
+```kotlin
+
+open class UFO(val shape: String) {
+    open fun fly() {
+        println("UFO o kształcie $shape leci przez niebo.")
+    }
+}
+
+class SilverUFO : UFO("dysk") {
+    override fun fly() {
+        println("Srebrne UFO śmiga przez chmury z prędkością światła!")
+    }
+}
+
+class GoldenUFO : UFO("dysk") {
+    override fun fly() {
+        println("Złote UFO przemyka cicho, zostawiając złoty blask na niebie!")
+    }
+}
+
+fun sendUfoToSky(ufo: UFO) {
+    ufo.fly() // Nie musimy wiedzieć, jakie to UFO – każde leci po swojemu!
+}
+
+
+
+fun main() {
+    val zwykleUfo = UFO("kula")
+    val srebrneUfo = SilverUFO()
+    val zlotyUfo = GoldenUFO()
+
+    val fleet = listOf(zwykleUfo, srebrneUfo, zlotyUfo)
+
+    for (ufo in fleet) {
+        sendUfoToSky(ufo)
+    }
+    /*
+     * UFO o kształcie kula leci przez niebo.
+	 * Srebrne UFO śmiga przez chmury z prędkością światła!
+	 * Złote UFO przemyka cicho, zostawiając złoty blask na niebie!
+     */
+}
+
+```
+
+
+
+

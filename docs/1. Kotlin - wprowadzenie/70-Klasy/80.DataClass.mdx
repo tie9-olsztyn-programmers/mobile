@@ -1,0 +1,102 @@
+---
+title: Klasy danych
+---
+
+# Klasy danych `data class`
+
+## Definicja
+- to specjalny rodzaj klas,
+- są używane głównie do przechowywania danych.
+- klasy danych automatycznie generują podstawowe metody, takie jak:
+    - `toString()`,
+    - `equals()`,
+    - `hashCode()`,
+    - `copy()`,
+    Dzięki tym metodom łatwe jest:
+        - porównywanie,
+        - wyświetlanie,
+        - kopiowanie obiektów.
+
+`data class` są szczególnie przydatne, gdy potrzebujesz klas reprezentujących modele danych, np. w aplikacjach pracujących z bazą danych lub API.
+
+:::tip Hash
+- w kontekście programowania, *hash* (lub kod skrótu) jest **wartością liczbową**,
+- jest obliczana na podstawie zawartości obiektu (np. danych w klasie) i używana do efektywnego:
+    - porównywania,
+    - przechowywania oraz
+    - wyszukiwania obiektów w takich strukturach jak
+        - tablice mieszające (*hash tables*) lub
+        - zbiory (*sets*).
+
+W Kotlinie, tak jak w wielu innych językach programowania,
+metoda `hashCode()` generuje taki kod skrótu dla obiektu.
+
+:::
+
+
+
+## Tworzenie klasy danych
+Klasy danych są definiowane za pomocą słowa kluczowego `data` przed deklaracją klasy.
+
+Muszą mieć co najmniej jeden parametr w konstruktorze podstawowym (`primary constructor`).
+`data class Osoba(val imie: String, val wiek: Int`
+
+
+## Automatycznie wygenerowane metody
+```kotlin
+// klasa danych
+data class Osoba(val imie: String, val wiek: Int)
+
+// zwykła klasa
+class Person(val name: String, val age: Int)
+
+
+fun main(){
+
+// testujemy klasę danych
+    val osoba1 = Osoba("Jan", 25)
+    val osoba2 = Osoba("Jan", 25)
+
+    val osoba3 = osoba2.copy(wiek=120)
+    println(osoba1)             // Wypisze: Osoba(imie=Jan, wiek=25)
+    println(osoba1 == osoba2)                           // true
+    println(osoba1.hashCode() == osoba2.hashCode())     // true
+    println(osoba3)
+
+
+// testujemy zwykłą klasę
+    val person1 = Person("John", 52)
+    val person2 = Person("John", 52)
+
+    //val person3 = person2.copy(age=122) // generuje błąd
+    println(person1) // Wypisze np. Person@b1bc7ed
+    println(person1 == person2) /* false
+                                operator == będzie porównywał referencje obiektów,
+                                a nie ich zawartość (wartości właściwości).
+                                */
+
+    println(person1.hashCode() == person2.hashCode()) // false
+}
+```
+
+## Nadpisywanie metod domyślnie generowanych
+
+```kotlin
+data class Osoba(val imie: String, val wiek: Int) {
+    override fun toString(): String {
+
+        return "Imię: $imie, Wiek: $wiek"
+    }
+}
+
+
+
+fun main() {
+    val osoba = Osoba("Jan", 25)
+    println(osoba) // Wypisze: Imię: Jan, Wiek: 25 (zamiast domyślnego `Osoba(imie=Jan, wiek=25)`)
+}
+
+```
+
+
+
