@@ -434,8 +434,11 @@ Ten fragment kodu przetłumaczony na język ludzki:
 - niestety nasz tytuł nie wyświetla się, bo jest przykryty przez `FragmentContainerView`
 
 ### Rozwiązanie
-Rozwiązanie polega na użyciu `AppBarLayout`
+Rozwiązanie polega na
+- użyciu `AppBarLayout` dla naszego tytułu,
+- zdefniniowaniu właściwości `app:layout_behavior` w `FragmentContainerView`
 
+#### `AppBarLayout`
 ```xml
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -457,14 +460,32 @@ Rozwiązanie polega na użyciu `AppBarLayout`
 
 ```
 
-### Wyjaśnienie
-Dlaczego rozwiązanie działa?
-:::info `AppBarLayout`
+
+
+
+:::info Czym jest `AppBarLayout`?
 To specjalny pojemnik z *Material Design*, stworzony po to, żeby trzymać:
     - tytuł aplikacji (Toolbar),
     - przyciski akcji (np. `szukaj`),
     - np. prosty `TextView` jako nagłówek.
 
 - mała metafora - `AppBarLayout` jest jak „belka u góry ekranu”
+
+:::
+
+### Musimy jeszcze zdefiniować `app:layout_behavior`
+```xml
+<androidx.fragment.app.FragmentContainerView
+   <!-- .... -->
+    app:navGraph="@navigation/nav_graph"
+
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+
+<!--...-->
+```
+
+:::note Co  robi ten `layout_behavior`?
+- sprawia, że treść pod Toolbar-em „wie”, że nad nią jest `AppBarLayout` i
+- ma się z nim inteligentnie dogadywać podczas przewijania/wyświetlania.
 
 :::

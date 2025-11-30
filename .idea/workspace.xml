@@ -5,10 +5,51 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
-      <change afterPath="$PROJECT_DIR$/static/myImages/overlay.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/40.CheckBoxSwitchRadioButton.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/41.PrzesylanieDanych.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/42.DaneOdRodzicaDoDziecka.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/44.DaneOdDzieckaDoRodzica.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/48.PodzialAplikacji.mdx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/01-intro.mdx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/01-intro.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/02-typyProste.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/03-expressions.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/04-pętle.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/05-tablitc-i-listy.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/01-funkcje.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/03-odczytDanychZKonsoli.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/20-funkcje-strzalkowe.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/30-filtrowanie.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/40-mapowanie-map.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/50-redukcja-reduce.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/60-redukcja-fold.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/65.foreach.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/70-DodatkoweFunkcje.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/III-kotlin-konsola-1.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/06-Funkcje/ZADANIE_III-kotlin-konsola_1.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/0.OOP.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/1.Wprowadzenie do klas.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/2.Konstruktor.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/3.Właściwości.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/4.Dziedziczenie.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/5.Enkapsulacja.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/6.Polimorfizm.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/7.Abstrakcja.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/1.Podstawowe pojęcia.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/15.PrzekazywanieDanychViewModel.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/15.PrzekazywanieDanychViewModel.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/16.BottomNavigationView.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/16.BottomNavigationView.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/20.Listy i dane/1.ListView/1.IntroListVIew.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/20.Listy i dane/1.ListView/1.IntroListVIew.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/10.ImageIcon.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/60.ImageIcon.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/12.CardSurface.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/70.CardSurface.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/14.SliderProgressIndicator.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/70.SliderProgressIndicator.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/15.ExposedDropdownMenuBox.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/80.ExposedDropdownMenuBox.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/16.LazyColumnLazyRow.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/90.LazyColumnLazyRow.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/2.TextFieldButtonText.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/10.TextFieldButtonText.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/4.ColumnRowBox.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/20.ColumnRowBox.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/6.SpacerModifier.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/30.SpacerModifier.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/8.CheckBoxSwitchRadioButton.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/9.SnackBarDialogAlertDialog.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/50.SnackBarDialogAlertDialog.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/css/custom.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/css/custom.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,6 +134,7 @@
       <recent name="$PROJECT_DIR$/static" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/Abstrakcja" />
       <recent name="$PROJECT_DIR$/docs/6.Nawigacja/3. Menu" />
       <recent name="$PROJECT_DIR$/docs/3. Kolejne View/1. Time View" />
       <recent name="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-Funkcje" />
@@ -101,7 +143,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.27397.92" />
+        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-WS-252.28238.10" />
       </set>
     </attachedChunks>
   </component>
@@ -150,6 +192,20 @@
       <workItem from="1761500405585" duration="285000" />
       <workItem from="1761500702039" duration="1206000" />
       <workItem from="1761502029090" duration="29000" />
+      <workItem from="1762504941192" duration="3000" />
+      <workItem from="1762504949802" duration="1783000" />
+      <workItem from="1762510782866" duration="633000" />
+      <workItem from="1762514087029" duration="7908000" />
+      <workItem from="1762970756526" duration="746000" />
+      <workItem from="1763456849230" duration="1881000" />
+      <workItem from="1763460979058" duration="4879000" />
+      <workItem from="1763477367680" duration="2022000" />
+      <workItem from="1763493267617" duration="4157000" />
+      <workItem from="1763535787158" duration="1863000" />
+      <workItem from="1763585026535" duration="1777000" />
+      <workItem from="1763626689822" duration="5763000" />
+      <workItem from="1763752943545" duration="1384000" />
+      <workItem from="1764532307615" duration="4053000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />

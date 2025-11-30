@@ -189,10 +189,10 @@ sharedViewModel.monsterDescription.observe(viewLifecycleOwner) { description ->
 binding.resultText.text = description
 }
 ```
-- `sharedViewModel` to połączenie z viewModelem z aktywności
+- `sharedViewModel` to połączenie z `viewModelem` z aktywności
 - `monsterDescritpion` to właściwość z klasy `MonsterViewModel`
     - ta właściwość zwraca specjalny obiekt `MutableLiveData<String>`
-    - na tej liście ustawiasz nasłuchiwacza/obserwatora:
+    - na tej właściwości ustawiasz nasłuchiwacza/obserwatora:
         - gdy wartość tego obiektu się zmieni (`monsterDescription.value`),
         - wykonuje się funkcja strzałkowa `{description -> ...}`
 
@@ -353,11 +353,15 @@ class MonsterViewModel: ViewModel() {
 
 #### Obserwowanie `MonsterViewModel` w `SecondFragment`
 ```kotlin
-binding.confirmButton.setOnClickListener {
+
 //...
  sharedViewModel.monsterName.observe(viewLifecycleOwner){ name ->
             binding.monsterLabel.text = "Twój potwór nazywa się: $name"
         }
+//...
+
+binding.confirmButton.setOnClickListener {
+
 //...
 
 // ustawiamy nową wartość dla desktypcji

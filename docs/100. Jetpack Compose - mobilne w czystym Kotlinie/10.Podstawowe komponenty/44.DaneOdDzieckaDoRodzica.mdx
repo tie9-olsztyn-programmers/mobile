@@ -1,0 +1,252 @@
+---
+title: Dane od dziecka do rodzica
+---
+
+# Dane od dziecka do rodzica przez zdarzenia
+- rodzic przekazuje dziecku referencję do funkcji
+- dziecko wywołuje tę funkcję przekazując jej dane
+- rodzic otrzymuje dane
+
+
+## Maksymalnie prosty przykład
+
+### Wprowadzenie
+- Utwórzmy nowy projekt `Empty Activity`.
+- Zamiast komponentu `Greeting` zróbmy komponent `Parent`:
+```kotlin
+@Composable
+fun Parent(){
+    Log.i("tag","Rodzic")
+
+}
+```
+W `Logcat` powinniśmy przy *tagu* `tag` zobaczyć napis `Rodzic`.
+
+W nowym pliku `Child.kt` zdefiniujmy nowy komponent:
+```kotlin
+@Composable
+fun Child(name: String){
+    Column() {
+        Text(text=name)
+    }
+}
+```
+
+Ten komponent przyjmuje od rodzica tekst i wyświetla go w kolumnie.
+Użyjmy go w rodzicu:
+```kotlin
+@Composable
+fun Parent(){
+    Log.i("tag","Rodzic")
+    Column() {
+        Child("wiadomość od rodzica")
+    }
+}
+```
+
+### Przekazywanie funkcji
+Teraz dziecko przy użyciu funkcji od rodzica prześle tekst:
+```kotlin
+@Composable
+fun Parent(){
+    Log.i("tag","Rodzic")
+    Column() {
+        Child("wiadomość od rodzica",
+            onEvent = {someValue ->
+                Log.i("tag", "Wysłano: $someValue")}
+            )
+    }
+}
+```
+
+
+```kotlin
+@Composable
+fun Child(name: String, onEvent: (String)-> Unit){
+    Column() {
+        Text(text=name)
+
+        Button(onClick = {onEvent("klik!")}) {
+            Text(text="Naciśnij mnie")
+        }
+    }
+}
+```
+
+## Bardziej złożony przykład - jakby gra
+- `Parent.kt` trzyma stan punktów
+- `Child.kt` zgłasza zdarzenie (`+1` punkt)
+
+Skasujmy komponent `Parent` a w jego miejsce wpiszmy `GameScreen.kt`:
+```kotlin
+@Composable
+fun GameScreen(){
+    var score by remember { mutableStateOf(0)}
+
+    ScorePanel(score = score, onAddPoint = { score += 1})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GameScreenPreview() {
+    DaneOdDzieckaDoRodzicaTheme {
+       GameScreen()
+    }
+}
+
+```
+
+Nowy plik, nowy komponent `ScorePanel.kt`:
+```kotlin
+@Composable
+fun ScorePanel(
+    score: Int,
+    onAddPoint: () -> Unit
+){
+    Column(
+        modifier = Modifier.padding(33.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text="Punkty: $score", fontSize = 30.sp)
+
+        Spacer(Modifier.height(16.dp))
+
+        Button(onClick = onAddPoint) {
+            Text("Dodaj punkt")
+        }
+
+    }
+}
+```
+
+---
+
+## Gra *5sec Stopwatch*
+
+### Co będzie robić rodzić?
+- przekazuje stan: `time`, `result`
+- przekazuje funkcje: `onStart`, `onStop`
+- dziecko wywołuje *callback*, rodzic obsługuje logikę
+- rodzic aktualizuje stan, Compose sam renderuje
+
+### Czego dziecko nie będzie robić?
+- dziecko niczego samo nie liczy
+- dziecko nie zna logiki gry
+- dziecko zgłasza tylko zdarzenia:
+    - `onStart()`
+    - `onStop()`
+- rodzic to wszystko obsługuje
+
+### Kodujemy rodzica `StopGameScreen.kt`:
+- skasujmy komponent `GameScreen`
+- dodajmy nowy komponent `StopGameScreen`
+```kotlin
+@Composable
+fun StopGameScreen() {
+
+    var time by remember { mutableStateOf(0f) }
+    var running by remember { mutableStateOf(false) }
+    var result by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(running) {
+        if (running) {
+            val start = System.currentTimeMillis()
+            while (running) {
+                val now = System.currentTimeMillis()
+                time = (now - start) / 1000f
+                delay(10)
+            }
+        }
+    }
+
+    GameUI(
+        time = time,
+        result = result,
+        onStart = {
+            time = 0f
+            result = null
+            running = true
+        },
+        onStop = {
+            running = false
+            val diff = abs(time - 5f)
+            result = if (diff < 0.01f) {
+                "Perfekcyjnie!"
+            } else {
+                "Pudło. Odchyłka: ${"%.2f".format(diff)} s"
+            }
+        },
+
+    )
+}
+
+
+```
+- `LaunchedEffect`
+    - uruchamia korutynę (kod działający równolegle i nieblokujący UI)
+    - `LaunchedEffect(running){...}` startuje, gdy `running`=`true`
+    - `val start = System.currentTimeMillis()` zapamiętuje czas startu
+    - `val now = System.currentTimeMillis()` oblicza czas aktualny
+    - `time = (now - start) / 1000f` oblicza czas trwania
+
+
+
+
+i dziecko `GameUI.kt`:
+```kotlin
+
+@Composable
+fun GameUI(
+    time: Float,
+    result: String?,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+
+) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(33.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = String.format("%.2f s", time),
+            fontSize = 48.sp
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Row{
+            Button(onClick = onStart){
+                Text(text="Start")
+            }
+            Spacer(Modifier.width(16.dp))
+            Button(onClick = onStop) {
+                Text(text = "Stop")
+            }
+        }
+
+        result?.let{
+            Spacer(Modifier.height(32.dp))
+            Text(
+                text = it,
+                fontSize = 24.sp,
+                color = Color.Magenta
+            )
+        }
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+

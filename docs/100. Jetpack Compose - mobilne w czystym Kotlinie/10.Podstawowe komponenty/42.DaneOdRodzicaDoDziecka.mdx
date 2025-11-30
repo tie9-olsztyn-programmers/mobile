@@ -1,0 +1,241 @@
+---
+title: Dane od rodzica do dziecka
+---
+
+
+# Dane płyną od rodzica do dziecka
+:::tip
+- Down with the data,
+- Up with the events!
+
+:::
+
+## Rodzic przekazuje imię do dziecka
+Obok naszego pliku `MainActivity.kt` zróbmy plik `Child.kt`
+```kotlin
+@Composable
+fun Child(name: String){
+    Text("Cześć, $name")
+}
+```
+Nasz komponent `Child` ma parametr `name`.
+Wartość przekazaną do tego parametru wyświetli na ekranie.
+
+Rozpatrujemy sytuację, w której rodzić (nasza funkcja `Parent`) przekazuje dane do dziecka.
+```kotlin
+@Composable
+fun Parent(name: String, modifier: Modifier = Modifier) {
+
+    Column() {
+        Child("Bob")
+
+        Child(name="Alice")
+    }
+}
+```
+
+## Rodzic przekazuje inne typy danych do dziecka
+Będziemy chcieli przesłać do dziecka `Boolean`, `Int` lub `String`.
+```kotlin
+@Composable
+fun Parent(name: String, modifier: Modifier = Modifier) {
+
+    Column() {
+        Child(name="Alice", isEnable=true, age=16)
+    }
+}
+```
+
+Musimy więc dopasować nasz komponent `Child` do w/w wymagań
+```kotlin
+@Composable
+fun Child(name: String, isEnable: Boolean, age: Int ){
+
+    Column(){
+        Text("Cześć, $name")
+        Text(text="Czy jesteś dostępna? $isEnable")
+        Text(text="Ile masza lat? $age")
+    }
+
+}
+```
+
+## Rodzic przekazuje obiekty do dziecka
+Utwórzmy plik `User.kt` ze zdefiniowaną klasą danych
+```kotlin
+data class User(val name: String, var age: Int)
+```
+
+Utwórzmy nowy komponent `UserCard.kt`
+
+```kotlin
+@Composable
+fun UserCard(user: User, modifier: Modifier = Modifier){
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(8.dp), // cień z Material3
+        modifier = modifier
+            .size(179.dp)
+       ) {
+
+        Box(
+            contentAlignment = Alignment.Center, // wycentrowania
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ){
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = user.name,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "${user.age} lat",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                )
+
+
+            }
+        }
+    }
+
+}
+
+@Preview(showBackground = true, backgroundColor = 0xfff5f5f5)
+@Composable
+fun UserCarPreview(){
+    MaterialTheme{
+        UserCard(
+            user = User(name="Zygfryd", age=44),
+            modifier = Modifier.padding(32.dp)
+        )
+    }
+}
+
+```
+
+Użyjemy komponentu `UserCard` w `Parent.kt`
+```kotlin
+@Composable
+fun Parent(name: String, modifier: Modifier = Modifier) {
+
+    val userZygfryd = User(name="Zygfryd", age = 198)
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Child(name="Alice", isEnable=true, age=16)
+        Spacer(modifier= Modifier.padding(30.dp))
+
+        UserCard(userZygfryd)
+
+
+    }
+}
+```
+
+
+## Rodzic przekazuje listę danych do dziecka
+Rozbudujmy nasz model o właściwości `id`:
+```kotlin
+data class User(
+    val id: Int,
+    val name: String,
+    var age: Int
+)
+```
+Tam, gdzie w naszym kodzie utworzyliśmy obiet typu `User`,
+będzie trzeba dopisać `id`.
+
+
+Utwórzmy nowy komponent `UserList.kt`
+```kotlin
+
+@Composable
+fun UserList(
+    users: List<User>,
+    modifier: Modifier = Modifier
+){
+
+    LazyColumn(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        items(
+            count = users.size,
+            key = {index -> users[index].id}
+        ) { index ->
+            val user = users[index]
+            UserCard(user = user)
+        }
+    }
+}
+```
+:::tip `LazyColumn` i `items`
+-  `LazyColumn` lista generowana w locie
+- `items` to wbudowana funkcja w środku `LazyColumn`, która tworzy elementy listy:
+- `count` Mówisz jej: „Mam tyle elementów — zrób mi z tego listę na ekranie” `count = users.size`
+- `key`:
+- unikalny identyfikator konkretnego elementu listy
+- Dzięki temu Compose:
+- wie, który item jest który,
+- nie wymienia elementów niepotrzebnie,
+- nie gubi ich stanu,
+- optymalizuje przewijanie,
+- reaguje poprawnie, gdy lista się zmienia., żeby lista się nie mieszała po zmianach.
+- `{index -> ...`
+- `items` działa jak pętla `for`
+- wywoła funkcję strzałkową `{index -> ` tyle razy ile zostało zdefiniowane w `count`
+
+:::
+
+
+Użyjmy komponentu `UserList` w `Parent.kt`
+```kotlin
+@Composable
+fun Parent(name: String, modifier: Modifier = Modifier) {
+
+    val userZygfryd = User(name="Zygfryd", age = 198, id = 10)
+    val users = remember {
+        listOf(
+            User(id = 1, name="Jan", age=22),
+            User(id = 2, name="Zosia", age=2),
+            User(id = 3, name="Dawid", age=321),
+        )
+    }
+
+
+    Column( //...
+
+      Spacer(modifier= Modifier.padding(30.dp))
+
+            UserCard(userZygfryd)
+
+            Spacer(modifier= Modifier.padding(20.dp))
+            UserList(users = users)
+
+//..
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

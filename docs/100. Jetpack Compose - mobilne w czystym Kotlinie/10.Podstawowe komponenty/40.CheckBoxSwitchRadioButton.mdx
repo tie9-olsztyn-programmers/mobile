@@ -1,0 +1,412 @@
+---
+title: CheckBox, Switch, RadioButton
+---
+
+
+# Aplikacja *UstawieniaUżytkownika* CheckBox, Switch, RadioButton
+- utwórz projekt *Empty View*
+- istniejące *Composable* `Greeting` zamień na `UserSettings`
+- skasuj parameter `name`, który występował w `Greeting`
+
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    CheckSwitchRadioJCTheme {
+        UserSettings()
+    }
+}
+```
+
+Aplikacja będzie zawierała:
+- `Switch` włączanie trybu powiadomień
+- `Checkbox`y wybór zainteresowań
+- `RadioButtony` – wybór motywu aplikacji (*Light*, *Dark*, *System*)
+
+| Komponent       | Opis                                                                                        | Kiedy używać?                                                                                              | Przykład użycia w aplikacji                                              | Wizualizacja                         |
+| --------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------ |
+| **Checkbox**    | Pole wyboru pozwalające zaznaczyć **dowolną liczbę opcji**. Każdy checkbox jest niezależny. | - Lista zainteresowań<br/>- Lista zadań „to-do”<br/>- Filtry (np. „pokaż tylko dania wege i ostre”)        | Uczeń może wybrać kilka zajęć dodatkowych: programowanie, muzyka, sport. | ☑ Programowanie<br/>⬜ Muzyka         |
+| **Switch**      | Przełącznik ON/OFF. Zawsze ma tylko dwa stany: aktywny / nieaktywny.                        | - Włączanie powiadomień<br/>- Tryb ciemny<br/>- Włączenie modułu GPS                                       | Przycisk „Włącz powiadomienia” w ustawieniach aplikacji.                 | 🟩◉ ON / ⚪ OFF                       |
+| **RadioButton** | Element wyboru **jednej opcji z wielu**. Każdy RadioButton należy do jednej grupy.          | - Wybór motywu aplikacji (jasny / ciemny / systemowy)<br/>- Wybór płatności<br/>- Jedna odpowiedź w quizie | Użytkownik wybiera jeden motyw aplikacji.                                | ◉ Jasny<br/>○ Ciemny<br/>○ Systemowy |
+
+Podstawowa struktura:
+```kotlin
+Checkbox(checked = value, onCheckedChange = { value = it })
+Switch(checked = on, onCheckedChange = { on = it })
+RadioButton(selected = isSelected, onClick = { isSelected = true })
+
+
+```
+
+## Dodajemy `Checkbox`y
+
+### Pierwszy `Checkbox` z napisem "Programowaniem"
+```kotlin
+ Column() {
+        Text(text="Zainteresowania")
+
+            Checkbox(
+                checked = true,
+                onCheckedChange = { })
+            Text(text="Programowanie")
+}
+```
+Napis "Programowanie znalazł się pod `Checkbox`em.
+Byłoby lepiej, gdyby znajdował się po prawej stronie tego napisu.
+Dlatego też dodamy `Row`.
+```kotlin
+Column() {
+        Text(text="Zainteresowania")
+
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Checkbox(
+                checked = true,
+                onCheckedChange = { })
+            Text(text="Programowanie")
+        }
+}
+```
+:::tip `Row` *vertical* a jednak *horizontal*
+- `Row` elementy są ustawiane horyzontalnie (w poziomie) – od lewej do prawej:
+    - oś główna (*main axis*) jest pozioma
+    - oś pomocnicza (*cross axis*) jest pionowa (*vertical*)
+- `verticalAlignment:
+    - oznacza jak elementy mają być wyrównane w pionie względem siebie
+    - w `Row` nie ma nic wspólnego z układem lewo–prawo
+    - to tylko pionowe wyrównanie elementów, które i tak są już obok siebie.
+
+:::
+
+### Logika działania naszego `Checkbox`a
+- potrzebujemy zmiennej, która będzie przechowywać informacje o tym, czy checkbox jest zaznaczony
+- potrzebujemy mechanizmu, który umożliwi zapamiętanie tej zmiennej
+
+```kotlin
+ var isProgrammingChecked by remember { mutableStateOf(false) }
+
+    Column() {
+        Text(text="Zainteresowania")
+
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Checkbox(
+                checked = isProgrammingChecked,
+                onCheckedChange = { newValue ->
+                    isProgrammingChecked = newValue
+                    Log.i("check", "$isProgrammingChecked")
+                })
+            Text(text="Programowanie")
+        }
+
+    }
+```
+**Wyjaśnienie**
+` var isProgrammingChecked by remember { mutableStateOf(false) }` znaczy:
+    - stworzy zmienną, która będzie pamiętać, czy użytkownik zaznaczył `checkbox` "Programowanie",
+    - na początku niech będzie odznaczona (`false`).
+    - nawet jak ekran się przeładuje (np. obrócisz telefon), to ta informacja ma nie zniknąć.
+- `remember`
+    - „Zapamiętaj to dla mnie”.
+    - Gdyby go nie było:
+        - za każdym razem, gdy ekran się odświeży (np. obrócisz telefon albo Compose coś przerysuje),
+        - stan wróciłby do początkowego i checkbox „zapomniałby”, że był zaznaczony.
+- `mutableStateOf`
+    - tworzy specjalny obiekt, który „pilnuje” wartości `false` (czyli checkbox odznaczony)
+    - gdy użytkownik kliknie `checkbox`, wartość zmieni się na `true`
+    - a Compose automatycznie przerysuje ekran
+    - to specjalny obiekt, który potrafi powiedzieć Compose’owi:
+        - „Hej! Ja się właśnie zmieniłem! Proszę przerysuj ekran!”
+
+## Dodajemy kolejne dwa `Checkbox`y - "Sport" i "Muzyka"
+- zwróć uwagę, że `Column` dostał `modifier`
+
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+
+    var isProgrammingChecked by remember { mutableStateOf(false) }
+    var isSportChecked by remember { mutableStateOf(false) }
+    var isMusicChecked by remember { mutableStateOf(false) }
+
+    Column( modifier = modifier) {
+        Text(text="Zainteresowania",
+            fontSize = 20.sp,
+            modifier = Modifier.padding(top=24.dp, bottom = 10.dp)
+        )
+
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Checkbox(
+                checked = isProgrammingChecked,
+                onCheckedChange = { newValue ->
+                    isProgrammingChecked = newValue
+                })
+            Text(text="Programowanie")
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Checkbox(
+                checked = isSportChecked,
+                onCheckedChange = { newValue ->
+                    isSportChecked = newValue
+                })
+            Text(text="Sport")
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Checkbox(
+                checked = isMusicChecked,
+                onCheckedChange = { newValue ->
+                    isMusicChecked = newValue
+                })
+            Text(text="Muzyka")
+        }
+    }
+}
+```
+
+## Dynamiczne tworzenie `Checkbox`ów
+- mamy kilka `Checkbox`ów, więc nasza funkcja `Composable` zaczyna być nieczytelna
+- będziemy dynamicznie generować `Checkbox`y
+
+
+
+### `data class` - model dla zainteresowań
+
+`Interest.kt`
+```
+
+data class Interest (val name: string, var checked: Boolean)
+
+```
+
+### Utworzenie listy obiektów `Interest`
+Zamiast oddzielnych zmiennych w naszej funkcji `Composable` utworzymy listę obiektów `Interest`:
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+    // var isProgrammingChecked by remember { mutableStateOf(false) }
+    // var isSportChecked by remember { mutableStateOf(false) }
+    // var isMusicChecked by remember { mutableStateOf(false) }
+
+    val interests = remember {
+    mutableStateListOf(
+        Interest("Programowanie", false),
+        Interest("Muzyka", false),
+        Interest("Sport", false)
+    )
+}
+```
+### Dynamiczne generowanie `Checkbox`ów
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+//...
+
+ Column( modifier = modifier) {
+        Text(text="Zainteresowania",
+            fontSize = 20.sp,
+            modifier = Modifier.padding(top=24.dp, bottom = 10.dp)
+        )
+
+        interests.forEachIndexed { index, interest ->
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Checkbox(
+                    checked = interest.checked,
+                    onCheckedChange = {
+
+                        // copy stworzy nowy obiekt
+                        // więc zmieni się lista
+                        // więc UI zostanie poinformowane o zmiania
+                        interests[index] = interest.copy(checked = it)
+
+                        /*to list obiektów jest reactywna (informuje UI o zmianach
+                        * sam obiekt i jego właściwości nie są reaktywne, więc
+                        * nie informują UI o swoich zmianach
+                        * */
+                       // interest.checked = it
+                    }
+                )
+                Text(text=interest.name)
+            }
+        }
+    }
+```
+
+## Dodajemy `Switch`
+Musimy:
+- dodać zmienną przechowującą stan `Switch`a
+- dodać funkcję tworzącą `Switch`
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+//...
+
+ var notificationsEnabled by remember { mutableStateOf(false) }
+
+//...pod checkboxami
+
+Row(modifier=Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+
+        ) {
+            Text("Powiadomienia")
+
+            Spacer(modifier=Modifier.width(12.dp))
+
+            Switch(
+                modifier = Modifier.padding(20.dp),
+                checked = notificationsEnabled,
+                onCheckedChange = {
+                    notificationsEnabled = it
+                    println(notificationsEnabled)
+                }
+            )
+        }
+```
+:::important Najważniejsza zasada Compose (zapamiętaj na zawsze)
+- Jeśli coś ma się zmieniać i ekran ma to zobaczyć, musi być w `remember { mutableStateOf(...) }`.
+- Bez tego Compose jest ślepy na zmiany i nic się nie aktualizuje.
+
+:::
+
+:::tip syntaktyka z `by` *property delegation*
+"Hej, ta zmienna ma nie trzymać bezpośrednio wartości false,
+tylko ma korzystać z innego obiektu (tutaj `MutableState`),
+a Ty (Kotlin) zajmij się za mnie automatycznym wywoływaniem `.getValue()` i `.setValue()`"
+
+Kotlin zamienia:
+`var notificationsEnabled by remember { mutableStateOf(false) }`
+
+na
+
+```kotlin
+private val notificationsEnabled$delegate = remember { mutableStateOf(false) }
+
+var notificationsEnabled: Boolean
+    get() = notificationsEnabled$delegate.value          // automatyczne .value przy odczycie
+    set(value) = notificationsEnabled$delegate.value = value  // automatyczne .value przy zapisie
+```
+
+:::
+
+
+
+## Dodajemy `RadioButton`y - motyw aplikacji
+Potrzebujemy:
+- zmiennej, która przechowa informację o tym, który `RadioButton` został wybrany
+- funkcji, która tworzy `RadioButton`y
+
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+//...
+    var notificationsEnabled by remember { mutableStateOf(false) }
+
+    var selectedTheme by remember { mutableStateOf("light") }
+
+// ... pod switchem
+ Row(modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically){
+
+            RadioButton(
+                selected = selectedTheme == "light",
+                onClick = {selectedTheme = "light"}
+            )
+            Text(text="Jasny")
+        }
+
+        Row(modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically){
+            RadioButton(
+                selected = selectedTheme == "dark",
+                onClick = {selectedTheme = "dark"}
+            )
+            Text(text="Ciemny")
+        }
+
+        Row(modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+            ){
+            RadioButton(
+                    selected= selectedTheme == "system",
+                    onClick = {selectedTheme = "system"}
+                    )
+            Text(text="Systemowy")
+        }
+        Text(text="Twój wybór: $selectedTheme",
+             modifier=Modifier.padding(10.dp)
+            )
+    }
+```
+
+## Dodajemy przycisk podsumowania
+- potrzebujemy przycisku, po naciśnięciu którego na dole ekranu pojawi się podsumowanie formularza
+- więc potrzebujemy też pola do wyświetlenia podsumowania
+- czyli potrzebujemy też zmiennej, która przechowa informacje z formularza
+
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+//...
+    var summary by remember { mutableStateOf("") }
+
+
+
+//...
+  Text(text="Twój wybór: $selectedTheme",
+             modifier=Modifier.padding(10.dp)
+            )
+
+// --------- podsumowanie ---------------------
+
+
+        Spacer(modifier= Modifier.size(20.dp))
+        Button(modifier = Modifier.padding(10.dp),
+            onClick = {
+
+                summary = "Motyw $selectedTheme, powiadomienia $notificationsEnabled" +
+                        ", zainteresowania ${
+                            interests
+                                .filter { it.checked }
+                                .joinToString { it.name  }
+                        }"
+            }){
+            Text(text="Podsumowanie")
+        }
+        Text(modifier = Modifier.padding(vertical = 12.dp, horizontal = 5.dp ),
+            text = "P o d s u m o w a n i e",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
+            )
+        Text(summary)
+
+```
+:::danger Podstawowy problem
+Nasza aplikacja zawiera się w jednym pliku.
+
+- przestaje być czytelna
+- staje się trudna do rozbudowy i testowania
+- ... i w ogóle jest niepoprawna
+
+:::
+
+Zanim przejdziemy do podziału naszej aplikacji na komponenty *Compose*,
+musimy nauczyc się przekazywać dane między komponentami.
+
+
+
+
+
+
+
+
+
+
+

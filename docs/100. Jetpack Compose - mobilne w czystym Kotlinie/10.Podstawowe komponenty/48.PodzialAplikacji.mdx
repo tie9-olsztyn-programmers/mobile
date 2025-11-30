@@ -1,0 +1,156 @@
+---
+title: Wydzielanie mniejszych Composable
+---
+
+
+# Wydzielanie mniejszych Composable
+
+## Dlaczego podział aplikacji jest ważny?
+Aplikacja z poprzedniej lekcji ma jedną podstawową wadę.
+Wszystko napisaliśmy w jednym pliku.
+
+Dobrze napisana aplikacja powinna być podzielona na niewielkie komponenty.
+
+:::info *Separation of Concerns* (*SoC*)
+To ogólna zasada inżynierii oprogramowania:
+
+Każda część powinna zajmować się jedną konkretną odpowiedzialnością.
+
+(W dokumentach Google to *Break down UI into small composables*)
+:::
+
+W naszym przypadku:
+- osobny `composable` dla sekcji powiadomień
+- osobny dla `checkbox`ów
+- osobny dla `radiobutton`ów
+- osobny dla podsumowania
+
+
+## Jaka będzie struktura naszej aplikacji?
+- stwórz folder/*package* `components`
+- wewnątrz niego pliki:
+    - `NotificationsSection.kt`,
+    - `InterestsSection.kt`,
+    - `ThemeSection.kt`,
+    - `SummarySection.kt`
+
+```
+ui/
+ ├─ SettingsScreen.kt
+ ├─ components/
+ │    ├─ NotificationsSection.kt
+ │    ├─ InterestsSection.kt
+ │    ├─ ThemeSection.kt
+ │    └─ SummarySection.kt
+
+```
+
+## *State Hoisting**
+:::tip Co to jest *State Hoisting*?
+- to zasada wynoszenia stanu (zmiennych, danych)
+- z niższych `Composable` do wyższego poziomu,
+- tak aby małe composable były *stateless* (bez własnej logiki).
+
+*State Hoisting* = **podnoszenie stanu w górę hierarchii komponentów**
+
+Inaczej mówiąc:
+- Mały `composable` nie powinien sam przechowywać stanu.
+
+- Stan powinien być trzymany wyżej, a `composable` powinien go tylko wyświetlać.
+:::
+
+
+
+
+
+# Definiujemy komponent `NotificationsSection.kt`
+```kotlin
+@Composable
+fun NotificationsSection(
+    enable: Boolean,
+    onToggle: (Boolean)-> Unit
+){
+    Row(modifier=Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
+
+    ) {
+        Text("Powiadomienia")
+        Spacer(modifier=Modifier.width(12.dp))
+        Switch(
+            modifier = Modifier.padding(20.dp),
+            checked = enable,
+            onCheckedChange = onToggle
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NotificationsSectionPreview(){
+    var enable by remember { mutableStateOf(false) }
+    NotificationsSection(enable, {enable = it})
+}
+```
+
+W głównym pliku używamy tej małej, bezstanowej funkcji composable:
+```kotlin
+// ... w miejscu, w którym poprzednio było wszystko ze Switchem
+
+        NotificationsSection(notificationsEnabled, { notificationsEnabled = it } )
+
+//
+```
+
+## Definiujemy komponent `InterestsSection.kt`
+Tu będzie sporo zmian.
+:::danger PAMIĘTAJ
+Pamiętaj o koniecznych importach "alt+enter" po najechaniu kursorem na brakujące importy.
+
+:::
+```kotlin
+
+@Composable
+fun InterestsSection(
+    interestList: List<Interest>,
+    onInterestChange: (Interest)-> Unit
+){
+    Column() {
+        Text(text="Zainteresowania",
+            fontSize = 20.sp,
+            modifier = Modifier.padding(
+                top=24.dp,
+                bottom = 10.dp,
+            )
+        )
+
+        interestList.forEach { interest ->
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Checkbox(
+                    checked = interest.checked,
+                    onCheckedChange = { isChecked ->
+                        val updatedInterest = interest.copy(checked = isChecked)
+                        onInterestChange(updatedInterest)
+                    }
+                )
+                Text(text=interest.name)
+            }
+        }
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
