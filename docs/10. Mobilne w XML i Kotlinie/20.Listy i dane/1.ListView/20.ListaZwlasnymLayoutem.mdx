@@ -1,0 +1,235 @@
+---
+title: Lista z własnym layoutem
+---
+
+# *HeroTrainer* - aplikacja do treningu postaci RPG
+
+- Utwórzmy nowy projekt *Empty Views Activity*.
+- Trzy obrazki postaci - pobierz.
+
+
+## Model danych
+- W folderze, gdzie jest `MainActivity.kt` zrób folder/package `model`.
+- Wewnątrz folderu zrób `TrainingEntry.kt`:
+```kotlin
+data class TrainingEntry(
+    val heroClass: String,
+    val date: String,
+    val trainingType: String,
+    val rating: Int
+)
+```
+
+## Layout dla pojedynczego elementu listy
+
+W folderze `res/layout` utwórz nowy plik `list_item_training.xml`:
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#EEEEEE"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="10dp"
+    >
+
+    <ImageView
+        android:id="@+id/heroImageView"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/ic_knight" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/heroClassTextView"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:text="Rycerz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/dateAndTypeTextView"
+            android:text="03.12, Trening siły"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:numStars="5"
+            android:stepSize="1"
+            android:isIndicator="true"
+            android:rating="4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>
+
+```
+
+## Tworzymy własny adapter
+
+:::tip Czym jest Adapter w Androidzie?
+- Adapter to pośrednik między danymi a widżetem interfejsu (np. `ListView`, `Spinner`, `RecyclerView`).
+- Adapter przekształca dane (np. lista tekstów, obiektów) na elementy widoczne w UI.
+
+:::
+
+:::note `ArrayAdapter`
+```kotlin
+val adapter = ArrayAdapter(
+    this,
+    android.R.layout.simple_list_item_1,
+    fruits
+)
+listView.adapter = adapter
+```
+- `this` kontekst (np. `Activity`)
+- `simple_list_item_1` gotowy layout XML (zawiera tylko `TextView`)
+- `fruits` dane
+
+:::
+
+
+Obok `MainActivity.kt` tworzymy plik `TrainingAdapter.kt`:
+```kotlin
+
+class TrainingAdapter(
+    private val context: Context,
+    private val trainings: List<TrainingEntry>
+) : ArrayAdapter<TrainingEntry>(context, 0, trainings){
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val itemView = convertView ?: LayoutInflater.from(context)
+            .inflate(R.layout.list_item_training, parent, false)
+
+        val entry = trainings[position]
+
+        val heroClassTextView = itemView.findViewById<TextView>(R.id.heroClassTextView)
+        val dateAndType = itemView.findViewById<TextView>(R.id.dateAndTypeTextView)
+        val ratingBar = itemView.findViewById<RatingBar>(R.id.ratingBar)
+        val heroImageView = itemView.findViewById<ImageView>(R.id.heroImageView)
+
+        heroClassTextView.text = entry.heroClass
+        dateAndType.text = "${entry.date}, ${entry.trainingType}"
+        ratingBar.rating =entry.rating.toFloat()
+
+        val imageResId = when (entry.heroClass.lowercase()){
+            "rycerz", "knight" -> R.drawable.ic_knight
+            "mag", "mage" -> R.drawable.ic_mage
+            "łucznik", "archer" -> R.drawable.ic_archer
+            else -> R.drawable.ic_launcher_foreground
+        }
+        heroImageView.setImageResource(imageResId)
+
+        return itemView
+    }
+}
+
+```
+:::tip Za co odpowiada metoda `getView()` w adapterze?
+- tworzy pojedynczy widok (`layout`) dla jednego elementu w liście (np. w `ListView`, `Spinner`).
+
+:::
+
+`fun getView(position: Int, convertView: View?, parent: ViewGroup): View`
+Co robi `getView()`:
+- Sprawdza, czy istnieje gotowy widok (`convertView`):
+    - Jeśli nie, to tworzy nowy z `LayoutInflater`.
+    - Jeśli tak, to używa go ponownie (to ważne dla wydajności).
+- Pobiera dane dla danego `position` z listy obiektów.
+- Wypełnia widok danymi — np. ustawia teksty, obrazki, oceny itp.
+- Zwraca gotowy widok, który zostanie wyświetlony w `ListView`.
+
+
+:::info `convertView` — co to daje?
+Bez `convertView`:
+    - dla każdego elementu tworzony byłby nowy layout XML,
+    - co zużywałoby RAM,
+    - co spowalniałoby scrollowanie.
+
+
+Dzięki `convertView`, widoki są recyklingowane (zamiast tworzyć nowe – są ponownie używane).
+
+:::
+
+
+## Konfigurowanie głównej aktywności
+
+`activity_main.xml`
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:padding="10dp"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HeroTrainer"
+        android:layout_gravity="center"
+        android:textSize="20sp"
+        />
+
+    <ListView
+        android:id="@+id/trainingsListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"/>
+
+
+</LinearLayout>
+
+```
+
+`MainActivity.kt`
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var listView: ListView
+    private lateinit var adapter: TrainingAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+      //...
+
+        listView = findViewById(R.id.trainingsListView)
+        val dummyTrainings = listOf(
+            TrainingEntry("Mag", "03.12", "Trening magii", 4),
+            TrainingEntry("Rycerz", "04.12", "Trening siły", 5),
+            TrainingEntry("Łucznik", "05.12", "Trening zręczności", 3),
+            TrainingEntry(heroClass = "Mage", date="06.12", trainingType="Trening mentalny", rating=8 )
+        )
+
+        adapter = TrainingAdapter(this, dummyTrainings)
+        listView.adapter = adapter
+
+         listView.setOnItemClickListener { parent, view, position, id ->
+                    // parent - to ListView, które obsługie kliknięcie
+                    // view - widok klikniętego elementu
+                    val clickedItem = adapter.getItem(position)
+                    Log.d("LIST_CLICK", "Kliknięto: $clickedItem")
+                }
+
+    }
+}
+
+
+
+
+
+
+
+
