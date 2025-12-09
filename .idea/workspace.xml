@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
-      <change afterPath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/20.Listy i dane/1.ListView/30.ListaZJSONem.mdx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/20.Listy i dane/1.ListView/2.Lista z włanym layoutem.mdx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,7 +162,7 @@
       <workItem from="1763626689822" duration="5763000" />
       <workItem from="1763752943545" duration="1384000" />
       <workItem from="1764532307615" duration="5039000" />
-      <workItem from="1765131477121" duration="4743000" />
+      <workItem from="1765131477121" duration="5493000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />
