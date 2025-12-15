@@ -184,16 +184,16 @@ fun UserList(
 - `items` to wbudowana funkcja w środku `LazyColumn`, która tworzy elementy listy:
 - `count` Mówisz jej: „Mam tyle elementów — zrób mi z tego listę na ekranie” `count = users.size`
 - `key`:
-- unikalny identyfikator konkretnego elementu listy
-- Dzięki temu Compose:
-- wie, który item jest który,
-- nie wymienia elementów niepotrzebnie,
-- nie gubi ich stanu,
-- optymalizuje przewijanie,
-- reaguje poprawnie, gdy lista się zmienia., żeby lista się nie mieszała po zmianach.
+    - unikalny identyfikator konkretnego elementu listy
+    - dzięki temu Compose:
+        - wie, który item jest który,
+        - nie wymienia elementów niepotrzebnie,
+        - nie gubi ich stanu,
+        - optymalizuje przewijanie,
+        - reaguje poprawnie, gdy lista się zmienia (lista nie miesza się po zmianach)
 - `{index -> ...`
-- `items` działa jak pętla `for`
-- wywoła funkcję strzałkową `{index -> ` tyle razy ile zostało zdefiniowane w `count`
+    - `items` działa jak pętla `for`
+    - wywoła funkcję strzałkową `{index -> ` tyle razy ile zostało zdefiniowane w `count`
 
 :::
 

@@ -6,6 +6,54 @@
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/0.Podstawowe komponenty.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/0.Podstawowe komponenty.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/1.PodstawowePojecia.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/1.PodstawowePojecia.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/0.intro.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/0.intro.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/1.AplikacjaZFragmentem.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/1.AplikacjaZFragmentem.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/10.PierwszyNavComponent.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/10.PierwszyNavComponent.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/12.PrzekazywanieDanych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/12.PrzekazywanieDanych.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/14.czesc2PrzekazywanieDanych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/14.czesc2PrzekazywanieDanych.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/15.1.zadanie-ZIELNIK.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/15.1.zadanie-ZIELNIK.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/15.PrzekazywanieDanychViewModel.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/15.PrzekazywanieDanychViewModel.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/16.BottomNavigationView.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/16.BottomNavigationView.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/17.Animacje.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/17.Animacje.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/18.DrawerLayout.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/18.DrawerLayout.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/4.ObslugaZdarzenIBinding.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/4.ObslugaZdarzenIBinding.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/6.Komunikacja.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/6.Komunikacja.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/8.NAvigationComponent.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/8.NAvigationComponent.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/zarys.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/10.Fragmenty/zarys.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/2.Activity.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/2.Activity.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/10.Nawigacja i  fragmenty/zarys.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/10.Nawigacja i  fragmenty/zarys.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/2. Podstawowe View/0.intro.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/2. Podstawowe View/0.intro.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/20.Listy i dane/1.ListView/1.IntroListVIew.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/20.Listy i dane/1.ListView/1.IntroListVIew.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/20.Listy i dane/1.ListView/20.ListaZwlasnymLayoutem.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/20.Listy i dane/1.ListView/20.ListaZwlasnymLayoutem.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/20.Listy i dane/1.ListView/30.ListaZJSONem.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/20.Listy i dane/1.ListView/30.ListaZJSONem.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/20.Listy i dane/zarys.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/20.Listy i dane/zarys.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/3. Kolejne View/1. Time View/1.TimePicker.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/3. Kolejne View/1. Time View/1.TimePicker.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/3. Kolejne View/1. Time View/2.DatePicker.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/3. Kolejne View/1. Time View/2.DatePicker.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/3. Kolejne View/1. Time View/3.Chronometer.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/3. Kolejne View/1. Time View/3.Chronometer.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10. Mobilne w XML i Kotlinie/30.BazyDanych/zarys.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30.BazyDanych/zarys.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/1.intro.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/1.intro.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/10.TextFieldButtonText.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/10.TextFieldButtonText.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/20.ColumnRowBox.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/20.ColumnRowBox.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/30.SpacerModifier.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/30.SpacerModifier.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/40.CheckBoxSwitchRadioButton.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/40.CheckBoxSwitchRadioButton.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/41.PrzesylanieDanych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/41.PrzesylanieDanych.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/42.DaneOdRodzicaDoDziecka.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/42.DaneOdRodzicaDoDziecka.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/44.DaneOdDzieckaDoRodzica.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/44.DaneOdDzieckaDoRodzica.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/48.PodzialAplikacji.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/48.PodzialAplikacji.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/50.SnackBarDialogAlertDialog.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/50.SnackBarDialogAlertDialog.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/60.ImageIcon.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/60.ImageIcon.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/70.CardSurface.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/70.CardSurface.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/70.SliderProgressIndicator.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/70.SliderProgressIndicator.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/80.ExposedDropdownMenuBox.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/80.ExposedDropdownMenuBox.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/10.Podstawowe komponenty/90.LazyColumnLazyRow.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/90.LazyColumnLazyRow.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/40.Nawigacja/1.Wprowadzenie.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/40.Nawigacja/1.Wprowadzenie.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/40.Nawigacja/10.AplikacjaZDwomaEkranami.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/40.Nawigacja/10.AplikacjaZDwomaEkranami.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/40.Nawigacja/20.Przekazywanie Danych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/40.Nawigacja/20.Przekazywanie Danych.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/50.Panele/1.Wprowadzenie.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/50.Panele/1.Wprowadzenie.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose - mobilne w czystym Kotlinie/50.Panele/10.TopAppBar.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/50.Panele/10.TopAppBar.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,28 +111,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/js/Desktop/docuzaurus/mobile/static&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/mnt/dane/_0_docusaurus/mobile/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "javascript.preferred.runtime.type.id": "node",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/Users/js/Desktop/docuzaurus/mobile",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true",
+    "ts.external.directory.path": "/mnt/dane/_0_docusaurus/mobile/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/static" />
@@ -99,7 +149,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-WS-252.28238.10" />
+        <option value="bundled-js-predefined-d6986cc7102b-c7e53b3be11b-JavaScript-WS-253.28294.332" />
       </set>
     </attachedChunks>
   </component>
@@ -163,6 +213,7 @@
       <workItem from="1763752943545" duration="1384000" />
       <workItem from="1764532307615" duration="5039000" />
       <workItem from="1765131477121" duration="5493000" />
+      <workItem from="1765797946856" duration="2069000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />
