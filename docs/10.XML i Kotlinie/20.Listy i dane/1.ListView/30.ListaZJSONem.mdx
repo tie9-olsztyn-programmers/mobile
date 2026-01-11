@@ -10,6 +10,274 @@ title: Lista i lokalny CRUD (JSON, SharedPreferences)
 
 Utwórzmy nowy projekt `Empty Views Activity` *MiniKino*.
 
-## z
+## Model danych
+
+:::tip Co to jest Model danych?
+- to klasa (najczęściej data class w Kotlinie), która
+- ta klasa opisuje strukturę danych, z jakimi pracuje dana aplikacja.
+
+:::
+
+- utwórz folder/package w folderze, w którym jest `MainActiviry`
+- w tym nowym folderze zrób plik `MovieEntry`
+```kotlin
+data class MovieEntry(
+    val title: String,
+    val genre: String,
+    val rating: Int
+)
+```
+
+## Projekt formularza dodawania filmu
+W `activity_main.xml` definiujemy formularz dodawania nowego filmu do listy
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    >
+
+        <EditText
+            android:id="@+id/titleEditText"
+            android:hint="Tytuł filmu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Spinner
+            android:id="@+id/genreSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="1.0"
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:id="@+id/addButton"
+            android:text="Dodaj film do listy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+
+```
+
+## Obsługa formularza
+
+### Włączenie bindingu
+
+:::tip Czym jest ViewBinding?
+To mechanizm Androida, który automatycznie generuje klasy dla każdego layoutu XML. Dzięki temu możemy:
+- bezpiecznie odwoływać się do widoków przez ID (`binding.editTextTitle`)
+- unikać `findViewById`
+- mieć autouzupełnianie i sprawdzanie typów
+
+
+:::
+
+- w pliku `buld.gradle.kts` (Module) dodajemy:
+```kts
+// ...
+    buildFeatures{
+        viewBinding = true
+    }
+}
+
+dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation //...
+```
+SYNCHRONIZUJEMY PROJEKT!
+
+
+Zmieniamy `MainActivity.kt`
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener( //...
+
+```
+
+### `Spinner` z gatunkami filmów
+W metodzie `onCreate`
+```kotlin
+val genres = listOf("Akcja", "Komedia", "Dramat", "Sci-Fi", "Fantasy", "Horror")
+val genreAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, genres)
+genreAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+spinnerGenre.adapter = genreAdapter
+```
+
+### Obsługa kliknięcia
+```kotlin
+
+        binding.addButton.setOnClickListener {
+            val title = binding.titleEditText.text.toString()
+            val genre = binding.genreSpinner.selectedItem.toString()
+            val rating = binding.ratingBar.rating.toInt()
+
+            if (title.isNotBlank()) {
+                val newMovie = MovieEntry(title, genre, rating)
+                movieList.add(newMovie)
+
+                Toast.makeText(
+                    this,
+                    "Dodano: $title",
+                    Toast.LENGTH_SHORT).show()
+
+                // Czyścimy formularz
+                binding.titleEditText.text.clear()
+                binding.ratingBar.rating = 0f
+                binding.genreSpinner.setSelection(0)
+            } else {
+                Toast.makeText(this, "Podaj tytuł filmu", Toast.LENGTH_SHORT).show()
+            }
+        }
+```
+
+## Dodajemy `ListView`
+
+### Definicja wyglądu
+```xml
+//...
+ <ListView
+            android:id="@+id/listViewMovies"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:dividerHeight="8dp" />
+```
+
+### Obsługa logiki działania
+Metoda `onCreate`
+```kotlin
+//...
+        genreAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.genreSpinner.adapter = genreAdapter
+
+// logika listview ---------------------------
+        val movieTitles = mutableListOf<String>()
+        val listAdapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            movieTitles
+        )
+        binding.moviesListView.adapter = listAdapter
+// --------------------------------------------
+
+        binding.addButton.setOnClickListener {
+        //...
+             if (title.isNotBlank()) {
+                val newMovie = MovieEntry(title, genre, rating)
+                movieList.add(newMovie)
+
+                // --------------- nowy kod ---------
+                movieTitles.add("${newMovie.title} - ${newMovie.genre} (*${newMovie.rating})")
+                listAdapter.notifyDataSetChanged()
+                //-----------------------------------
+
+                Toast.makeText(
+                    this,
+                    "Dodano: $title",
+                    Toast.LENGTH_SHORT).show()
+
+                // Czyścimy formularz ...
+
+```
+
+## `Gson` - zapisywanie danych do pliku
+
+### Dodajemy bibliotekę `Gson` do aplikacji
+
+W `.toml` dodajemy i synchronizujemy:
+```kts
+[libraries]
+gson = "com.google.code.gson:gson:2.13.2"
+```
+
+
+W `build.gradle.kts` (module) dodajemy i synchronizujemy:
+```kotlin
+dependencies {
+    implementation(libs.gson)
+```
+
+### Metoda zapisu danych
+Do klasy `MainActivity` dodajemy nową metodę:
+```kotlin
+private fun saveMoviesToJsonFile(){
+        val gson = Gson()
+        val jsonString = gson.toJson(movieList) // zamienia listę na tekst w formacie JSON - SERIALIZACJA
+
+
+        // Context.MODE_PRIVATE tylko ta aplikacja ma dostęp do tego pliku (bezpiecznie)
+        // .use { output -> ... }
+            // To sprytna konstrukcja z Kotlin: otwórz strumień, użyj go,
+            // a potem go automatycznie zamknij (czyli close() zostanie wywołane automatycznie).
+            // toByteArray() = „przetłumacz tekst na ciąg bajtów”
+        openFileOutput(
+            "movies.json",
+            Context.MODE_PRIVATE).use{ output ->
+                output.write(jsonString.toByteArray())
+        }
+
+        Toast.makeText(this,
+            "Zapisano ${movieList.size} filmów to JSON",
+            Toast.LENGTH_SHORT
+            ).show()
+    }
+
+```
+
+Gdzie jest ten plik?
+- W Android Studio kliknij *View* -> *Tool Windows* -> *Device File Explorer*
+- `data > data > <nazwa_projektu> > files` tu będzie nasz plik `movies.json`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
