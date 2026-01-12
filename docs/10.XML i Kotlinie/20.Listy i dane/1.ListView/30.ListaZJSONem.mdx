@@ -201,53 +201,183 @@ Metoda `onCreate`
 
 ```
 
-## `Gson` - zapisywanie danych do pliku
+## `kotlinx.serialization` - zapisywanie danych do pliku
+:::note Czym jest *serialization* (serializacja)?
+To proces zamiany obiektów programu na zapis tekstowy lub binarny, tak aby można je było:
+- zapisać do pliku,
+- przesłać przez sieć,
+- odtworzyć później w tej samej lub innej aplikacji.
 
-### Dodajemy bibliotekę `Gson` do aplikacji
+:::
+
+:::tip *Deserialization*
+to proces odtworzenia obiektów programu z zapisanego formatu
+
+
+:::
+
+
+
+### Dodajemy bibliotekę `serialization` do aplikacji
 
 W `.toml` dodajemy i synchronizujemy:
-```kts
+```toml
+[versions]
+kotlinxSerialization = "1.6.3"
+
 [libraries]
-gson = "com.google.code.gson:gson:2.13.2"
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
+[plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+
 ```
 
 
 W `build.gradle.kts` (module) dodajemy i synchronizujemy:
 ```kotlin
+plugins {
+    alias(libs.plugins.kotlin.serialization)
+
+//...
+
 dependencies {
-    implementation(libs.gson)
+    implementation(libs.kotlinx.serialization.json)
+
+//...
 ```
 
-### Metoda zapisu danych
+- Plugin = kompilator
+- Library = runtime
+
+### Zapis danych do pliku
+#### Przycisk do zapisu danych
+```xml
+  <RatingBar
+         ...
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+        <Button
+            android:id="@+id/addButton"
+            android:text="Dodaj film do listy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:text="Zapisz listę do JSON"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="10dp"
+            />
+
+    </LinearLayout>
+
+
+        <ListView...
+```
+
+#### Uruchamianie zapisu
+W `onCreate` dodajemy
+```kotlin
+  binding.saveButton.setOnClickListener{
+            saveMoviesToJsonFile()
+        }
+```
+
+
+#### Metoda zapisu danych
+
+:::tip `Json`
+- ma dwie główne funkcje:
+    - `encodeToString`  bierze obiekt Kotlina i "wypycha" go do Stringa (JSON).
+    - `decodeFromString` bierze Stringa (JSON) i "wciąga" go do obiektu Kotlina.
+
+- może występować w dwóch wariantach:
+    - domyślny `Json` tłumacz, który tłumaczy wszystko "jednym ciągiem",
+        bez przerw, żeby było szybciej.
+        - np. `val tekst = Json.encodeToString(mojeDane)`
+    - unikalna instancja
+        - np. taka, która będzie formatować tekst ` val json = Json { prettyPrint = true }`
+        - np. ignoruje pola niezgodne z modelem `val json = Json {
+      ignoreUnknownKeys = true // "Ignoruj klucze, których nie znam"
+      }`
+:::
+
+
+:::danger `@Serializable`
+Instancja `Json` potrafi serializować tylko te klasy, które mają adnotację `@Serializable`
+
+:::
+
+
+Dopiszmy adnotację do naszego modelu
+```kotlin
+@Serializable
+data class MovieEntry(
+    val title: String,
+    val genre: String,
+    val rating: Int
+)
+```
+
+
+
+
 Do klasy `MainActivity` dodajemy nową metodę:
 ```kotlin
-private fun saveMoviesToJsonFile(){
-        val gson = Gson()
-        val jsonString = gson.toJson(movieList) // zamienia listę na tekst w formacie JSON - SERIALIZACJA
+    private fun saveMoviesToJsonFile() {
+        try {
+            val json = Json { prettyPrint = true }
+            val jsonString = json.encodeToString(movieList)
+
+            val file = File(filesDir, "movies.json")
+            // filesDir:
+            // - obiekt typu File
+            // - /data/data/<nazwa.pakietu>/files/
+            // - jest właściwością dziedziczoną po klasie Context
+            file.writeText(jsonString)
 
 
-        // Context.MODE_PRIVATE tylko ta aplikacja ma dostęp do tego pliku (bezpiecznie)
-        // .use { output -> ... }
-            // To sprytna konstrukcja z Kotlin: otwórz strumień, użyj go,
-            // a potem go automatycznie zamknij (czyli close() zostanie wywołane automatycznie).
-            // toByteArray() = „przetłumacz tekst na ciąg bajtów”
-        openFileOutput(
-            "movies.json",
-            Context.MODE_PRIVATE).use{ output ->
-                output.write(jsonString.toByteArray())
+            Toast.makeText(
+                this,
+                "Zapisano ${movieList.size} filmów to JSON",
+                Toast.LENGTH_SHORT
+            ).show()
+
+        } catch (e: Exception) {
+
+            Toast.makeText(
+                this,
+                "Błąd zapisu pliku!",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            e.printStackTrace() // dokładne błędy w Logcat
         }
 
-        Toast.makeText(this,
-            "Zapisano ${movieList.size} filmów to JSON",
-            Toast.LENGTH_SHORT
-            ).show()
     }
-
 ```
 
-Gdzie jest ten plik?
+#### Gdzie jest ten plik?
 - W Android Studio kliknij *View* -> *Tool Windows* -> *Device File Explorer*
 - `data > data > <nazwa_projektu> > files` tu będzie nasz plik `movies.json`
+
+
+#### Odczyt danych z pliku
+Cel
+- odczytać plik `movies.json`
+- zamienić JSON na `List<MovieEntry>`
+- załadować dane do listy i `ListView` przy starcie aplikacji
+
+
 
 
 
