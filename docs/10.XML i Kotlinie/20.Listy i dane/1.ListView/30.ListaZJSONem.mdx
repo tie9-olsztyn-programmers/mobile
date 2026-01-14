@@ -119,8 +119,10 @@ class MainActivity : AppCompatActivity() {
 W metodzie `onCreate`
 ```kotlin
 val genres = listOf("Akcja", "Komedia", "Dramat", "Sci-Fi", "Fantasy", "Horror")
+
 val genreAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, genres)
 genreAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
 spinnerGenre.adapter = genreAdapter
 ```
 
@@ -248,8 +250,8 @@ dependencies {
 //...
 ```
 
-- Plugin = kompilator
-- Library = runtime
+- plugin = kompilator
+- library = runtime
 
 ### Zapis danych do pliku
 #### Przycisk do zapisu danych
@@ -372,33 +374,252 @@ Do klasy `MainActivity` dodajemy nową metodę:
 
 
 #### Odczyt danych z pliku
-Cel
+##### Cel
 - odczytać plik `movies.json`
 - zamienić JSON na `List<MovieEntry>`
 - załadować dane do listy i `ListView` przy starcie aplikacji
 
 
+##### Przenieśmy `movieTitles` z metody `onCreate` na poziom właściwości obiektu:
+```kotlin
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    private val movieList = mutableListOf<MovieEntry>()
+
+    // tu przenieśliśmy deklarację i inicjalizację zmiennej movieTitles
+    val movieTitles = mutableListOf<String>()
+
+
+    lateinit var listAdapter: ArrayAdapter<String>
+//....
+```
+
+Dzięki temu lista będzie dostępna w nowej metodzie, która będzie odczytywała dane z JSON.
+
+
+:::tip Trzy różne role, trzy różne odpowiedzialności
+- Model danych (np. `movieList`):
+    - przechowuje prawdziwe dane aplikacji
+    - odpowiada strukturze biznesowej (tytuł, gatunek, ocena)
+    - jest zapisywany / odczytywany z JSON
+    - UI go nie wyświetla bezpośrednio
+
+
+- Lista dla UI (np. `movieTitles`):
+    - zawiera tekstową reprezentację danych
+    - jest przygotowana specjalnie do wyświetlania
+    - powstaje na podstawie modelu danych
+    - to ją obserwuje adapter
+
+
+- Adapter (`ArrayAdapter`)
+    - łączy listę UI z `ListView`
+    - nie zna modelu danych
+    - reaguje tylko na zmiany tej jednej listy, którą dostał
+    - wymaga wywołania `notifyDataSetChanged()`
+:::
+
+
+###### Definiujemy metodę do odczytu danych
+Do klasy `MainActivity` dodamy nową metodę\
+```kotlin
+private fun loadMoviesFromJsonFile() {
+        try {
+            val file = File(filesDir, "movies.json")
+            if (!file.exists()) return
+
+
+            val jsonString = file.readText()
+            val json = Json { ignoreUnknownKeys = true }
+            val loadedList = json.decodeFromString<List<MovieEntry>>(jsonString)
+
+            movieList.clear()
+            movieList.addAll(loadedList)
+
+
+            // lista używana przez adapter
+            movieTitles.clear()
+            movieTitles.addAll(
+                movieList.map {
+                    "${it.title} (${it.genre}) ★${it.rating}"
+                }
+            )
+            listAdapter.notifyDataSetChanged()
+
+        } catch (e: java.lang.Exception) {
+            Toast.makeText(
+                this,
+                "Błąd odczytu pliku!",
+                Toast.LENGTH_SHORT
+            ).show()
+            e.printStackTrace()
+        }
+    }
+```
+
+##### Wywołujemy metodę `loadMoviesFromJsonFile`
+W metodzie `onCreate()` na końcu wywołujemy metodę `loadMoviesFromJsonFile`
 
 
 
 
+----
+
+## SharedPreferences
+Cel:
+- w będziemy zapisywali w informację o tym, jaki gatunek filmu użytkownik ostatnio wybrał
+- gdy aplikacja zostanie uruchomina ponowanie, domyślnie zaznaczony będzie ostatnio wybrany gatunek
+
+
+:::note SharedPreferences
+- najprostszy sposób na trwałe przechowywanie małych ilości danych.
+- Wyobraź sobie to jako system "klucz-wartość" (jak słownik lub mapa),
+- takie dane klucz-wartość zostają zapisane w pamięci telefonu.
+
+:::
+
+### Nowe właściwości w `MainActivity.kt`
+```kotlin
+class MainActivity : AppCompatActivity() {
+/...
+
+    private val PREFS_NAME = "minikino_prefs"
+    private val KEY_LAST_GENRE = "last_genre"
+
+    override fun onCreate(savedInstanceState: Bundle?) {//...
+```
+- `PREFS_NAME`
+    - wartością jest nazwa pliku
+    - plik zostanie stworzony, jeżeli go jeszcze nie ma
+    - w pliku zostaną zapisane dane
+- `KEY_LAST_GENRE`
+    - w tej właściwości przechowujemy nazwę klucza
+    - pod tym kluczem zapiszemy dane
+
+### Zmianny w ` binding.addButton.setOnClickListener ` (dodawaniu do listy)
+Gdy tworzony jest nowy film, zapamiętany zostanie jego gatunek
+```kotlin
+ binding.addButton.setOnClickListener {
+            val title = binding.titleEditText.text.toString()
+            val genre = binding.genreSpinner.selectedItem.toString()
+            val rating = binding.ratingBar.rating.toInt()
+
+
+            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            prefs.edit {
+                putString(KEY_LAST_GENRE, genre)
+            }
+//...
+```
+`getSharedPreferences(PREFS_NAME, MODE_PRIVATE)`
+- otwiera (lub tworzy) zestaw preferencji aplikacji o podanej nazwie
+- i zwraca obiekt,
+- przez który możemy zapisywać i odczytywać ustawienia.
+    - `prefs.getString(...)`
+    - `prefs.getInt(...)`
+    - `prefs.getBoolean(...)`
+    - `prefs.edit().putString(...)`
+
+- `prefs.edit { putString(KEY_LAST_GENRE, genre) }`
+    - otwiera edycję `SharedPreferences`,
+    - zapisuje parę `klucz-> wartość` i automatycznie zapisuje zmiany.
+    - `prefs.edit { ... }`
+        - tworzy obiekt `SharedPreferences.Editor`
+        - Kotlin przekazuje go do funkcji strzałkowej `{ ... }`
+        - Kotlin po wyjściu z bloku automatycznie wywołuje `apply()`
+
+- `putString(KEY_LAST_GENRE, genre)` zapisuje:
+    - klucz: `"last_genre"`
+    - wartość: np. `"Sci-Fi"`
 
 
 
+### Gdzie znajdziemy plik z zapisanymi danymi?
+```
+/data
+ └── data
+     └── <nazwa twojej aplikacji>
+         └── shared_prefs
+             └── minikino_prefs.xml
+```
+
+
+### Wczytywanie danych przy starcie aplikacji
+W metodzie `onCreate` dodajemy :
+```kotlin
+    val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+    val lastGenre = prefs.getString(KEY_LAST_GENRE, null)
+    lastGenre?.let {
+        val index = genres.indexOf(it)
+        if (index >= 0) {
+            binding.genreSpinner.setSelection(index)
+        }
+    }
+```
+- `val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)`
+    - jak poprzednio tworzymy obiekt do obsługi pliku
+- `prefs.getString(KEY_LAST_GENRE, null)`:
+    - odczytujemy dane z pliku przy użyciu klucza
+- `genres` to lista stringów z nazwami rodzajów filmów
+- `lastGenre?.let { ... }`
+    - `?` dalszy kod wykona się, o ile `lastGenre` nie jest `null`
+    - `let` wykona zawartość bloku, przekazując w zmiennej `it` wartość zmiennej `lastGenre`
+-`genres.indexOf(it)`
+    - zwraca indeks wartości zapisanej w `it`
+    - u nas `it` to `lastGenre`, czyli string ostatnio wybranego rodzaju filmu
 
 
 
+### Zapisujemy wartość `RatingBar`
 
 
+#### W `MainActivity` dodajemy nową właściwość `KEY_LAST_RATING`:
+```kotlin
+//...
+    private val PREFS_NAME = "minikino_prefs"
+    private val KEY_LAST_GENRE = "last_genre"
 
+    private val KEY_LAST_RATING = "last_rating"
 
+//...
+```
 
+#### Zmiany podczas dodawania filmu - `putInt()`
+```kotlin
+   binding.addButton.setOnClickListener {
+            val title = binding.titleEditText.text.toString()
+            val genre = binding.genreSpinner.selectedItem.toString()
+            val rating = binding.ratingBar.rating.toInt()
 
+            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            prefs.edit {
+                putString(KEY_LAST_GENRE, genre)
+                putInt(KEY_LAST_RATING, rating)
+            }
+```
 
+### Odczytujemy dane o ratingu
+W metodzia `onCreate()` dodamy odczyt danych
+```kotlin
+//...
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val lastGenre = prefs.getString(KEY_LAST_GENRE, null)
+        lastGenre?.let {
+            val index = genres.indexOf(it)
+            if (index >= 0) {
+                binding.genreSpinner.setSelection(index)
+            }
+        }
 
+// ----- nowy kod -----
+        val lastRating = prefs.getInt(KEY_LAST_RATING, 0)
+        binding.ratingBar.rating = lastRating.toFloat()
 
-
-
+//....
+```
 
 
 
