@@ -1,0 +1,149 @@
+---
+title: Terminologia Jetpack Compose
+sidebar_label: Terminologia
+---
+
+
+# Terminologia Jetpack Compose
+
+## Jak nazywać funkcje `@Composable`?
+
+
+1. Komponent (*Component*) – Zalecane
+
+To najbardziej uniwersalne i poprawne określenie. Funkcja `@Composable` tworzy logiczną część interfejsu.
+    - Przykład: "Stwórz komponent `UserCard`, który wyświetli dane użytkownika."
+    - Dlaczego?
+        - Jest to termin zrozumiały dla programistów Reacta, Vue czy Fluttera.
+        - Podkreśla, że interfejs budujemy z klocków.
+
+2. Funkcja Komponowalna (*Composable Function*) – Technicznie najdokładniejsze
+
+To bezpośrednie tłumaczenie angielskiego Composable function.
+    - Przykład: "Każda funkcja komponowalna musi być oznaczona adnotacją `@Composable`."
+    - Dlaczego?
+        - Jest to nazwa oficjalna.
+        - Przymiotnik "komponowalna" oddaje istotę rzeczy: te funkcje można składać (komponować) jedna w drugiej.
+
+
+:::note Słowniczek pojęć (Glossary)
+
+| Termin polski | Termin angielski | Definicja |
+| :--- | :--- | :--- |
+| **Funkcja komponowalna** | *Composable function* | Podstawowa jednostka budulcowa UI w Compose. Funkcja z adnotacją `@Composable`. |
+| **Komponent** | *Component* | Wyższy poziom abstrakcji; funkcja komponowalna pełniaca określoną rolę w UI. |
+| **Komponowanie** | *Composition* | Proces budowania drzewa interfejsu użytkownika przez uruchamianie funkcji komponowalnych. |
+| **Rekmpozycja** | *Recomposition* | Proces ponownego uruchomienia funkcji komponowalnej w celu aktualizacji UI przy zmianie danych. |
+
+
+:::
+
+---
+## Konwencje Nazewnictwa Funkcji Composable
+
+W świecie Jetpack Compose nazewnictwo to przede wszystkim czytelności i odróżnienia UI od logiki biznesowej.
+
+### 1. Złota Zasada: Rzeczownik zamiast Czasownika
+
+W standardowym Kotlinie funkcje nazywamy czasownikami (np. `calculateValues()`, `fetchData()`),
+ponieważ reprezentują one **akcje**.
+
+Jednak funkcje `@Composable`, które emitują interfejs użytkownika, powinny być **rzeczownikami**.
+
+**Dlaczego?**
+- Wyobraź sobie, że tworzysz widget.
+- Nie "robisz przycisku", ale "deklarujesz, że przycisk istnieje".
+- Funkcja *Composable* opisuje **stan** i **strukturę** UI, a nie wykonuje sekwencyjne działanie.
+
+:::tip
+* **Dobrze:** `MessageCard`, `UserAvatar`, `PrimaryButton`
+* **Źle:** `DrawMessageCard`, `ShowUserAvatar`, `CreateButton`
+
+:::
+
+
+### 2. PascalCase vs camelCase
+
+W Jetpack Compose stosujemy specyficzne rozróżnienie:
+
+| Typ Funkcji | Konwencja | Przykład |
+| :--- | :--- | :--- |
+| **Emitująca UI** (zwraca `Unit`) | **PascalCase** | `HeaderSection()` |
+| **Zwracająca wartość** (logika/obliczenia) | **camelCase** | `rememberWindowSize()` |
+
+### Porównanie: Compose vs XML (Legacy)
+
+W starym systemie View (XML), definiowaliśmy komponenty w plikach `.xml` używając PascalCase dla tagów.
+Jetpack Compose przenosi tę logikę bezpośrednio do kodu Kotlin.
+
+
+**Stary system (XML):**
+```xml
+<TextView
+    android:id="@+id/title"
+    android:text="Witaj!" />
+```
+
+**Nowy system (*Compose*)
+```kotlin
+@Composable
+fun GreetingText(namme: String) {
+    Text(text= "Witaj, $name!"
+}
+```
+
+---
+
+##  Emitowanie UI: Dlaczego funkcje Compose "nic nie zwracają"?
+- W standardowym programowaniu funkcje zwracają wynik (np. liczbę lub tekst).
+- W Jetpack Compose funkcje `@Composable` zwracają `Unit` (czyli pustkę).
+- Skoro nic nie zwracają, to jak to się dzieje, że widzimy interfejs?
+
+Odpowiedzią jest **Emitowanie (Emitting)**.
+
+### Emitowanie vs Zwracanie
+
+#### Standardowy Kotlin (Zwracanie)
+Funkcja oblicza wynik i „oddaje” go tam, gdzie została wywołana.
+```kotlin
+fun calculateSum(a: Int, b: Int): Int {
+    return a + b
+}
+// Wywołanie: "Daj mi wynik, żebym mógł go użyć"
+val result = calculateSum(5, 5)
+```
+
+#### Jetpack Compose (Emitowanie)
+- Funkcja nie oddaje wyniku.
+- Ona wysyła instrukcję do specjalnego mechanizmu zwanego *Composer*'em.
+```kotlin
+@Composable
+fun WelcomeMessage() {
+    Text("Witaj w aplikacji!")
+}
+// Wywołanie: "Hej Composerze, zapisz sobie, że w tym miejscu ma być tekst"
+```
+
+:::tip Metafora
+1. System XML (Rzeźbiarz)
+    - Tradycyjny system widoków (Views) jest jak rzeźbiarz.
+    - Tworzy fizyczny obiekt (np. Button), który zajmuje miejsce w pamięci RAM.
+    - Jeśli chcesz zmienić napis na przycisku, musisz podejść do „posągu” i go zmodyfikować (button.text = "Nowy").
+    - Ten obiekt „żyje” tam cały czas.
+
+2. Jetpack Compose (Reżyser Światła)
+- Compose jest jak reżyser oświetlenia w teatrze.
+- On nie stawia na scenie kolorowych przedmiotów. On emituje strumień światła.
+    - Kiedy wywołujesz `Text("Cześć")`, emitujesz „strumień światła” o treści „Cześć”.
+    - Gdy dane się zmieniają (Rekompozycja), reżyser po prostu zmienia parametry źródła światła.
+    - Jeśli funkcja przestaje być wywoływana – „światło” gaśnie i element znika, nie zostawiając po sobie ciężkiego obiektu.
+
+
+**Jak to działa pod spodem?** (*Slot Table*)
+- Każda „emisja” jest zapisywana w strukturze danych zwanej *Slot Table*.
+- Można o niej myśleć jak o zeszycie nutowym kompozytora:
+    - Podczas Kompozycji, *Compose* zapisuje instrukcje w zeszycie.
+    - Podczas Rekompozycji, *Compose* sprawdza, czy nowe instrukcje różnią się od tych w zeszycie.
+    - Jeśli nic się nie zmieniło – *Compose* pomija tę funkcję (to tzw. Skipping), co czyni go niesamowicie szybkim.
+
+:::

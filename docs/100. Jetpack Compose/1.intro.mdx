@@ -14,7 +14,7 @@ title: Wprowadzenie
     - Nie ma plików XML, a UI reaguje automatycznie na zmiany danych (reaktywny UI).
 
 
-==Compose = Kotlinowy sposób budowania interfejsu==
+**Compose = Kotlinowy sposób budowania interfejsu**
 
 ## Filozofia Compose — „Deklaratywny UI”
 
@@ -148,5 +148,61 @@ Metafora 3 – „Instrukcje dla stolarza”
     - Każda instrukcja to kolejny Modifier.
 
 :::
+
+
+---
+
+## Kompozycja i Rekompozycja: Jak "myśli" Jetpack Compose?
+
+- W tradycyjnym systemie XML, interfejs był **statyczny** – raz narysowany przycisk "siedział" w pamięci,
+dopóki go ręcznie nie zmieniliśmy (np. przez `findViewById`).
+- W Jetpack Compose interfejs jest **dynamiczny** i stale reaguje na zmiany danych.
+
+### 1. Kompozycja (*The Composition*)
+- **Kompozycja** to proces "pierwszego rysowania".
+- Kiedy Twoja aplikacja się uruchamia, Jetpack Compose wykonuje Twoje funkcje `@Composable`
+- w ten sposób buduje drzewo (strukturę) interfejsu.
+
+> **Analogia:** Wyobraź sobie, że jesteś reżyserem, który ustawia aktorów na scenie przed premierą.
+> Decydujesz, kto gdzie stoi i co ma na sobie. To jest właśnie **pierwsza kompozycja**.
+
+### 2. Rekompozycja (Recomposition)
+- **Rekompozycja** to proces aktualizacji interfejsu, gdy zmienią się dane (stan).
+- *Compose* jest inteligentny:
+    - nie rysuje całego ekranu od nowa,
+    - a jedynie te funkcje, których dane się zmieniły.
+
+> **Analogia:** Wyobraź sobie, że w trakcie spektaklu jeden z aktorów musi zmienić kapelusz.
+> Nie przerywasz całego przedstawienia i nie budujesz dekoracji od nowa – zmieniasz tylko ten jeden element u konkretnego aktora. To jest **rekompozycja**.
+
+---
+
+## Przykład Kodu: Licznik w akcji
+
+W poniższym przykładzie funkcja `ClickCounter` przejdzie proces **rekompozycji** za każdym razem, gdy użytkownik kliknie przycisk.
+
+```kotlin
+@Composable
+fun ClickCounter() {
+    // Stan - zmiana tej wartości wywoła rekompozycję
+    var count by remember { mutableStateOf(0) }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // Ten tekst będzie rekomponowany przy każdej zmianie 'count'
+        Text(text = "Kliknięto: $count razy")
+
+        Button(onClick = { count++ }) {
+            Text("Kliknij mnie")
+        }
+    }
+}
+```
+
+
+
+
+
+
+
 
 

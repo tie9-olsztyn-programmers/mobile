@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/4.Terminologia.mdx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/20.Listy i dane/1.ListView/30.ListaZJSONem.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/20.Listy i dane/1.ListView/30.ListaZJSONem.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/1.intro.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/1.intro.mdx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,6 +95,7 @@
       <recent name="$PROJECT_DIR$/static" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docs/100. Jetpack Compose" />
       <recent name="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/Abstrakcja" />
       <recent name="$PROJECT_DIR$/docs/6.Nawigacja/3. Menu" />
       <recent name="$PROJECT_DIR$/docs/3. Kolejne View/1. Time View" />
@@ -170,7 +173,10 @@
       <workItem from="1768061496817" duration="9522000" />
       <workItem from="1768155467556" duration="8281000" />
       <workItem from="1768212501694" duration="5402000" />
-      <workItem from="1768388400776" duration="9894000" />
+      <workItem from="1768388400776" duration="10234000" />
+      <workItem from="1768813753236" duration="12947000" />
+      <workItem from="1768894103798" duration="7809000" />
+      <workItem from="1769277089935" duration="6919000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />

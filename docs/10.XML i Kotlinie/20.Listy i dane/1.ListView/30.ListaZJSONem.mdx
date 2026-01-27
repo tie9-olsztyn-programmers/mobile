@@ -317,6 +317,12 @@ W `onCreate` dodajemy
 :::danger `@Serializable`
 Instancja `Json` potrafi serializować tylko te klasy, które mają adnotację `@Serializable`
 
+:::tip Adnotacja `@...`
+- W języku Kotlin adnotacje to metadane, czyli "dane o danych".
+- Nie zmieniają one bezpośrednio logiki np. naszej klasy.
+- Dają wskazówki kompilatorowi lub zewnętrznym bibliotekom, jak mają tę klasę obsługiwać.
+
+
 :::
 
 
@@ -602,7 +608,7 @@ W metodzie `onCreate` dodajemy :
 ```
 
 ### Odczytujemy dane o ratingu
-W metodzia `onCreate()` dodamy odczyt danych
+W metodzie `onCreate()` dodamy odczyt danych
 ```kotlin
 //...
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -622,11 +628,366 @@ W metodzia `onCreate()` dodamy odczyt danych
 ```
 
 
+---
+## Usuwanie elementu z listy i z pamięci (`.json`)
+
+Do metody `onCreate()` dodamy obsługę długiego kliknięcia.
+To przytrzymane kliknięcie usunie element z listy i pamięci.
+```kotln
+ binding.moviesListView.setOnItemLongClickListener { _, _, position, _ ->
+            // 1. Najpierw usuwamy dane z obu list
+                movieList.removeAt(position)
+                movieTitles.removeAt(position)
+
+            // 2. Odświeżamy wygląd listy
+            listAdapter.notifyDataSetChanged()
+
+            // 3. Zapisujemy stan
+            saveMoviesToJsonFile()
+
+            Toast.makeText(
+                this,
+                "Usunięto element",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            true // musimy zwrócić true, aby poinformować, że obsłużaliśmy event kliknięcia
+        }
+```
+
+## Aktualizacja danych
+
+### Nowa aktywność do aktualizacji `EditMovieActivity`
+`activity_edit_movie.xml`
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditMovieActivity"
+    android:orientation="vertical"
+    android:padding="36dp"
+    android:gravity="center_horizontal|center_vertical"
+    android:background="#C1F0F8"
+    >
+    <EditText
+        android:id="@+id/titleUpdateEditText"
+        android:hint="Tytuł filmu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Spinner
+        android:id="@+id/genreUpdateSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp" />
+
+    <RatingBar
+        android:id="@+id/updateRatingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:layout_marginTop="12dp" />
+
+    <Button
+        android:id="@+id/saveChangesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#123123"
+        android:layout_margin="20dp"
+        android:text="Zapisz zmiany"/>
+</LinearLayout>
+```
+
+### Wybór elementu przez klinknięcie
+Aktualizacja włączy się, gdy użytkownik krótko kliknie na jeden z elementów listy.
+
+#### Stworzenie *launchera*
+`MainActivity.kt`
+```kotlin
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+// ---------------------------------------------------------
+    private val editMovieLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        // jeżeli użytkownik kliknął w OK:
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            val updatedMovie = if (Build.VERSION.SDK_INT >= 33) {
+                //  to kod dla nowszych telefonów
+                data?.getSerializableExtra("UPDATED_MOVIE", MovieEntry::class.java)
+            } else {
+                // to kod do wykonania w przypadku starszych wersji
+                @Suppress("DEPRECATION")
+                data?.getSerializableExtra("UPDATED_MOVIE") as? MovieEntry
+            }
+            val position = data?.getIntExtra("POSITION", -1) ?: -1
+
+            if (updatedMovie != null && position != -1) {
+                 // 1. Aktualizacja dla JSON-a
+                movieList[position] = updatedMovie
+
+                // 2. Aktualizacja "Wyglądu" (dla Adaptera)
+                movieTitles[position] = updatedMovie.title
+
+                // 3. Teraz Adapter zobaczy zmianę na liście stringów
+                listAdapter.notifyDataSetChanged()
+
+                // 4. Zapis do pliku
+                saveMoviesToJsonFile()
+            }
+        }
+    }
+
+// ---------------------------------------------------------
+
+    // właściwość przechowująca informacje o filmach
+    private val movieList = mutableListOf<MovieEntry>()
+    val movieTitles = mutableListOf<String>()
+//....
+
+```
+:::tip editMovieLauncher
+- to obiekt klasy `ActivityResultLayncher<Intent>`
+- to pośrednik między naszym kodem a Androidem
+- `<Intent>` aby ten *launcher*/wyrzutnia zadziałał, potrzebuje paliwa w postaci obiektu `Intent`
+- ten obiekt przechowuje w sobie:
+    - *kontrakt*/ wiedzę
+        - jak wysłać żądanie
+        - jak odebrać odpowiedź
+    -*callback*, czyli funkcję `{result -> ...`
+        - zostanie uruchomiana dopiero wtedy, gdy drugie "okno" zostanie zamknięte
+
+
+To obiekt, z kanału komunikacji:
+    - pozwala uruchomić inną aktywność
+    - nasłuchuje, kiedy ta inna aktywność zakończy działanie, aby wykonać *callback*a
+
+:::
+
+
+#### Włączenie obsługi kliknięcia
+```kotlin
+binding.moviesListView.setOnItemClickListener { _, _, position, _ ->
+            // wybrany element z listy movieList
+            val selectedMovie = movieList[position]
+
+            // tworzymy obiekt typu Intent
+            val intent = Intent(this, EditMovieActivity::class.java)
+
+            // dodajemy do obiektu intent informacje o wybranym elemencie
+            // używamy klucza, aby drugie okno wiedziało, jak rozpakować dane
+            intent.putExtra("EXTRA_MOVIE", selectedMovie) // patrz zmiana w modelu MovieEntry
+            intent.putExtra("EXTRA_POSITION", position)
+
+
+            // przełączamy się do nowej aktywności
+            editMovieLauncher.launch(intent)
+        }
+```
+
+Musimy jeszcze zaktualizować nasz model `MovieEntry`
+```kotlin
+@Serializable
+data class MovieEntry(
+    val title: String,
+    val genre: String,
+    val rating: Int
+) : java.io.Serializable
+```
+- system Androida i język Kotlin to dwie różne warstwy
+- Kotlin potrafi serializować `kotlinx.serialization` (`@Serializable`)
+- Android nie wie, jak poradzić sobie z obiektem `MovieEntry`
+    - nauczymy Androida przez dodanie `: java.io.Serializable`
+    - teraz Android wraz z `Intent` potrafi przesyłać obiekt między aktywnościami
+
+#### Odbieranie danych w drugiej Aktywności
+##### Włączamy *binding*
+```kotlin
+
+class EditMovieActivity : AppCompatActivity() {
+
+    lateinit var binding: ActivityEditMovieBinding
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        binding = ActivityEditMovieBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(
+///....
+```
+
+##### Przenosimy listę gatunków do pliku zewnętrznego
+- Mamy kłopot ze `Spinner`em, który korzysta z listy gatunków zdefiniowanej w `MainActivity`
+- Lepiej mieć jedną listę z elementami, dostępną w różnych plikach, niż duplikować jedną listę w wielu plikach.
+
+:::important
+DON'T REPEAT YOURSELF
+
+Nie powtarzaj się
+
+:::
+
+
+W Androidzie tą "Centralą Danych" jest plik `res/values/strings.xml`.
+
+Dopiszmy do niego listę gatunków filmowych:
+```xml
+<resources>
+    <string name="app_name">MiniKino</string>
+
+    <string-array name="movie_genres">
+        <item>Akcja</item>
+        <item>Komedia</item>
+        <item>Dramat</item>
+        <item>Horror</item>
+        <item>Sci-Fi</item>
+        <item>Dokumentalny</item>
+    </string-array>
+
+</resources>
+```
+
+W `onCreate()` w głównej aktywności zmieniamy
+```kotlin
+// val genres = listOf("Akcja", "Komedia", "Dramat", "Sci-Fi", "Fantasy", "Horror")
+// zamiast listy wpisanej na sztywno, dane "ściągniemy" z naszej centrali
+   val genres = resources.getStringArray(R.array.movie_genres)
+
+//...
+```
 
 
 
+W `onCreate()` `EditMovieActivity` (pobieramy dane do `Spinner`a i z `intent`:
+```kotlin
+    val genres = resources.getStringArray(R.array.movie_genres)
+
+    val adapter = ArrayAdapter(
+        this,
+        android.R.layout.simple_spinner_item,
+        genres)
+
+    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    binding.genreUpdateSpinner.adapter = adapter
+```
 
 
+
+##### Odbieramy dane
+W metodzie `onCreate()` poniżej kodu z `Spinner`em
+```kotlin
+        // odbieramy dane
+        val movieToEdit = if (Build.VERSION.SDK_INT >= 33) {
+            intent.getSerializableExtra("EXTRA_MOVIE", MovieEntry::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getSerializableExtra("EXTRA_MOVIE") as? MovieEntry
+        }
+
+        if(movieToEdit == null){
+            finish()
+            return
+        }
+
+        // wypełniamy formularz danymi
+        binding.titleUpdateEditText.setText(movieToEdit.title)
+        binding.updateRatingBar.rating = movieToEdit.rating.toFloat()
+        val currentGenreIndex = adapter.getPosition(movieToEdit.genre)
+        binding.genreUpdateSpinner.setSelection(currentGenreIndex)
+```
+:::tip `Build`
+- `Build.VERSION.SDK_INT`
+    - To jest "Wiek Telefonu" wyrażony liczbą.
+    - Każdy telefon z Androidem ma ten numer zaszyty w sobie.
+    - Np. Android 9 to numer 28. Android 13 to numer 33.
+- `Build.VERSION_CODES.TIRAMISU`
+    - To "ludzka nazwa" dla liczby 33.
+    - Ciekawostka: Google nazywa wersje Androida od nazw słodyczy (alfabetycznie).
+        - Oreo (Android 8)
+        - Pie (Android 9)
+        - ...
+        - Tiramisu (Android 13)
+
+:::
+
+##### Zapisujemy dan
+W metodzie `onCreate()` pisząc dalej:
+```kotlin
+  // zapisanie aktualizacji
+        binding.saveChangesButton.setOnClickListener {
+
+            val newTitle = binding.titleUpdateEditText.text.toString()
+            val newGenre = binding.genreUpdateSpinner.selectedItem.toString()
+            val newRating = binding.updateRatingBar.rating.toInt()
+
+            if (newTitle.isNotEmpty()) {
+                val updateMovie = MovieEntry(newTitle, newGenre, newRating)
+                val returnIntent = Intent() // Konstruktor jest pusty, bo obiekt to pojemnik na dane
+                returnIntent.putExtra("UPDATED_MOVIE", updateMovie)
+
+                // pobiera pozycję z "paczki" która przyszła
+                // ustawia tę samą pozycję w paczce , która wychodzi
+                val originalPosition = intent.getIntExtra("EXTRA_POSITION", -1)
+                returnIntent.putExtra("POSITION", originalPosition)
+
+                //potwierdzenie, że operacja się udała
+                setResult(RESULT_OK, returnIntent)
+
+                //zniszczenie aktywności do aktualizacji
+                finish()
+            }else {
+                Toast.makeText(
+                    this,
+                    "Tytuł jest wymagany",
+                    Toast.LENGTH_SHORT).show()
+            }
+
+        }
+```
+
+| Kierunek Podróży| Nadawca (Kto wysyła?) | Odbiorca (Kto czyta?) | Nazwa Klucza (String) | Co jest w środku? |
+| :--- | :--- | :--- | :--- | :--- |
+| **Wylot (Start)** | `MainActivity` <br/> *(setOnItemClickListener)* | `EditMovieActivity` <br/> *(onCreate)* | **`"EXTRA_MOVIE"`** | Obiekt filmu (`MovieEntry`) do wyświetlenia w formularzu. |
+| **Wylot (Start)** | `MainActivity` <br/> *(setOnItemClickListener)* | `EditMovieActivity` <br/> *(onCreate)* | **`"EXTRA_POSITION"`** | Numer wiersza (Int), który kliknął użytkownik. Musimy go zapamiętać! |
+| | | | | |
+| **Powrót (Koniec)** | `EditMovieActivity` <br/> *(przycisk Zapisz)* | `MainActivity` <br/> *(Launcher)* | **`"UPDATED_MOVIE"`** | Nowy, poprawiony obiekt filmu, który mamy zapisać. |
+| **Powrót (Koniec)** | `EditMovieActivity` <br/> *(przycisk Zapisz)* | `MainActivity` <br/> *(Launcher)* | **`"POSITION"`** | Ten sam numer wiersza, który dostaliśmy na początku. Odsyłamy go, aby `MainActivity` wiedziało, który element podmienić. |
+
+
+
+## Nazwy kluczy w oddzielnym pliku
+Nazwy kluczy lepiej jest trzymać w oddzielnym pliku:
+- zero literówek
+- podpowiedzi IDE
+- łatwa zmiana
+
+
+Do głównego folderu aplikacji (tam gdzie jest `MainActivity.kt`) dodajemy nowy plik `Keys.kt`
+```kotlin
+object Keys {
+    // Klucze do wysyłki (Tam ->)
+    const val MOVIE_TO_EDIT = "EXTRA_MOVIE"
+    const val POSITION_TO_EDIT = "EXTRA_POSITION"
+
+    // Klucze do powrotu (<- Z powrotem)
+    const val UPDATED_MOVIE = "UPDATED_MOVIE"
+    const val RETURN_POSITION = "POSITION"
+}
+```
+
+Teraz w kodzie podmieniamy odpowiednio:
+- za string `"EXTRA_MOVIE"` -> `Keys.MOVIE_TO_EDIT`
+- za string `"EXTRA_POSITION"` ->  `Keys.POSITION_TO_EDIT`
+- ...
 
 
 
