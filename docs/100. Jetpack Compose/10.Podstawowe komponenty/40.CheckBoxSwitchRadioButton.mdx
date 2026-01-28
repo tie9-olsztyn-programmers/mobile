@@ -30,8 +30,8 @@ Aplikacja będzie zawierała:
 
 | Komponent       | Opis                                                                                        | Kiedy używać?                                                                                              | Przykład użycia w aplikacji                                              | Wizualizacja                         |
 | --------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------ |
-| **Checkbox**    | Pole wyboru pozwalające zaznaczyć **dowolną liczbę opcji**. Każdy checkbox jest niezależny. | - Lista zainteresowań<br/>- Lista zadań „to-do”<br/>- Filtry (np. „pokaż tylko dania wege i ostre”)        | Uczeń może wybrać kilka zajęć dodatkowych: programowanie, muzyka, sport. | ☑ Programowanie<br/>⬜ Muzyka         |
-| **Switch**      | Przełącznik ON/OFF. Zawsze ma tylko dwa stany: aktywny / nieaktywny.                        | - Włączanie powiadomień<br/>- Tryb ciemny<br/>- Włączenie modułu GPS                                       | Przycisk „Włącz powiadomienia” w ustawieniach aplikacji.                 | 🟩◉ ON / ⚪ OFF                       |
+| **Checkbox**    | Pole wyboru pozwalające zaznaczyć **dowolną liczbę opcji**. Każdy checkbox jest niezależny. | - Lista zainteresowań<br/>- Lista zadań „to-do”<br/>- Filtry (np. „pokaż tylko dania wege i ostre”)        | Uczeń może wybrać kilka zajęć dodatkowych: programowanie, muzyka, sport. | ☑ Programowanie<br/> Muzyka         |
+| **Switch**      | Przełącznik ON/OFF. Zawsze ma tylko dwa stany: aktywny / nieaktywny.                        | - Włączanie powiadomień<br/>- Tryb ciemny<br/>- Włączenie modułu GPS                                       | Przycisk „Włącz powiadomienia” w ustawieniach aplikacji.                 | ◉ ON / ⚪ OFF                       |
 | **RadioButton** | Element wyboru **jednej opcji z wielu**. Każdy RadioButton należy do jednej grupy.          | - Wybór motywu aplikacji (jasny / ciemny / systemowy)<br/>- Wybór płatności<br/>- Jedna odpowiedź w quizie | Użytkownik wybiera jeden motyw aplikacji.                                | ◉ Jasny<br/>○ Ciemny<br/>○ Systemowy |
 
 Podstawowa struktura:
@@ -179,7 +179,7 @@ fun UserSettings( modifier: Modifier = Modifier) {
 `Interest.kt`
 ```
 
-data class Interest (val name: string, var checked: Boolean)
+data class Interest (val name: String, var checked: Boolean)
 
 ```
 
@@ -223,7 +223,7 @@ fun UserSettings( modifier: Modifier = Modifier) {
                         // więc UI zostanie poinformowane o zmiania
                         interests[index] = interest.copy(checked = it)
 
-                        /*to list obiektów jest reactywna (informuje UI o zmianach
+                        /*ta list obiektów jest reaktywna (informuje UI o zmianach
                         * sam obiekt i jego właściwości nie są reaktywne, więc
                         * nie informują UI o swoich zmianach
                         * */
@@ -236,173 +236,41 @@ fun UserSettings( modifier: Modifier = Modifier) {
     }
 ```
 
-## Dodajemy `Switch`
-Musimy:
-- dodać zmienną przechowującą stan `Switch`a
-- dodać funkcję tworzącą `Switch`
+
+## `remember` vs `rememberDaveable`
+W Jetpack Compose mamy dwa podstawowe sposoby na to, aby UI "pamiętało", co się w nim dzieje. Wybór odpowiedniego zależy od tego, jak długo dane mają przetrwać.
+
+| Cecha | `remember` | `rememberSaveable` |
+| :--- | :--- | :--- |
+| **Przetrwanie rekompozycji** (odświeżenie fragmentu UI) | ✅ Tak | ✅ Tak |
+| **Przetrwanie rekonfiguracji** (np. obrót ekranu) | ❌ Nie | ✅ Tak |
+| **Zamykanie aplikacji** (proces w tle) | ❌ Nie | ✅ Tak (częściowo) |
+| **Wymagania systemowe** | Brak (pamięć RAM) | Dane muszą być możliwe do zapisania w `Bundle` |
+| **Najlepszy dla...** | Animacji i stanów tymczasowych | Formularzy, checkboxów i danych użytkownika |
+
 ```kotlin
-@Composable
-fun UserSettings( modifier: Modifier = Modifier) {
-//...
+// ten kod
+var isSportChecked by remember  { mutableStateOf(false)}
+var isProgrammingChecked by remember  { mutableStateOf(false)}
+var isMusicChecked by remember  { mutableStateOf(false)}
 
- var notificationsEnabled by remember { mutableStateOf(false) }
+// zamienilibyśmy na
+var isSportChecked by rememberSaveable  { mutableStateOf(false)}
+var isProgrammingChecked by rememberSaveable  { mutableStateOf(false)}
+var isMusicChecked by rememberSaveable  { mutableStateOf(false)}
 
-//...pod checkboxami
 
-Row(modifier=Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
-
-        ) {
-            Text("Powiadomienia")
-
-            Spacer(modifier=Modifier.width(12.dp))
-
-            Switch(
-                modifier = Modifier.padding(20.dp),
-                checked = notificationsEnabled,
-                onCheckedChange = {
-                    notificationsEnabled = it
-                    println(notificationsEnabled)
-                }
-            )
-        }
 ```
-:::important Najważniejsza zasada Compose (zapamiętaj na zawsze)
-- Jeśli coś ma się zmieniać i ekran ma to zobaczyć, musi być w `remember { mutableStateOf(...) }`.
-- Bez tego Compose jest ślepy na zmiany i nic się nie aktualizuje.
+
+:::tip Złota zasada
+- Używaj `remember`, gdy masz dane tymczasowe, które nie są krytyczne
+(np. animacja, która może zacząć się od nowa).
+- Używaj `rememberSaveable` dla wszystkiego, co wpisał lub zaznaczył użytkownik
+(np. tekst w polu wyszukiwania, zaznaczone checkboxy),
+aby nie irytować go koniecznością ponownego wypełniania formularza po obróceniu telefonu.
+
 
 :::
-
-:::tip syntaktyka z `by` *property delegation*
-"Hej, ta zmienna ma nie trzymać bezpośrednio wartości false,
-tylko ma korzystać z innego obiektu (tutaj `MutableState`),
-a Ty (Kotlin) zajmij się za mnie automatycznym wywoływaniem `.getValue()` i `.setValue()`"
-
-Kotlin zamienia:
-`var notificationsEnabled by remember { mutableStateOf(false) }`
-
-na
-
-```kotlin
-private val notificationsEnabled$delegate = remember { mutableStateOf(false) }
-
-var notificationsEnabled: Boolean
-    get() = notificationsEnabled$delegate.value          // automatyczne .value przy odczycie
-    set(value) = notificationsEnabled$delegate.value = value  // automatyczne .value przy zapisie
-```
-
-:::
-
-
-
-## Dodajemy `RadioButton`y - motyw aplikacji
-Potrzebujemy:
-- zmiennej, która przechowa informację o tym, który `RadioButton` został wybrany
-- funkcji, która tworzy `RadioButton`y
-
-```kotlin
-@Composable
-fun UserSettings( modifier: Modifier = Modifier) {
-//...
-    var notificationsEnabled by remember { mutableStateOf(false) }
-
-    var selectedTheme by remember { mutableStateOf("light") }
-
-// ... pod switchem
- Row(modifier = Modifier.padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically){
-
-            RadioButton(
-                selected = selectedTheme == "light",
-                onClick = {selectedTheme = "light"}
-            )
-            Text(text="Jasny")
-        }
-
-        Row(modifier = Modifier.padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically){
-            RadioButton(
-                selected = selectedTheme == "dark",
-                onClick = {selectedTheme = "dark"}
-            )
-            Text(text="Ciemny")
-        }
-
-        Row(modifier = Modifier.padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically
-            ){
-            RadioButton(
-                    selected= selectedTheme == "system",
-                    onClick = {selectedTheme = "system"}
-                    )
-            Text(text="Systemowy")
-        }
-        Text(text="Twój wybór: $selectedTheme",
-             modifier=Modifier.padding(10.dp)
-            )
-    }
-```
-
-## Dodajemy przycisk podsumowania
-- potrzebujemy przycisku, po naciśnięciu którego na dole ekranu pojawi się podsumowanie formularza
-- więc potrzebujemy też pola do wyświetlenia podsumowania
-- czyli potrzebujemy też zmiennej, która przechowa informacje z formularza
-
-```kotlin
-@Composable
-fun UserSettings( modifier: Modifier = Modifier) {
-//...
-    var summary by remember { mutableStateOf("") }
-
-
-
-//...
-  Text(text="Twój wybór: $selectedTheme",
-             modifier=Modifier.padding(10.dp)
-            )
-
-// --------- podsumowanie ---------------------
-
-
-        Spacer(modifier= Modifier.size(20.dp))
-        Button(modifier = Modifier.padding(10.dp),
-            onClick = {
-
-                summary = "Motyw $selectedTheme, powiadomienia $notificationsEnabled" +
-                        ", zainteresowania ${
-                            interests
-                                .filter { it.checked }
-                                .joinToString { it.name  }
-                        }"
-            }){
-            Text(text="Podsumowanie")
-        }
-        Text(modifier = Modifier.padding(vertical = 12.dp, horizontal = 5.dp ),
-            text = "P o d s u m o w a n i e",
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold
-            )
-        Text(summary)
-
-```
-:::danger Podstawowy problem
-Nasza aplikacja zawiera się w jednym pliku.
-
-- przestaje być czytelna
-- staje się trudna do rozbudowy i testowania
-- ... i w ogóle jest niepoprawna
-
-:::
-
-Zanim przejdziemy do podziału naszej aplikacji na komponenty *Compose*,
-musimy nauczyc się przekazywać dane między komponentami.
-
-
-
-
 
 
 

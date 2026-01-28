@@ -1,0 +1,67 @@
+---
+title: Switch
+---
+Kontynuujemy projekt z poprzedniej lekcji.
+
+
+## Dodajemy `Switch`
+Musimy:
+- dodać zmienną przechowującą stan `Switch`a
+- dodać funkcję tworzącą `Switch`
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+//...
+
+ var notificationsEnabled by remember { mutableStateOf(false) }
+
+//...pod checkboxami
+
+Row(modifier=Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+
+        ) {
+            Text("Powiadomienia")
+
+            Spacer(modifier=Modifier.width(12.dp))
+
+            Switch(
+                modifier = Modifier.padding(20.dp),
+                checked = notificationsEnabled,
+                onCheckedChange = {
+                    notificationsEnabled = it
+                    println(notificationsEnabled)
+                }
+            )
+        }
+```
+:::important Najważniejsza zasada Compose (zapamiętaj na zawsze)
+- Jeśli coś ma się zmieniać i ekran ma to zobaczyć, musi być w `remember { mutableStateOf(...) }`.
+- Bez tego Compose jest ślepy na zmiany i nic się nie aktualizuje.
+
+:::
+
+:::tip syntaktyka z `by` *property delegation*
+"Hej, ta zmienna ma nie trzymać bezpośrednio wartości false,
+tylko ma korzystać z innego obiektu (tutaj `MutableState`),
+a Ty (Kotlin) zajmij się za mnie automatycznym wywoływaniem `.getValue()` i `.setValue()`"
+
+Kotlin zamienia:
+`var notificationsEnabled by remember { mutableStateOf(false) }`
+
+na
+
+```kotlin
+private val notificationsEnabled$delegate = remember { mutableStateOf(false) }
+
+var notificationsEnabled: Boolean
+    get() = notificationsEnabled$delegate.value          // automatyczne .value przy odczycie
+    set(value) = notificationsEnabled$delegate.value = value  // automatyczne .value przy zapisie
+```
+
+:::
+
+

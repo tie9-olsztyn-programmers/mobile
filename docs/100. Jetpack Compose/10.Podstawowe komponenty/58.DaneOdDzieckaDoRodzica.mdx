@@ -51,7 +51,8 @@ Teraz dziecko przy użyciu funkcji od rodzica prześle tekst:
 fun Parent(){
     Log.i("tag","Rodzic")
     Column() {
-        Child("wiadomość od rodzica",
+        Child(
+            name = "wiadomość od rodzica",
             onEvent = {someValue ->
                 Log.i("tag", "Wysłano: $someValue")}
             )
@@ -80,7 +81,7 @@ fun Child(name: String, onEvent: (String)-> Unit){
 Skasujmy komponent `Parent` a w jego miejsce wpiszmy `GameScreen.kt`:
 ```kotlin
 @Composable
-fun GameScreen(){
+fun GameScreen(modifier: Modifier = Modifier){
     var score by remember { mutableStateOf(0)}
 
     ScorePanel(score = score, onAddPoint = { score += 1})
@@ -142,16 +143,19 @@ fun ScorePanel(
 - dodajmy nowy komponent `StopGameScreen`
 ```kotlin
 @Composable
-fun StopGameScreen() {
+fun StopGameScreen(modifier: Modifier ){
+    val targetTime = 5f
+    val tolerance = 0.05f
 
-    var time by remember { mutableStateOf(0f) }
+    var time  by remember { mutableStateOf(0f) }
     var running by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<String?>(null) }
 
+
     LaunchedEffect(running) {
-        if (running) {
+        if(running){
             val start = System.currentTimeMillis()
-            while (running) {
+            while(running){
                 val now = System.currentTimeMillis()
                 time = (now - start) / 1000f
                 delay(10)
@@ -161,6 +165,7 @@ fun StopGameScreen() {
 
     GameUI(
         time = time,
+        targetTime = targetTime,
         result = result,
         onStart = {
             time = 0f
@@ -169,16 +174,18 @@ fun StopGameScreen() {
         },
         onStop = {
             running = false
-            val diff = abs(time - 5f)
-            result = if (diff < 0.01f) {
+            val diff = abs(time - targetTime)
+            result = if (diff <= tolerance){
                 "Perfekcyjnie!"
             } else {
-                "Pudło. Odchyłka: ${"%.2f".format(diff)} s"
+                "Pudło . Odchyłka ${"%.2f".format(diff)}"
             }
-        },
-
+        }
     )
+
 }
+
+
 
 
 ```
@@ -198,24 +205,27 @@ i dziecko `GameUI.kt`:
 @Composable
 fun GameUI(
     time: Float,
+    targetTime: Float,
     result: String?,
     onStart: () -> Unit,
-    onStop: () -> Unit,
-
-) {
-
+    onStop: () -> Unit
+){
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(33.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = String.format("%.2f s", time),
-            fontSize = 48.sp
-        )
+    ){
+            Text(text="Traf w $targetTime",
+                modifier = Modifier.padding(10.dp),
+                style = MaterialTheme.typography.headlineLarge
+            )
 
+            Text(
+                text = String.format("%.2f s", time),
+                fontSize = 48.sp
+            )
         Spacer(Modifier.height(16.dp))
 
         Row{
@@ -223,8 +233,8 @@ fun GameUI(
                 Text(text="Start")
             }
             Spacer(Modifier.width(16.dp))
-            Button(onClick = onStop) {
-                Text(text = "Stop")
+            Button(onClick = onStop){
+                Text("Stop")
             }
         }
 
@@ -237,6 +247,7 @@ fun GameUI(
             )
         }
     }
+
 }
 ```
 

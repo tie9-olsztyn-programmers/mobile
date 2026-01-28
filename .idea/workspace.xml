@@ -5,10 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
-      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/4.Terminologia.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/42.Switch.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/45.RadioButton.mdx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/20.Listy i dane/1.ListView/30.ListaZJSONem.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/20.Listy i dane/1.ListView/30.ListaZJSONem.mdx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/1.intro.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/1.intro.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/40.CheckBoxSwitchRadioButton.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/40.CheckBoxSwitchRadioButton.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/41.PrzesylanieDanych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/50.PrzesylanieDanych.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/42.DaneOdRodzicaDoDziecka.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/55.DaneOdRodzicaDoDziecka.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/44.DaneOdDzieckaDoRodzica.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/58.DaneOdDzieckaDoRodzica.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/48.PodzialAplikacji.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/60.PodzialAplikacji.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/50.SnackBar.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/80.SnackBarIToast.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/52.DialogAlertDialog.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/152.DialogAlertDialog.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/60.ImageIcon.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/70.ImageIcon.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/70.CardSurface.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/170.CardSurface.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/70.SliderProgressIndicator.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/170.SliderProgressIndicator.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/80.ExposedDropdownMenuBox.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/100. Jetpack Compose/10.Podstawowe komponenty/180.ExposedDropdownMenuBox.mdx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +115,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.29346.242" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.30387.83" />
       </set>
     </attachedChunks>
   </component>
@@ -177,6 +187,7 @@
       <workItem from="1768813753236" duration="12947000" />
       <workItem from="1768894103798" duration="7809000" />
       <workItem from="1769277089935" duration="6919000" />
+      <workItem from="1769510130626" duration="9195000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />

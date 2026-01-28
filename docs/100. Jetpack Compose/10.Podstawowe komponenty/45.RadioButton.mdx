@@ -1,0 +1,108 @@
+---
+title: RadioButton
+---
+Kontyuujemy projekt z poprzedniej lekcji.
+
+
+## Dodajemy `RadioButton`y - motyw aplikacji
+Potrzebujemy:
+- zmiennej, która przechowa informację o tym, który `RadioButton` został wybrany
+- funkcji, która tworzy `RadioButton`y
+
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+//...
+    var notificationsEnabled by remember { mutableStateOf(false) }
+
+    var selectedTheme by remember { mutableStateOf("light") }
+
+// ... pod switchem
+ Row(modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically){
+
+            RadioButton(
+                selected = selectedTheme == "light",
+                onClick = {selectedTheme = "light"}
+            )
+            Text(text="Jasny")
+        }
+
+        Row(modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically){
+            RadioButton(
+                selected = selectedTheme == "dark",
+                onClick = {selectedTheme = "dark"}
+            )
+            Text(text="Ciemny")
+        }
+
+        Row(modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+            ){
+            RadioButton(
+                    selected= selectedTheme == "system",
+                    onClick = {selectedTheme = "system"}
+                    )
+            Text(text="Systemowy")
+        }
+        Text(text="Twój wybór: $selectedTheme",
+             modifier=Modifier.padding(10.dp)
+            )
+    }
+```
+
+## Dodajemy przycisk podsumowania
+- potrzebujemy przycisku, po naciśnięciu którego na dole ekranu pojawi się podsumowanie formularza
+- więc potrzebujemy też pola do wyświetlenia podsumowania
+- czyli potrzebujemy też zmiennej, która przechowa informacje z formularza
+
+```kotlin
+@Composable
+fun UserSettings( modifier: Modifier = Modifier) {
+//...
+    var summary by remember { mutableStateOf("") }
+
+
+
+//...
+  Text(text="Twój wybór: $selectedTheme",
+             modifier=Modifier.padding(10.dp)
+            )
+
+// --------- podsumowanie ---------------------
+
+
+        Spacer(modifier= Modifier.size(20.dp))
+        Button(modifier = Modifier.padding(10.dp),
+            onClick = {
+
+                summary = "Motyw $selectedTheme, powiadomienia $notificationsEnabled" +
+                        ", zainteresowania ${
+                            interests
+                                .filter { it.checked }
+                                .joinToString { it.name  }
+                        }"
+            }){
+            Text(text="Podsumowanie")
+        }
+        Text(modifier = Modifier.padding(vertical = 12.dp, horizontal = 5.dp ),
+            text = "P o d s u m o w a n i e",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold
+            )
+        Text(summary)
+
+```
+:::danger Podstawowy problem
+Nasza aplikacja zawiera się w jednym pliku.
+
+- przestaje być czytelna
+- staje się trudna do rozbudowy i testowania
+- ... i w ogóle jest niepoprawna
+
+:::
+
+Zanim przejdziemy do podziału naszej aplikacji na komponenty *Compose*,
+musimy nauczyc się przekazywać dane między komponentami.
+

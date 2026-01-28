@@ -225,7 +225,35 @@ fun Parent(name: String, modifier: Modifier = Modifier) {
 //..
 ```
 
+## Ważne porównanie
+## Zarządzanie listami w Compose: Którą wybrać?
 
+W Jetpack Compose wybór typu listy decyduje o tym, czy Twoja aplikacja będzie "żywa" (reaktywna), czy "zamrożona".
+
+| Typ listy | Możliwość edycji (`add`/`remove`) | Reaktywność (Odświeżenie UI) | Kiedy stosować? |
+| :--- | :---: | :---: | :--- |
+| **`listOf()`** | ❌ Nie | ➖ Nie dotyczy | Dla stałych danych, które tylko wyświetlasz (np. dni tygodnia). |
+| **`mutableListOf()`** | ✅ Tak | ❌ **Brak** | **Unikaj w Compose!** Zmienisz dane w pamięci, ale użytkownik nie zobaczy zmian na ekranie. |
+| **`mutableStateListOf()`** | ✅ Tak | ✅ **Pełna** | Gdy dodajesz lub usuwasz elementy z listy (np. lista zadań do zrobienia). |
+
+---
+
+### Dlaczego `mutableListOf()` to pułapka? 🪤
+
+Używając zwykłej listy modyfikowalnej (`mutableListOf`), zmieniasz dane w "ukryciu" przed systemem Compose. Mechanizm **rekompozycji** (recomposition) nie dostaje sygnału, że musi narysować ekran na nowo.
+
+W efekcie:
+1. Klikasz przycisk "Dodaj użytkownika".
+2. Użytkownik zostaje dodany do listy w pamięci RAM.
+3. **Na ekranie nie dzieje się nic**, co dezorientuje użytkownika aplikacji.
+
+### Rozwiązanie: `mutableStateListOf()`
+
+Ta specjalna lista jest "obserwowalna". Każda operacja taka jak `.add()`, `.remove()` czy `.clear()` automatycznie powiadamia Compose, że czas na odświeżenie widoku.
+
+:::tip Wskazówka dla Inżyniera
+Pamiętaj, aby zawsze owijać `mutableStateListOf()` w funkcję `remember`, w przeciwnym razie przy każdym odświeżeniu ekranu Twoja lista będzie się tworzyć od nowa (i stracisz dodane elementy)!
+:::
 
 
 
