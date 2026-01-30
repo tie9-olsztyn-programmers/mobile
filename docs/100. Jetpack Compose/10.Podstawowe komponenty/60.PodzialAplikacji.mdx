@@ -106,12 +106,14 @@ W głównym pliku używamy tej małej, bezstanowej funkcji composable:
 //
 ```
 
-## Definiujemy komponent `InterestsSection.kt`
+## Nowy komponent dla `CheckBox`ów -  `InterestsSection.kt`
 Tu będzie sporo zmian.
 :::danger PAMIĘTAJ
 Pamiętaj o koniecznych importach "alt+enter" po najechaniu kursorem na brakujące importy.
 
 :::
+
+### Definicja
 ```kotlin
 
 @Composable
@@ -144,8 +146,269 @@ fun InterestsSection(
 }
 ```
 
+### Będne użycie
+Teraz używamy nowego komponentu zamiast poprzednich `Checkbox`ów:
+```kotlin
+ InterestsSection(interestList, { interest ->
+            val index = interestList.indexOf(interest)
+            interestList[index] = interest.copy(checked = !interest.checked)
+        } )
+
+```
+#### Nasz błąd
+Po uruchomieniu aplikacji i kliknięciu na dowolny `Checkbox` aplikacja wyłącza się. Dlaczego?
 
 
+Odpowiedź:
+1. Klikamy na `Checkbox` - czyli jesteśmy w komponencie `InterestsSection`
+2. To kliknięcie wywołuje metodę `onCheckedChange`:
+    - tworzymy nowy obiekt klasy `Interest`, który jest kopią ze zmianą w `checked`
+    - ten nowy obiekt jest wysyłany do `MainActivity` przez funkcję zapisaną w zmiennej `onInterestChange`
+3. Teraz jesteśmy w `MainActivity`:
+    - w zmiennej `interest` jest ten nowy obiekt,
+    - pobieramy indeks, pod którym przechowywany jest ten obiekt w liście, ale
+    - takiego samego obiektu na liście nie ma, bo zmieniliśmy wartość właściwości `checked` tego obiektu
+    - metoda `indexOf` zwróci `-1`
+    - następnie pod indeksem `-1` próbujemy wstawić nowy obiekt
+    - takiego indeksu nie ma, więc aplikacja "pada"
+
+
+### Naprawa błędu
+
+- do `data class` dodamy `id`, bo lepiej jest poszukiwac obiektu na liście przez `id`,
+a nie przez poszukiwanie całego obiektu
+```kotlin
+data class Interest(
+    val id: Int,
+    val name: String,
+    var checked: Boolean
+)
+```
+Dodajemy to `id` do obiektów na liście w `MainActivity`
+```kotlin
+val interestList = remember {
+        mutableStateListOf(
+            Interest(id = 1, "Programowanie", false),
+            Interest(id = 2, "Sport", false),
+            Interest(id = 3,"Muzyka", false)
+        )
+    }
+```
+Zmieniamy ciało funkcji komponentu `InterestsSection`:
+```Kotlin
+ InterestsSection(interestList, {changedInterest ->
+            // Szukamy indeksu elementu, który ma to samo ID
+            val index = interestList.indexOfFirst { it.id == changedInterest.id }
+
+            if (index != -1) {
+                // Podmieniamy stary element na ten nowy, który przyszedł z dołu
+                interestList[index] = changedInterest
+            }
+        } )
+```
+
+
+
+## Nowy komponent `ThemeSection.kt`
+Teraz utworzymy komponent dla naszych `RadioButton`ów, czyli miejsce, w którym wybieramy motyw
+```kotlin
+
+@Composable
+fun ThemeSection(
+    selectedTheme: String,
+    onThemeChange: (String) -> Unit
+){
+    Row(
+        modifier = Modifier.padding(20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        RadioButton(
+            selected = selectedTheme == "light",
+            onClick =  { onThemeChange("light") }
+        )
+        Text("Jasny")
+    }
+
+
+
+    Row(
+        modifier = Modifier.padding(20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        RadioButton(
+            selected = selectedTheme == "dark",
+            onClick = { onThemeChange("dark") }
+        )
+        Text("Ciemny")
+    }
+
+    Row(
+        modifier = Modifier.padding(20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        RadioButton(
+            selected = selectedTheme == "system",
+            onClick = { onThemeChange("system")}
+        )
+        Text("Systemowy")
+    }
+    Text(text = "Twój wybór to: $selectedTheme")
+}
+
+```
+
+Używamy nowego komponentu w `MainActivity.kt`
+```kotlin
+     NotificationsSection(
+            notificationsEnable,
+            { notificationsEnable = it } )
+
+
+        ThemeSection(
+            selectedTheme,
+            { newTheme ->
+                selectedTheme = newTheme
+            }
+        )
+        Spacer(modifier = Modifier.size(20.dp))
+
+```
+
+### Mały problem z danymi
+Prac na stringach generuje błędy
+- posługujemy się stringami `light`, `dark`, `system`,
+- bardzo łatwo zrobić w nich błąd (np. literówka)
+- brak podpowiedzi od IDE
+
+
+### Rozwiązanie i uporządkowanie:
+
+:::tip Folder `model`
+- to miejsce, w którym definiujemy "CO" nasza aplikacja przetwarza, a nie "JAK" to wyświetla.
+- Znajdują się tu szablony danych – czyli
+  - klasy opisujące obiekty ze świata rzeczywistego, które są zrozumiałe dla komputera.
+  - klasy opisujące obiekty ze świata logicznego
+  - ogólnie surowe dane
+- Nie umieszcza się w nim:
+  - funkcji `@Composable` (to rola UI).
+  - logiki biznesowej (np. zapisywania do bazy danych).
+  - kolorów czy wymiarów w dp (chyba że są one integralną częścią danych, np. w programie graficznym).
+:::
+
+
+    - wprowadzimy do naszej projektu nowy folder wewnątrz głównego `model`
+    - tam przenieśmy na plik `Interest.kt`
+    - i tam utwórzmy nowy `AppTheme.kt`
+```kotlin
+enum class AppTheme {
+    Light,
+    Dark,
+    System
+}
+
+```
+
+Drobne zmiany w naszym komponencie, który teraz będzie pracował na typie wyliczeniowym `AppTheme`:
+`ThemeSection.kt`
+```kotlin
+
+@Composable
+fun ThemeSection(
+    selectedTheme: AppTheme,            //zmiana
+    onThemeChange: (AppTheme) -> Unit   //zmiana
+){
+    Row(
+        modifier = Modifier.padding(20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ){
+        RadioButton(
+            selected = selectedTheme == AppTheme.Light, //zmiana
+            onClick =  { onThemeChange(AppTheme.Light) }//zmiana
+        )
+        Text("Jasny")
+    }
+
+//...
+// i odpowiednie zmiany w pozostałuch RadioButtonach
+
+```
+
+oraz zmiana w `MainAcivity.kt`
+```kotlin
+// ...
+    var selectedTheme by remember { mutableStateOf(AppTheme.Light) }
+
+//...
+```
+
+
+## Nowy komponent `SummarySection.kt`
+```kotlin
+@Composable
+fun SummarySection(
+    summary: String,
+    modifier: Modifier = Modifier // dodajemy modifier, aby rodzic mógł sterować
+){
+    // Opakowujemy wszystko w Column (Pudełko)
+    Column(
+        modifier = modifier // Aplikujemy modifier do głównego pudełka
+            .background(Color.LightGray.copy(alpha = 0.1f)) //  lekkie tło dla sekcji
+            .padding(10.dp) // Padding WEWNĘTRZNY sekcji
+    ) {
+        Text(
+            text = "P o d s u m o w a n i e",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp) // Odstęp od treści
+        )
+
+        // Wyświetlamy treść. Jeśli jest pusta, dajemy informację.
+        if (summary.isNotEmpty()) {
+            Text(text = summary)
+        } else {
+            Text(
+                text = "Kliknij przycisk, aby wygenerować podsumowanie",
+                fontStyle = FontStyle.Italic,
+                color = Color.Gray
+            )
+        }
+    }
+}
+```
+
+Używamy nowego komponentu w `MainActivity.kt` w miejscu, gdzie wywołaliśmy poprzednie `Text`
+```kotlin
+@Composable
+fun SummarySection(
+    summary: String,
+    modifier: Modifier = Modifier // dodajemy modifier, aby rodzic mógł sterować
+){
+    // Opakowujemy wszystko w Column (Pudełko)
+    Column(
+        modifier = modifier // Aplikujemy modifier do głównego pudełka
+            .background(Color.LightGray.copy(alpha = 0.1f)) //  lekkie tło dla sekcji
+            .padding(10.dp) // Padding WEWNĘTRZNY sekcji
+    ) {
+        Text(
+            text = "P o d s u m o w a n i e",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp) // Odstęp od treści
+        )
+
+        // Wyświetlamy treść. Jeśli jest pusta, dajemy informację.
+        if (summary.isNotEmpty()) {
+            Text(text = summary)
+        } else {
+            Text(
+                text = "Kliknij przycisk, aby wygenerować podsumowanie",
+                fontStyle = FontStyle.Italic,
+                color = Color.Gray
+            )
+        }
+    }
+}
+```
 
 
 
