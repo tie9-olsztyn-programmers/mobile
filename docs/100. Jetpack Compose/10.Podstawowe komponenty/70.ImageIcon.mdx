@@ -2,6 +2,206 @@
 title: Image, Icon
 ---
 
+import useBaseUrl from "@docusaurus/useBaseUrl";
+
+# Komponenty `Image` i `Icon`
+
+1. `Image` służy do wyświetlania zdjęć, grafik, avatarów (formaty PNG, JPEG, WebP).
+2. `Icon` służy do wyświetlania symboli interfejsu, np. strzałek, kosza na śmieci, serduszek (formaty wektorowe XML).
+
+
+- zróbmy nowy projekt `Empty Avtivity`
+- będziemy pracować wewnątrz domyślnie stworzonego komponentu `Greeting`
+
+Cecha | Image | Icon
+--- | --- | ---
+Źródło      |"Piksele (JPG, PNG)" | "Wektory (SVG, XML)"
+Kolorowanie |Trudne (filtrowanie) | Łatwe (parametr tint)
+Jakość      |Traci jakość przy powiększaniu| Zawsze idealnie ostra
+Zastosowanie|"Zdjęcia produktów, avatary" | "Przycisk wstecz, ikona koszyka"
+
+
+## `Image`
+- Komponent Image służy do wyświetlania "cięższych" grafik.
+- Wymaga on podania Malarza (Painter), czyli instrukcji, skąd wziąć obrazek.
+
+### Prosty przykład
+```kotlin
+@Composable
+fun Greeting( modifier: Modifier = Modifier) {
+
+    Column(modifier=modifier) {
+        Text(
+            text = "Example for Image",
+            modifier = modifier,
+            style = MaterialTheme.typography.displayLarge
+        )
+
+        Image(
+            //ładowanie obrazka
+            painter= painterResource(id = R.drawable.ic_launcher_foreground),
+
+            // obowiązkowy słowny opis obrazka
+
+            contentDescription = "Android robot",
+
+            //ustawiam rozła i tło
+            modifier = Modifier
+                .padding(10.dp)
+                .size(200.dp)
+                .background(Color.DarkGray)
+        )
+    }
+}
+```
+
+### Dragon App
+* Kontynuując nasz projekt.
+* Wyczyśćmy ciało funkcji `Greeting`
+* Dodamy do niego 3 obrazki:
+
+<a href={useBaseUrl("/myImages/img_dragon_horizontal.png")} target="_blank" download className="button button--primary button--lg"> Pobierz Smoka </a>
+
+<a href={useBaseUrl("/myImages/img_pacifier_vertical.png")} target="_blank"  download className="button button--primary button--lg"> Pobierz Smoczka </a>
+
+<a href={useBaseUrl("/myImages/img_she_dragon_square.png")} target="_blank"  download className="button button--primary button--lg"> Pobierz Smoczycę </a>
+
+
+Obrazki "wrzuć" do foldery `res/drawable`.
+
+#### Laboratorium: Smocze Testy
+Masz ramkę na zdjęcie o wymiarach 200x200 pikseli.
+Masz też zdjęcie smoka, które jest szerokie i niskie. Co robisz?
+- Ucinasz boki smoka, żeby wypełnić ramkę?
+- Zmniejszasz smoka, żeby wszedł cały, godząc się na puste paski u góry i dołu?
+- Rozciągasz smoka jak gumę, deformując go?
+
+W Jetpack Compose decyduje o tym parametr `contentScale`.
+
+
+| Tryb (ContentScale) | Odpowiednik XML | Opis działania | Kiedy używać? |
+| :--- | :--- | :--- | :--- |
+| **`ContentScale.Crop`** | `centerCrop` | **"Wypełnij ramkę"**. Skaluje obraz tak, by wypełnił cały obszar kontenera. Nadmiar obrazka (góra/dół lub boki) jest ucinany. | Tła, avatary, zdjęcia ozdobne, gdzie ucięcie fragmentu nie boli. |
+| **`ContentScale.Fit`** | `fitCenter` | **"Pokaż całość"**. Skaluje obrazek tak, by był w całości widoczny. Zachowuje proporcje. Często powstają puste paski (*letterboxing*). | Wykresy, logotypy, schematy, ważne treści, których nie wolno uciąć. |
+| **`ContentScale.FillBounds`** | `fitXY` | **"Rozciągnij"**. Ignoruje proporcje. Rozciąga obraz w pionie i poziomie, by wypełnić ramkę co do piksela. |  **Unikać!** Powoduje deformację (rozciągnięcie/spłaszczenie) obrazu. |
+| **`ContentScale.Inside`** | `centerInside` | Podobnie do `Fit`, ale jeśli obrazek jest fizycznie **mniejszy** od ramki, to go **nie powiększa**. Zostaje w oryginalnym rozmiarze na środku. | Małe ikonki w dużych przyciskach lub duże kontenery na małe zasoby. |
+
+
+
+##### Zróby nowy komponent `DragonScaleLesson.kt`
+
+:::tip Czym jest `rememberScrollState()`?
+Funkcja, która:
+- tworzy specjalny obiekt typu `ScrollState`
+- "zapamiętuje go.
+
+Obiekt ten pełni rolę licznika, który przechowuje jedną kluczową liczbę:
+    - "Ile pikseli użytkownik przewinął ekran w dół?".
+
+:::
+
+**Pierwszy przypadek**
+```kotlin
+
+@Composable
+fun DragonScaleLesson(){
+
+// Column nie jest "scrollowalny"
+//   .verticalScroll(rememberScrollState()) - w uproszczeniu włącza funkcję skrolowania
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+    ){
+
+
+        // przypadek 1
+        Text("Szeroki smok + CROP", fontWeight = FontWeight.Bold)
+        Image(
+            painter = painterResource(id = R.drawable.img_dragon_horizontal),
+            contentDescription = null,
+            contentScale = ContentScale.Crop, // ucinamy boki
+            modifier = Modifier
+                .size(200.dp)
+                .background(Color.Red)
+        )
+        Text(
+            text="Głowa i ogon mogą być ucięte, ale ramka jest pełna.",
+            fontSize = 12.sp
+        )
+
+    }
+}
+```
+
+Użycie komponentu w `MainActivity`
+```kotlin
+@Composable
+fun Greeting( modifier: Modifier = Modifier) {
+    Column(modifier=modifier) {
+        DragonScaleLesson()
+    }
+
+}
+```
+
+**Drugi przypadek**
+Po spodem poprzedniego obrazka dopiszmy:
+```kotlin
+//...
+       Text(
+            text="Głowa i ogon mogą być ucięte, ale ramka jest pełna.",
+            fontSize = 12.sp
+        )
+
+    // 2. przypadek Wysoki smoczek + fit
+    Text("2. Wysoki Smoczek + FIT", fontWeight = FontWeight.Bold)
+    Image(
+        painter = painterResource(R.drawable.img_pacifier_vertical),
+        contentDescription = null,
+        contentScale = ContentScale.Fit, // "wpakujemy" cały obrazek
+        modifier = Modifier
+            .size(200.dp)
+            .background(Color.Yellow)
+    )
+    Text("Widzisz cały smoczek, ale sa też 'puste' żółte miejsca",
+        fontSize = 12.sp)
+//...
+```
+
+**Trzeci przypadek**
+Po ostatnim obrazkiem dopiszmy kod:
+```kotlin
+//...
+        Text("Widzisz cały smoczek, ale sa też 'puste' żółte miejsca",
+            fontSize = 12.sp)
+
+        // PRZYPADEK 3: Kwadratowa Smoczyca + FillBounds
+        // Wkładamy kwadrat (1:1) do prostokąta (2:1)
+        Text("3. Smoczyca + FILL BOUNDS", fontWeight = FontWeight.Bold)
+        Image(
+            painter = painterResource(id = R.drawable.img_she_dragon_square),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds, // ozciągamy
+            modifier = Modifier
+                .width(200.dp)
+                .height(100.dp) // Zmieniamy kształt ramki na płaski
+                .background(Color.Green)
+        )
+        Text("Twarz jest spłaszczona.", fontSize = 12.sp)
+
+//...
+```
+
+
+
+
+
+
+
 
 
 
