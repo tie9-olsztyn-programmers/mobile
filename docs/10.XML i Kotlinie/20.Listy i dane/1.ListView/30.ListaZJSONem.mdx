@@ -221,6 +221,12 @@ to proces odtworzenia obiektów programu z zapisanego formatu
 
 
 ### Dodajemy bibliotekę `serialization` do aplikacji
+:::tip Może się zdarzyć błąd
+- Dodajnie tej biblioteki może wywołać błąd.
+- Jeżeli tak się stanie, po prostu dodaj do`[version]` wpis:
+    - `kotlin `kotlin = "2.1.0"`
+
+:::
 
 W `.toml` dodajemy i synchronizujemy:
 ```toml
@@ -252,6 +258,39 @@ dependencies {
 
 - plugin = kompilator
 - library = runtime
+
+
+:::note Krótkie wyjaśnienie
+1. Plik `.toml` (*Version Catalog*)
+    - Analogia: Centralny spis inwentarza lub książka telefoniczna.
+    - W dużych projektach masz setki plików. Gdybyś w każdym z nich wpisywał wersję biblioteki ręcznie (np. 1.2.3), a potem musiał ją zaktualizować, zginąłbyś w gąszczu poprawek.
+    - Czym jest:
+        - to plik konfiguracyjny (zazwyczaj `libs.versions.toml`),
+        - plik tentrzyma wszystkie numery wersji i nazwy bibliotek w jednym miejscu.
+    - Rola:
+        - Zapewnia porządek.
+        - Jeśli zmieniasz wersję biblioteki w `.toml`, zmienia się ona automatycznie w całej aplikacji
+
+2. Plik build.gradle.kts
+    - Analogia: Przepis kulinarny lub instrukcja montażu.
+        - Sam spis części (`.toml`) nic nie zbuduje.
+        - Musisz mieć instrukcję, która powie:
+            - „Do tej konkretnej części aplikacji (modułu) dodaj te i te biblioteki”.
+    - Czym jest:
+        - To skrypt napisany w języku Kotlin (stąd końcówka `.kts` – Kotlin Script).
+    - Rola:
+        - Definiuje
+            - parametry budowania (np.jaka jest minimalna wersja Androida, na której zadziała apka)
+            - które elementy z katalogu `.toml` mają zostać użyte.
+
+:::
+
+Cecha | Libraries (Biblioteki) | Plugins (Wtyczki)
+---   | ---                    |  ---
+Główny cel | Dodanie nowych funkcji do Twojego kodu. | Dodanie nowych funkcji do procesu budowania.
+Gdzie trafiają? | Są pakowane do pliku końcowego aplikacji. | Zostają tylko na komputerze programisty.
+Pochodzenie | Inne firmy lub społeczność (Open Source).| "Twórcy narzędzi (Google, JetBrains)."
+Sekcja w .toml | `[libraries]`  | [plugins]
 
 ### Zapis danych do pliku
 #### Przycisk do zapisu danych
