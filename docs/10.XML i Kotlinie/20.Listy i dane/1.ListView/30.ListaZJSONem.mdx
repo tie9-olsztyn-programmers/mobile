@@ -375,7 +375,20 @@ data class MovieEntry(
 )
 ```
 
+:::tip `encodeToString()`
+Biblioteka `kotlinx.serialization` ma dwie metody o tej samej nazwie:
+- Trudna (Low-level): `encodeToString(serializer: SerializationStrategy<T>, value: T)`
+    - To metoda wbudowana w klasę Json.
+    - Wymaga podania ręcznie "przepisu" jak serializować obiekt (np. `ListSerializer(Movie.serializer()))`.
+- Łatwa (*Extension*): `encodeToString(value: T)`
+    - To funkcja, która "dokleja się" do klasy Json.
+    - Używa mechanizmu *Reified Types* w Kotlinie, żeby automatycznie wygenerować ten "przepis" w tle.
+    - Bez importu, Kotlin po prostu nie widzi tego ułatwienia.
+    - Aby jej użyć, trzeba ją zaimportować:
+        - *alt+enter* — kursor na nazwie tej metody
+        - lub ręcznie `import kotlinx.serialization.encodeToString`
 
+:::
 
 
 Do klasy `MainActivity` dodajemy nową metodę:

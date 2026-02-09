@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation" />
+    <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -178,6 +180,8 @@
       <workItem from="1769792392305" duration="9597000" />
       <workItem from="1769871347237" duration="7321000" />
       <workItem from="1769961777520" duration="4455000" />
+      <workItem from="1770632539745" duration="1911000" />
+      <workItem from="1770643509223" duration="14000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />
