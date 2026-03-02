@@ -1,0 +1,76 @@
+---
+title: Firebase
+---
+
+https://firebase.google.com/
+
+## Czym jest Firebase
+
+:::note Firebase
+- to platforma stworzona przez Google, która działa jako *BaaS* (*Backend as a Service8 - gotowe zaplecze serwerowe). Z
+- zamiast samodzielnie kupować serwery, konfigurować je i pisać trudny kod obsługujący bazy danych na backendzie, Google daje nam "gotowca".
+- to taki szwajcarski scyzoryk dla programistów mobilnych. Oprócz bazy danych w chmurze (Cloud Firestore) oferuje:
+    - *Authentication* (Uwierzytelnianie) – system logowania użytkowników (jak wydawanie kart bibliotecznych).
+    - *Cloud Storage* (Magazyn w chmurze) – miejsce na pliki, np. zdjęcia profilowe użytkowników.
+    - *Crashlytics* – system raportowania błędów, który mówi nam, dlaczego aplikacja "wywaliła się" u użytkownika.
+
+:::
+
+## Separation of Concerns
+Kiedy zaczniemy używać Firebase, musimy pamiętać o żelaznej zasadzie: **oddzielamy wygląd od logiki biznesowej** (*Separation of Concerns*).
+
+Interfejs użytkownika (UI), czyli nasz szkielet budynku w XML, nie powinien wiedzieć, jak działa biblioteka w chmurze.
+Jego zadaniem jest tylko zebranie danych i przekazanie ich dalej.
+
+
+**Przykład**
+```xml
+<Button
+    android:id="@+id/btnSendData"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Wyślij do chmury" />
+```
+
+W Kotlinie dbamy o to, aby kliknięcie przycisku
+tylko wywołało odpowiednią funkcję, a nie zajmowało się od razu skomplikowanym łączeniem z serwerem w miejscu kliknięcia:
+```kotlin
+// 1. Znajdujemy nasz przycisk (włącznik)
+val sendButton = findViewById<Button>(R.id.btnSendData)
+
+// 2. Ustawiamy nasłuchiwacz kliknięć (Listener)
+sendButton.setOnClickListener {
+    // 3. UI tylko reaguje na kliknięcie i wywołuje osobną funkcję!
+    // Nie piszemy logiki bazy danych tutaj.
+    val studentName = "Jan Kowalski"
+    saveDataToCloud(studentName)
+}
+
+// 4. Osobna funkcja (logika biznesowa) zajmująca się "wysłaniem kuriera do biblioteki"
+fun saveDataToCloud(name: String) {
+    val db = Firebase.firestore // Pobieramy instancję bazy danych
+    val userMap = hashMapOf("name" to name) // Tworzymy paczkę z danymi
+
+    // Wysyłamy paczkę do kolekcji "students"
+    db.collection("students").add(userMap)
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
