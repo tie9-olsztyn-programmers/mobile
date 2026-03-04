@@ -1,0 +1,137 @@
+---
+title: HelpDesk połączenie z FireBase
+---
+
+Co zrobiliśmy do tej pory:
+- Zbudowaliśmy formularz.
+- Zatrudniliśmy pracownika poczty (kod Kotlin).
+- Zamówiliśmy kuriera (zależności Gradle).
+    - Nawet otworzyliśmy mu drzwi wyjściowe (uprawnienia).
+
+Ale jest jeden fundamentalny problem: Nasz kurier wybiega na ulicę i... nie wie,
+gdzie ma jechać!
+Brakuje nam adresu naszego konkretnego magazynu w chmurze.
+
+Czas go wygenerować i wręczyć naszej aplikacji.
+
+
+## Zakładamy projekt w konsoli (Firebase Console)
+- Wchodzimy w przeglądarce na stronę: https://console.firebase.google.com
+    - musisz mieć konto na Google,
+    - włącz dwuetapową weryfikację (najłatwiej przy użyciu aplikacji *Authenticator*)
+- Klikamy "Dodaj projekt" (Add project).
+- Nazywamy go np. *FirestHelpDesk*.
+- Przechodzimy przez kreatora (wyłączmy Google Analytics, żeby było szybciej).
+- Gdy projekt się utworzy, jesteście w panelu głównym Waszego nowego magazynu!
+
+
+## Rejestrujemy naszą aplikację (Wydanie przepustki)
+Aby nasza aplikacja mogła wysłać zgłoszenie,
+musi mieć „przepustkę” i „mapę”. Zrobimy to w trzech dużych krokach.
+
+
+### Krok 1: Znajdujemy prawdziwy identyfikator (PESEL aplikacji)
+- W Android Studio otwórz plik `build.gradle.kts` (*Module :app*).
+- Znajdź sekcję `defaultConfig` i linijkę `applicationId`.
+- Skopiuj tekst znajdujący się w cudzysłowie (np. `com.example.xmlfirebasefirst`).
+    - Ważne: Kopiujemy tylko sam tekst, BEZ słowa package i BEZ cudzysłowów!
+
+### Krok 2: Budowa Magazynu (Firestore Database)
+- Musimy teraz fizycznie „postawić budynek” bazy danych.
+- W konsoli Firebase wejdź w zakładkę `Build` -> `Firestore Database`.
+- Kliknij `Create database`.
+- Wybierz lokalizację Europe (np. `eur3`), żeby dane nie latały przez ocean.
+- Kluczowe: Wybierz `Start in test mode` (Tryb testowy).
+
+
+### Krok 3: Rejestracja w Firebase i pobranie „Mapy GPS”
+- Wejdź do konsoli Firebase i otwórz swój projekt.
+- Na stronie głównej (**Project Overview**) kliknij koło zębate ⚙️ `>` *General*
+- Dodaj aplikację *Android*
+- W polu Android package name wklej skopiowany wcześniej `applicationId`.
+- Kliknij *Register app*.
+
+:::warning
+Pobierz plik `google-services.json` i "wrzuć" go do swojego projektu w Android Studio.
+
+W Android Studio zmień widok na *Project* (lewy górny róg),
+znajdź folder `app` i tam wklej pobrany plik.
+**To jest mapa dla naszego kuriera**.
+
+:::
+
+
+
+##  Włączamy nawigatora `google-services`
+:::tip Analogia: Mapa vs. Nawigator
+### Plik `google-services.json` to Mapa.
+- Są na niej zapisane adresy (Project ID, API Key, Database URL).
+- Sama mapa nie potrafi prowadzić samochodu.
+
+### Wtyczka `google-services` to Nawigator (GPS).
+To on bierze mapę, odczytuje z niej współrzędne i ustawia całą trasę w samochodzie (Twojej aplikacji),
+żebyś Ty nie musiał tego robić ręcznie.
+
+:::
+
+:::note Co wtyczka `google-services` robi "pod maską"?
+Gdy klikasz *Sync Project with Gradle Files*, wtyczka wykonuje brudną robotę za Ciebie:
+- Szuka pliku: Przeszukuje folder /app w poszukiwaniu pliku google-services.json.
+- Tłumaczy JSON-a: Czyta ten plik i wyciąga z niego skomplikowane kody (np. current_key czy project_id).
+- Generuje zasoby (XML): Tworzy wewnątrz Twojej aplikacji ukryte pliki XML (w folderze values), których potrzebuje biblioteka Firebase, aby wiedzieć, gdzie wysłać dane.
+- Łączy kropki: Dzięki niej, kiedy piszesz w Kotlinie Firebase.firestore, biblioteka automatycznie wie, że ma połączyć się z serwerem w Europie (bo wyczytała to z pliku przez wtyczkę).
+
+:::
+
+### Dodajemy wpis do Książki Adresowej
+Otwórz plik `libs.versions.toml`.
+Musimy tam zameldować naszego nowego „Dyspozytora” (*plugin Google Services*).
+
+```toml
+[versions]
+# ... inne wersje ...
+googleServices = "4.4.1"
+
+[plugins]
+# ... inne pluginy ...
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+```
+
+### Deklarujemy plugin w głównym pliku projektu
+Otwórz plik `build.gradle.kts` (ten z dopiskiem *Project*).
+
+Tutaj tylko mówimy Gradle’owi: „Będziemy używać takiego pluginu, przygotuj go”.```kts
+```kts
+plugins {
+    // ... inne pluginy ...
+    alias(libs.plugins.google.services) apply false
+}
+```
+
+:::tip  `apply false`
+oznacza:
+> „miej go w gotowości, ale jeszcze go tu nie włączaj”
+
+Włączymy go dopiero w aplikacji.
+
+:::
+
+### Włączamy plugin w module aplikacji
+Teraz otwórz plik `build.gradle.kts` (ten z dopiskiem *Module :app*).
+
+Na samej górze w sekcji plugins:
+
+```kotlin
+plugins {
+     // ...
+
+    // OTO Nasz Dyspozytor włączony poprawnie
+    alias(libs.plugins.google.services)
+}
+```
+
+
+
+
+
+

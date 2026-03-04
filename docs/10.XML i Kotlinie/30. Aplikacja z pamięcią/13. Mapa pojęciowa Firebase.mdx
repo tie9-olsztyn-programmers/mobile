@@ -1,0 +1,48 @@
+---
+title: Mapa pojęciowa FireBase
+---
+
+
+## 1. Architektura Systemu
+
+| Pojęcie | Nasza Analogia | Co to właściwie jest? |
+| :--- | :--- | :--- |
+| **Project** | **Działka budowlana** | Najwyższy poziom. Tu trzymasz bazę, pliki i konfigurację Twojej konkretnej aplikacji. |
+| **Firebase Console** | **Centrum dowodzenia** | Panel w przeglądarce (strona WWW), gdzie „wyklikujesz” ustawienia i podglądasz dane. |
+| **google-services.json** | **Mapa GPS / Klucze** | Plik, który mówi Twojej aplikacji: „Twoja baza jest TUTAJ, masz prawo do niej wejść”. |
+| **Security Rules** | **Ochroniarz** | Kod w chmurze, który sprawdza, czy ktoś ma prawo zapisać/odczytać dane. |
+
+---
+
+## 2. Cloud Firestore (Wnętrze Magazynu)
+
+
+
+| Pojęcie | Poziom | Opis |
+| :--- | :--- | :--- |
+| **Kolekcja** (*Collection*) | **Szuflada** | Pojemnik na dokumenty. Np. kolekcja `awarie` zawiera wszystkie zgłoszenia. |
+| **Dokument** (*Document*) | **Kartka w szufladzie** | Pojedynczy wpis. Każda awaria to osobny dokument z unikalnym numerem ID. |
+| **Pole** (*Field*) | **Linijka na kartce** | Konkretna informacja, np. `status: "nowe"` lub `numer_pc: 12`. |
+
+---
+
+## 3. Cloud Firestore vs Firestore Database
+
+| Nazwa w interfejsie | To samo co... | Czy tego używamy? | Dlaczego? |
+| :--- | :--- | :--- | :--- |
+| **Cloud Firestore** | Firestore Database | **TAK** ✅ | To oficjalna, pełna nazwa produktu. |
+| **Firestore Database** | Cloud Firestore | **TAK** ✅ | To nazwa tej samej usługi w menu bocznym konsoli. |
+
+> **Werdykt:** Jeśli widziecie jedną z tych dwóch nazw – jesteście w dobrym miejscu!
+
+---
+
+## 4. Firestore vs Realtime Database
+
+Uważajcie, żeby nie pomylić tych dwóch usług, bo leżą obok siebie w menu!
+
+| Cecha | **Cloud Firestore** (Wybieramy!) | **Realtime Database** (Omijamy!) |
+| :--- | :--- | :--- |
+| **Model** | Dokumenty i Kolekcje (Strukturalne). | Jeden wielki, chaotyczny plik JSON. |
+| **Wiek** | Nowoczesna, potężna, skalowalna. | Starsza technologia, trudniejsza w obsłudze. |
+| **Werdykt** | **Idealna dla naszego HelpDesku.** | **Używana w starych projektach.** |

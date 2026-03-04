@@ -5,11 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/10. Firebase.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. HelpDesk App.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/13. Mapa pojęciowa Firebase.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/20. HelpDesk App.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/30.Konfiguracja połączenia.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/40. Create - Połączenie z bazą.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/50. Read - pobieranie danych.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/60. Wyświetlanie danych w ListView.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/70. Automatyczne wyświetlanie danych.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/80. Update - aktualizacja.mdx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/90. Delete - usuwanie danych.mdx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30.BazyDanych/zarys.txt" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/zarys.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/10. Firebase.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/10. Firebase.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. HelpDesk App.mdx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,41 +74,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "javascript.preferred.runtime.type.id": "node",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/home/js/Desktop/docuzaurus/mobile",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "/mnt/dane/_0_docusaurus/mobile/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/js/Desktop/docuzaurus/mobile&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/mnt/dane/_0_docusaurus/mobile/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/static/myImages" />
       <recent name="$PROJECT_DIR$/static" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk" />
       <recent name="$PROJECT_DIR$/docs/100. Jetpack Compose" />
       <recent name="$PROJECT_DIR$/docs/1. Kotlin - wprowadzenie/07-Klasy/Abstrakcja" />
       <recent name="$PROJECT_DIR$/docs/6.Nawigacja/3. Menu" />
       <recent name="$PROJECT_DIR$/docs/3. Kolejne View/1. Time View" />
-      <recent name="$PROJECT_DIR$/docs/01-Wprowadzenie-do-języka-Kotlin/06-Funkcje" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -188,6 +195,8 @@
       <workItem from="1770643509223" duration="14000" />
       <workItem from="1770643542016" duration="874000" />
       <workItem from="1772482969387" duration="2242000" />
+      <workItem from="1772563442782" duration="3794000" />
+      <workItem from="1772618160926" duration="2376000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />

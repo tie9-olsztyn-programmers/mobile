@@ -1,0 +1,82 @@
+---
+title: Wyświetlanie danych w ListView
+---
+
+## Dodajemy `LisView`
+Pod ostatnim `Buttonem`
+
+```xml
+//...
+
+    <ListView
+        android:id="@+id/malfunctionsListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>
+```
+
+## Logika działania - adapter
+Adapter to "tłumacz" między surowymi danymi, a danymi wyświetlanymi na ekranie.
+
+### Inicjalizacja
+W `onCreate()`
+```kotlin
+    val malfunctionsListView = findViewById<ListView>(R.id.malfunctionsListView)
+
+    val  dataList = mutableListOf<String>()
+    val adapter = ArrayAdapter(
+        this,
+        android.R.layout.simple_list_item_1,
+        dataList
+        )
+    malfunctionsListView.adapter = adapter
+```
+
+### Wczytywanie danych po naciśnięciu przycisku
+Modyfikujemy ciało metody ` getDataButton.setOnClickListener`
+
+```kotlin
+getDataButton.setOnClickListener {
+            val db = Firebase.firestore
+
+            db.collection("awarie")
+                .get()
+                .addOnSuccessListener { result ->
+                    // result to teczka z wszystkimi dokumentami z kolekcji "awarie"
+                    //var allMalfunctions = ""
+
+                    // Czyścimy starą listę, żeby nie dublować wpisów
+                    dataList.clear()
+
+                    for (doc in result) {
+                        val pcNumber = doc.getString("computer") ?: "brak pc_id"
+                        val desc = doc.getString("description") ?: "brak opisu"
+                        val stat = doc.getString("status") ?: "brak statusu"
+
+                        // Dodajemy do listy
+                        dataList.add("🚨 $pcNumber: $desc ($stat)")
+
+                        //allMalfunctions += "🚨 $pcNumber: $desc ($stat)"
+                    }
+
+                    adapter.notifyDataSetChanged()
+
+                    Toast.makeText(
+                        this,
+                        "Pobrano ${dataList.size} zgłoszeń",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                .addOnFailureListener { ex ->
+                    Log.w("firebase", "Błąd podczas pobierania", ex)
+                }
+        }
+
+```
+
+
+
+
+
+

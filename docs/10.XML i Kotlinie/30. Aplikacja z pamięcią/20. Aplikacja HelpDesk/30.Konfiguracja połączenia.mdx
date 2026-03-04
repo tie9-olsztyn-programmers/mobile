@@ -1,0 +1,102 @@
+---
+title: Create - konfiguracja połączenia z Firebase
+---
+
+
+## Umowa z firmą kurierską, czyli Zależności (*Dependencies*)
+Android Studio domyślnie nie zawiera kodu Firebase, bo ważyłby zbyt wiele.
+Musimy poprosić narzędzie budujące projekt (tzw. `Gradle`),
+aby pobrało dla nas z internetu instrukcje obsługi Firestore.
+
+
+### Zmiany w `libs.version.toml`
+**Książka Adresowa, czyli Katalog Wersji (*Version Catalogs*)**
+
+Dodajemy
+```toml
+[versions]
+# Dodajemy wersję dla całego pakietu Firebase (nasz główny numer umowy)
+firebaseBom = "34.10.0"
+
+[libraries]
+# Dodajemy główny katalog Firebase (BoM)
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+# Dodajemy konkretny moduł bazy danych (nasz kurier magazynowy)
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+```
+
+:::info  `firebaseBom` (Kierownik Budowy)
+Skrót *BoM* pochodzi od angielskiego *Bill of Materials* (Zestawienie Materiałów).
+
+#### Analogia:
+    - Wyobraźcie sobie Firebase jako ogromny zestaw klocków.
+    - Macie w nim
+        - klocki do budowy magazynu na dane (Firestore),
+        - bramki z ochroniarzem (*Authentication* - logowanie) i
+        - wielkiego dysku na zdjęcia (Storage).
+
+Gdybyście dobierali klocki losowo, mogłoby się okazać, że brama z 2021 roku nie pasuje do magazynu z 2024 roku.
+Aplikacja by się zawiesiła!
+*BoM* to Wasz Kierownik Budowy.
+Mówicie mu tylko jeden raz:
+
+> "Szefie, budujemy według planu w wersji 32.7.0".
+
+Od tego momentu *BoM* sam pilnuje, aby wszystkie dostarczone klocki Firebase idealnie do siebie pasowały.
+
+
+#### Technicznie:
+- To specjalny plik, który zarządza wersjami wszystkich bibliotek Firebase w Waszym projekcie.
+- Dzięki niemu podajecie numer wersji tylko przy `firebaseBom`, a przy kolejnych modułach Firebase
+(np. bazie danych) nie musicie już wpisywać żadnych numerków!
+
+:::
+
+:::note `firebase-firestore` (Instrukcja Obsługi Magazynu)
+#### Analogia:
+    - Skoro *BoM* to Kierownik Budowy, to `firebase-firestore` jest już konkretnym Narzędziem z jego skrzynki.
+    - To dokładna instrukcja dla naszego kuriera:
+        - jak ma wjechać do magazynu,
+        - jak otwierać szufladki z napisem "Awarie" i
+        - jak bezpiecznie odkładać tam formularze.
+
+
+#### Technicznie:
+- To właściwa biblioteka (*Library* / *Dependency*),
+która zawiera wszystkie gotowe klasy i funkcje w języku Kotlin
+(takie jak użyte przez nas FirebaseFirestore.getInstance()).
+- To ona pozwala naszej aplikacji fizycznie połączyć się z nierelacyjną bazą danych (*NoSQL*) w chmurze Google.
+
+:::
+
+### Zmiany w `build.gradle.kts` (*Module*)
+To taka **Lista Zamówień / Lista Gości)**
+
+:::tip
+Zamiast pisać na liście zamówień pełne, długie adresy i martwić się o numery wersji,
+piszecie po prostu skróty:
+
+> "Hej Gradle, zamów mi na dzisiaj dostawcę `libs.firebase.firestore`, adres znajdziesz w Książce Adresowej!".
+
+:::
+
+Dopisujemy:
+```kts
+dependencies {
+// ...
+// Podpinamy Firebase używając naszej Książki Adresowej (Katalogu Wersji)!
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+
+//...
+
+```
+
+Oczywiście synchronizujemy projekt i teraz możemy doimportować brakującą klasę
+`FirebaseFirestore`.
+
+
+
+
+
+

@@ -1,0 +1,65 @@
+---
+title: Read -  pobieranie danych
+---
+
+## Dodajemy `Button` do pobierania
+
+```xml
+<Button
+    android:id="@+id/getDataButton"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Pobierz listę awarii"
+    android:backgroundTint="#FF9800" />
+```
+
+
+## Dodajemy logikę działania
+W `onCreate()` dodajemy:
+```kotlin
+// ...
+val issueDescription = findViewById<EditText>(R.id.IssueDescriptionEditText)
+val submitIssueButton = findViewById<Button>(R.id.submitIssueButton)
+
+val submitIssueButton = findViewById<Button>(R.id.submitIssueButton)
+val getDataButton = findViewById<Button>(R.id.getDataButton)
+
+getDataButton.setOnClickListener {
+    val db = Firebase.firestore
+
+    db.collection("awarie")
+        .get()
+        .addOnSuccessListener { result ->
+            // result to teczka z wszystkimi dokumentami z kolekcji "awarie"
+            var allMalfunctions = ""
+
+            for (doc in result) {
+                val pcNumber = doc.getString("computer")
+                val desc = doc.getString("description")
+                val stat = doc.getString("status")
+
+                allMalfunctions += "🚨 $pcNumber: $desc ($stat)"
+            }
+
+            if (allMalfunctions.isEmpty()) {
+                Toast.makeText(this, "Brak zgłoszeń", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.d("firebase", "Znaleziono dane: \n$allMalfunctions")
+            }
+
+        }
+        .addOnFailureListener { ex ->
+            Log.w("firebase", "Błąd podczas pobierania", ex)
+            }
+
+
+```
+
+
+
+
+
+
+
+
+
