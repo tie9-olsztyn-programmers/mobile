@@ -5,18 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/13. Mapa pojęciowa Firebase.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/20. HelpDesk App.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/30.Konfiguracja połączenia.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/40. Create - Połączenie z bazą.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/50. Read - pobieranie danych.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/60. Wyświetlanie danych w ListView.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/70. Automatyczne wyświetlanie danych.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/80. Update - aktualizacja.mdx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/90. Delete - usuwanie danych.mdx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/10. Firebase.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/10. Firebase.mdx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. HelpDesk App.mdx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/70. Automatyczne wyświetlanie danych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/70. Automatyczne wyświetlanie danych.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/80. Update - aktualizacja.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/80. Update - aktualizacja.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/90. Delete - usuwanie danych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/90. Delete - usuwanie danych.mdx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -196,7 +188,7 @@
       <workItem from="1770643542016" duration="874000" />
       <workItem from="1772482969387" duration="2242000" />
       <workItem from="1772563442782" duration="3794000" />
-      <workItem from="1772618160926" duration="2376000" />
+      <workItem from="1772618160926" duration="9225000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />

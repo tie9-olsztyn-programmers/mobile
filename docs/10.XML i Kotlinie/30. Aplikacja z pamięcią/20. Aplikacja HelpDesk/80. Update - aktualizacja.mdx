@@ -2,8 +2,85 @@
 title: Update - aktualizacja danych
 ---
 
+## Lista z `id` dokumentów
+Aby móc łatwo dopasować element z `ListView` z dokumentem w bazie danych
+zrobimy dodatkową listę, która będzie przechowywała `id` dokumentów.
 
 
+Do definicji klasy dodamy nową właściwość:
+```kotlin
+
+class MainActivity : AppCompatActivity() {
+
+    val dataList = mutableListOf<String>()
+    val idList = mutableListOf<String>()  // nowa lista
+//...
+```
+
+
+## Zmiana w `addSnapshotListener`
+Do już istniejącej metody w pętli `for` będziemy dodawać `id` każdego dokumentu:
+```kotlin
+   // Czyścimy starą listę, żeby nie dublować wpisów
+    dataList.clear()
+
+    idList.clear()          // nowy fragment
+    for (doc in snapshot) {
+        val pcNumber = doc.getString("computer") ?: "brak pc_id"
+        val desc = doc.getString("description") ?: "brak opisu"
+        val stat = doc.getString("status") ?: "brak statusu"
+
+        // Dodajemy do listy
+        dataList.add("🚨 $pcNumber: $desc ($stat)")
+
+        idList.add(doc.id) // nowy fragment
+    }
+```
+
+## Dodajemy obsługę kliknięcia elementu z listy
+W metodzie `onCreate()` dodajemy "nasłuchiwacza" na kliknięcie elementu z listy.
+
+
+```kotlin
+  malfunctionsListView.setOnItemClickListener { _,_, position, _ ->
+            val selectedId = idList[position] // wyciągamy id klikniętego dokumentu
+
+            db.collection("awarie").document(selectedId)
+                .update("status", "Naprawione")
+                .addOnSuccessListener {
+                    Toast.makeText(
+                        this,
+                        "Status zmieniony!",
+                        Toast.LENGTH_SHORT).show()
+
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firebase", "Błąd aktualizacji", e)
+
+                }
+
+        }
+
+```
+
+
+:::info 📦 Co się dzieje "pod maską"? (Metoda `.update`)
+W kodzie użyliśmy ścieżki: `.collection(...).document(...).update(...).`
+- `.document(ID)`
+    - Zamiast dodawać nową kartkę do szuflady, mówimy kurierowi:
+        - "Wyciągnij z szuflady tę konkretną kartkę o numerze ID".
+- `update("status", "Naprawione")`
+    - Kurier bierze gumkę do ścierania, zmazuje starą wartość w linijce status i wpisuje nową.
+    - Wszystkie inne informacje (stanowisko, opis, data) zostają nietknięte!
+
+:::warring ⚠️ Różnica między `.update()` a `.set()`
+- użycie `.set()`:
+    - kurier wziąłby nową czystą kartkę, napisał na niej tylko status:
+        - "Naprawione", a starą kartkę (ze stanowiskiem i opisem awarii) by wyrzucił!
+
+Dlatego do **edycji pojedynczych pól** używamy zawsze `.update()`.
+
+:::
 
 
 

@@ -1,6 +1,201 @@
 ---
 title: Automatyczne wyświetlanie danych
 ---
+Do tej pory dane na liście wyświetlają się, o ile naciśniemy przycisk.
+
+Zmienimy naszą aplikację tak, aby w momencie startu aplikacji dane były zaciągane z bazy danych
+i wyświetlane automatycznie na liście.
+
+
+## Nowa metoda w `fetchData()`
+- Najpierw wydzielimy logikę pobierania danych do nowej metody klasy `MainActivity`.
+- Naszą listę danych i adapter musimy przenieść na "najwyższy" poziom klasy:
+    - staną się właściwościami.
+    - w ten sposób będą dostępne we wszystkich metodach.
+- do poziomu właściwości wyniesiemy też zmienną `db` przechowującą instancję naszej bazy danych:
+    - będziemy musieli usunąć deklarację i inicjalizację tej zmiennej w metodach:
+        - `sendIssueToFirebase`
+        - `getDataButton.setOnClickListener`
+    - i tak będziemy mieli dostęp do zmiennej `db` we wszystkich metodach
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    val  dataList = mutableListOf<String>()
+    lateinit var adapter: ArrayAdapter<String>
+    val db = Firebase.firestore
+
+    override fun onCreate...{
+
+         adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            dataList
+            )
+        malfunctionsListView.adapter = adapter
+
+...
+
+```
+
+Teraz możemy przejść do definicji metody `fetchData`:
+
+:::tip
+**Ciało metody przeniosłem z `getDataButton.setOnClickListener`**
+
+:::
+
+```kotlin
+private fun fetchData() {
+       db.collection("awarie")
+                .get()
+                .addOnSuccessListener { result ->
+                    // result to teczka z wszystkimi dokumentami z kolekcji "awarie"
+                    //var allMalfunctions = ""
+                    // Czyścimy starą listę, żeby nie dublować wpisów
+                    dataList.clear()
+
+
+                    for (doc in result) {
+                        val pcNumber = doc.getString("computer") ?: "brak pc_id"
+                        val desc = doc.getString("description") ?: "brak opisu"
+                        val stat = doc.getString("status") ?: "brak statusu"
+
+                        // Dodajemy do listy
+                        dataList.add("🚨 $pcNumber: $desc ($stat)")
+                        //allMalfunctions += "🚨 $pcNumber: $desc ($stat)"
+                    }
+
+                    adapter.notifyDataSetChanged()
+
+                    Toast.makeText(
+                        this,
+                        "Pobrano ${dataList.size} zgłoszeń",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                .addOnFailureListener { ex ->
+                    Log.w("firebase", "Błąd podczas pobierania", ex)
+                }
+}
+```
+
+## Pasywne aktualizowanie `ListView`
+Teraz metodę tę wywołamy w `onCreate()` oraz w `getDataButton.setOnClickListener`:
+
+```kotlin
+//...
+    malfunctionsListView.adapter = adapter
+
+    fetchData()
+
+    getDataButton.setOnClickListener {
+       fetchData()
+    }
+
+```
+
+Teraz jest tak:
+- uruchomienie aplikacji łączy się z automatycznym wczytaniem i wyświetleniem danych z bazy
+- dodanie nowego elementu do bazy nie odświeża listy
+- odświeżenie listy nastąpi po naciśnięciu przycisku
+
+
+## Reaktywne
+Aby nasza lista sama się odświeżała, gdy nastąpi zmiana w danych, musimy:
+- zastąpić metodę `get()`
+- metodą `.addSnapshotListener`
+
+:::tip `return` vs `return@`
+### `return`
+Gdy programista używa w kodzie słowa `return`, mówi komputerowi:
+> "Przerwij pracę i natychmiast wyjdź!". Ale skąd ma wyjść?
+
+Zwykłe `return` (Ewakuacja z budynku):
+- "Stare" `return` kazałoby programowi natychmiast zamknąć całą funkcję onCreate.
+- To tak, jakby z powodu braku internetu w Sali Informatycznej, dyrektor zarządził ewakuację całej szkoły.
+- Aplikacja mogłaby się zawiesić albo nie załadować reszty interfejsu!
+
+### `return@addSnapshotListener`
+- `return@addSnapshotListener` to jak wyjście tylko z sali:
+- Znak `@ `to tzw. etykieta.
+- Mówimy komputerowi:
+> "Jeśli wystąpił błąd pobierania bazy (np. brak internetu),
+> to przerwij wykonywanie tylko i wyłącznie tego bloku kodu wewnątrz nasłuchiwacza"
+
+- To jak ewakuacja tylko sali informatycznej, ale reszta szkoły (aplikacji) działa normalnie.
+
+:::
+
+
+Reszta ciała metody `fetchData` pozostanie prawie niezmieniona:
+```kotlin
+    private fun fetchData() {
+        db.collection("awarie")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w("firebase", "Błąd subskrypcji", e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null){
+                    // result to teczka z wszystkimi dokumentami z kolekcji "awarie"
+                    //var allMalfunctions = ""
+                    // Czyścimy starą listę, żeby nie dublować wpisów
+                    dataList.clear()
+
+
+                    for (doc in snapshot) {
+                        val pcNumber = doc.getString("computer") ?: "brak pc_id"
+                        val desc = doc.getString("description") ?: "brak opisu"
+                        val stat = doc.getString("status") ?: "brak statusu"
+
+                        // Dodajemy do listy
+                        dataList.add("🚨 $pcNumber: $desc ($stat)")
+                        //allMalfunctions += "🚨 $pcNumber: $desc ($stat)"
+                    }
+
+                    adapter.notifyDataSetChanged()
+
+                    Toast.makeText(
+                        this,
+                        "Pobrano ${dataList.size} zgłoszeń",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+            }
+    }
+```
+
+
+:::note 📸 `addSnapshotListener`: Magia czasu rzeczywistego
+### Metoda `get()`
+Do tej pory używaliśmy metody `.get()`.
+- Działała ona jak jednorazowe wysłanie kuriera do magazynu.
+- Kurier jechał, spisywał stan półek, wracał z kartką i na tym jego praca się kończyła.
+- Jeśli pięć minut później w magazynie pojawił się nowy towar,
+    nasza aplikacja o tym nie wiedziała, dopóki znowu nie kliknęliśmy przycisku „Pobierz”.
+
+
+### Metoda `addSnapshotListener`
+Dlaczego nazywa się "Snapshot" (Zdjęcie)?
+- Wyobraźcie sobie, że Wasza baza danych w chmurze to pokój.
+- Firebase nie wysyła Wam ciągłego strumienia wideo z tego pokoju
+(to by zużyło cały internet w telefonie).
+- Zamiast tego, Firebase montuje w pokoju aparat fotograficzny z czujnikiem ruchu.
+    - Pierwsze zdjęcie: Gdy tylko aplikacja się uruchamia, aparat robi pierwsze zdjęcie (Snapshot) aktualnego stanu całego pokoju (wszystkich zgłoszeń) i wysyła je na ekran telefonu.
+    - Kolejne zdjęcia: Za każdym razem, gdy w bazie zajdzie jakakolwiek zmiana:
+        - ktoś doda nową awarię,
+        - zmieni status starej na "Naprawione" albo
+        - usunie zgłoszenie
+        - aparat natychmiast robi nowe zdjęcie całego pokoju i
+      automatycznie podrzuca je do Waszej aplikacji.
+
+
+Otrzymujecie "migawkę" (*snapshot*) danych w dokładnie tej sekundzie, w której nastąpiła zmiana.
+
+:::
 
 
 

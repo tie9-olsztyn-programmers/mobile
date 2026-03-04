@@ -3,5 +3,46 @@ title: Usuwanie danych
 ---
 
 
+Usuwanie elementu z listy będzie obsłużone przez długie kliknięcie `setOnItemLongClickListener`.
+
+```kotlin
+malfunctionsListView.setOnItemLongClickListener { _, _, position, _ ->
+    val selectedId = idList[position] // wyciągamy id klikniętego dokumentu
+
+        db.collection("awarie").document(selectedId)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(
+                    this,
+                    "Dokument usunięty!",
+                    Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firebase", "Błąd usuwania", e)
+            }
+
+
+        return@setOnItemLongClickListener true
+    }
+```
+
+:::tip 🛑 Tajemnica `return@setOnItemLongClickListener true`
+Dlaczego zwracamy `return@...`?
+- W Androidzie, kiedy przytrzymujecie palec na ekranie, system rejestruje długie kliknięcie,
+- ale gdy puszczacie palec, system może pomyśleć:
+ > "O, puścił palec, to pewnie było też zwykłe kliknięcie!".
+
+
+- Zwracając `true`, mówicie systemowi Android:
+> "Hej, ja już obsłużyłem to długie kliknięcie, skonsumowałem je.
+> Nie uruchamiaj już zwykłego `setOnItemClickListener`, który zmienia status!".
+
+Gdybyście zwrócili `false`:
+- aplikacja spróbowałaby usunąć dokument,
+- a ułamek sekundy później spróbowałaby zmienić jego status
+(co skończyłoby się błędem, bo dokumentu już nie ma!).
+
+:::
+
 
 
