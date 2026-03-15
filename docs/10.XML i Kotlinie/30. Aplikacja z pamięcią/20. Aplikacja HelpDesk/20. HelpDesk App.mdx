@@ -1,0 +1,198 @@
+---
+title: Prosta aplikacja HelpDesk
+---
+
+## Założenie aplikacji
+
+:::tip Wyobraźcie sobie, że
+- w pracowni komputerowej często psują się myszki, klawiatury albo brakuje internetu.
+- zamiast biegać do nauczyciela, uczeń otwiera naszą aplikację:
+    - wpisuje numer stanowiska,
+    - opisuje problem i
+    - klika "Zgłoś".
+
+Zgłoszenie leci prosto do naszej bazy Firebase w chmurze,
+gdzie nauczyciel (administrator) widzi je w czasie rzeczywistym!
+
+:::
+
+## Analogia: Formularz, Listonosz i Magazyn
+Zanim przejdziemy do kodu, wyobraźmy sobie ten proces w świecie rzeczywistym:
+- Układ XML (Interfejs):
+    - To pusty papierowy formularz leżący na biurku.
+    - Ma wyznaczone miejsca na wpisanie numeru komputera i opis usterki.
+- Kod Kotlin w UI (Logika widoku):
+    - To pracownik poczty, który sprawdza, czy poprawnie wypełniliście formularz i przybija pieczątkę po kliknięciu przycisku "Wyślij".
+- Połączenie z Firebase (Logika biznesowa):
+    - To kurier, który
+        - bierze Wasz formularz,
+        - wsiada w furgonetkę (Internet) i
+        - zawozi go do wielkiego magazynu z szufladkami (baza Firestore).
+      Każda szufladka to inna kategoria (np. szufladka "Awarie").
+
+---
+## Formularz w XML
+
+`activity_main.xml`
+```xml
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/ComputerNumberEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Numer komputera (np. PC-05)" />
+
+    <EditText
+        android:id="@+id/IssueDescriptionEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Opis problemu (np. niedziałająca myszka)"
+        android:minLines="3" />
+
+    <Button
+        android:id="@+id/submitIssueButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Zgłoś awarię do chmury" />
+
+</LinearLayout>
+```
+
+
+## Logika działania
+`MainActivity.kt`
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+// ....
+
+
+    val computerNumber = findViewById<EditText>(R.id.ComputerNumberEditText)
+    val issueDescription = findViewById<EditText>(R.id.IssueDescriptionEditText)
+    val submitIssueButton = findViewById<Button>(R.id.submitIssueButton)
+
+    submitIssueButton.setOnClickListener {
+        val pcNumber = computerNumber.text.toString().trim()
+        val issueDesc = issueDescription.text.toString().trim()
+
+        // Sprawdzamy, czy uczeń nie zostawił pustych pól
+        if (pcNumber.isNotEmpty() && issueDesc.isNotEmpty()) {
+            // Pola są wypełnione, wywołujemy osobną funkcję do wysyłki!
+            sendIssueToFirebase(pcNumber, issueDesc)
+        } else {
+            Toast.makeText(this,
+                "Wypełnij wszystkie pola!",
+                Toast.LENGTH_SHORT).show()
+        }
+      }
+   }
+
+    // metoda napisana poza metodą onCreate(), ale wewnątrz klasy MainActivity
+    // LOGIKA BIZNESOWA: Funkcja wysyłająca dane do chmury (Nasz Kurier)
+    private fun sendIssueToFirebase(pcNumber: String, issueDesc: String) {
+        // Pobieramy instancję bazy danych Firestore (wchodzimy do magazynu)
+        // val db = FirebaseFirestore.getInstance() // to syntaktyka nawiązująca do Javy
+        val db = Firebase.firestore // to nowsza syntaktyka Kotlin style
+
+
+        // Tworzymy "paczkę" z danymi.
+        // Firestore wymaga formatu "Klucz" -> "Wartość" (HashMap)
+        val issueMap = hashMapOf(
+            "computer" to pcNumber,
+            "description" to issueDesc,
+            "status" to "Oczekujące" // Dodajemy domyślny status zgłoszenia
+        )
+
+        // Wskazujemy konkretną kolekcję (szufladkę) o nazwie "awarie" i dodajemy paczkę
+        db.collection("awarie")
+            .add(issueMap)
+            .addOnSuccessListener {
+                // Sukces! Kurier dostarczył paczkę. (.addOnSuccessListener Callback)
+                Toast.makeText(this,
+                    "Zgłoszenie wysłane pomyślnie!",
+                    Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                // Ojej, furgonetka złapała gumę (brak internetu, błąd serwera)
+                Toast.makeText(this, "Błąd wysyłania: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+}
+
+```
+
+:::tip 🛠️ `hashMapOf()` vs `mutableMapOf()`
+- `hashMapOf(...)`:
+    - Tworzy czystą, javową mapę haszującą.
+    - Jest bardzo szybka, ale nie gwarantuje kolejności elementów.
+    - Jeśli wyślesz pola: `status`, `opis`, `data`, w konsoli Firebase mogą się wyświetlić w innej kolejności
+    (np. data, status, opis).
+
+- `mutableMapOf(...)`:
+    - W Kotlinie domyślnie tworzy `LinkedHashMap`.
+    - Jest odrobinę wolniejsza, ale zachowuje kolejność, w jakiej dodawałeś elementy.
+
+
+Dla Firebase:
+- Nie ma to większego znaczenia, bo Firestore i tak sortuje pola alfabetycznie w swojej konsoli.
+- Dlatego `hashMapOf()` jest najczęściej spotykanym wyborem w dokumentacji.
+
+
+:::note CRUD z mapą
+1. CREATE
+```kotlin
+val zgloszenie = hashMapOf(
+"stanowisko" to "PC-01",
+"opis" to "Brak prądu"
+)
+```
+
+2. READ
+```kotlin
+val coSieStalo = zgloszenie["opis"]
+
+```
+
+3. UPDATE
+```kotlin
+zgloszenie["opis"] = "Już działa" // Zmiana istniejącego pola
+zgloszenie["priorytet"] = "Wysoki" // Dodanie zupełnie nowego pola
+```
+
+:::
+
+4. DELETE
+```kotlin
+zgloszenie.remove("priorytet")
+// Pole "priorytet" znika z mapy
+```
+
+## Problem
+Nasz kod wie, co chce zrobić, ale Android Studio nie ma pojęcia, kim jest ten cały `FirebaseFirestore`.
+
+Wracając do naszej analogii:
+- nasz kod to pracownik poczty, który chce wysłać formularz do magazynu, ale...
+- nie podpisaliśmy jeszcze umowy z firmą kurierską *Firebase*,
+- a co gorsza, nasz budynek nie ma drzwi wyjściowych na zewnątrz (brak pozwolenia na dostęp do internetu)!
+
+
+
+
+
+
+
+
+
+
+
+
+
