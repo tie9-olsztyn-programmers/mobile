@@ -1,0 +1,61 @@
+---
+title: Zdjęcia w aplikacji
+---
+
+:::note Gdzie trzymać zdjęcia
+Analogia: Wystawa Samochodowa i Katalog.
+
+Wyobraźcie sobie, że organizujecie wielką wystawę samochodów przyszłości.
+- *Firebase Storage* (Magazyn Plików):
+    - To Wasz fizyczny, ogromny Garaż. T
+    - To tutaj wstawiacie prawdziwe, ciężkie samochody (czyli w naszym przypadku pliki graficzne .jpg lub .png).
+    - Garaż jest pojemny, ale trudno w nim szybko wyszukiwać informacje.
+
+- *Cloud Firestore* (Baza Danych):
+    - To elegancki Katalog na recepcji.
+    - W tym katalogu nie ma fizycznych samochodów!
+    - Są tam tylko lekkie karteczki (Dokumenty), na których napisane jest:
+  > "Samochód nazywa się AeroPod, a jego fizyczne zdjęcie znajdziesz w Garażu pod adresem URL: https://...".
+
+
+:::tip Złota zasada programisty
+- Nigdy nie wrzucamy całych plików (zdjęć, wideo) bezpośrednio do tekstowej bazy danych (Firestore)!
+- Pliki trzymamy w Storage, a w Firestore zapisujemy tylko linki (adresy URL) do tych plików.
+
+:::
+
+
+----
+
+#  Nowy Projekt i Garaż (Firebase Storage)
+- Wejdźcie na stronę konsoli Firebase (Firebase Console).
+- Kliknijcie "Dodaj projekt" (Add project).
+    - Nazwijcie go np. *FutureCars*.
+    - Przejdźcie przez kroki kreatora (możecie wyłączyć Google Analytics, nie będzie nam tu potrzebne).
+    - W nowym projekcie, w lewym menu w *Product categories* jest *Databases & Store*.
+    - Wybierz to menu i tam znajdziesz *Storage*.
+    - Niestety, aby korzystać ze *Storage*, trzeba byłoby podpiąć kartę kredytową.
+
+
+Będziemy udawali, że z tego *Storage* będziemy pobierali pliki ze zdjęciami, a *de fact* pliki będą pobierane
+z *Docuzaurusa*:
+
+
+### 🔗 Linki do zdjęć dla Waszej bazy danych
+
+Poniżej znajdują się linki do naszych 6 samochodów. Skopiujcie pełny adres internetowy każdego z nich i wklejcie go jako wartość pola `imageUrl` w Waszej bazie Firestore.
+### 🔗 Linki do zdjęć dla Waszej bazy danych
+
+1. **Auto 1 (AeroPod):** `https://tie9-olsztyn-programmers.github.io/mobile/MyImages/f_car_1.png`
+2. **Auto 2 (SolarExplorer):** `https://tie9-olsztyn-programmers.github.io/mobile/MyImages/f_car_2.png`
+3. **Auto 3 (CityHover):** `https://tie9-olsztyn-programmers.github.io/mobile/MyImages/f_car_3.png`
+4. **Auto 4 (LuxuryLiner):** `https://tie9-olsztyn-programmers.github.io/mobile/MyImages/f_car_4.png`
+5. **Auto 5 (ModularCargo):** `https://tie9-olsztyn-programmers.github.io/mobile/MyImages/f_car_5.png`
+6. **Auto 6 (SportsFlyer):** `https://tie9-olsztyn-programmers.github.io/mobile/MyImages/f_car_6.png`
+
+*(Wskazówka: Zaznaczcie cały link zaczynający się od
+`https://`, kliknijcie prawym przyciskiem myszy i wybierzcie "Kopiuj")*
+
+
+
+
