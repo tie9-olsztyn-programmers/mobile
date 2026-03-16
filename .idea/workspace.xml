@@ -5,15 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="94ff3090-d75e-48fc-99dc-29d155214d83" name="Changes" comment="Add navigation">
+      <change afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/30. Future Car App/10. Future Car App.mdx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/70. Automatyczne wyświetlanie danych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/70. Automatyczne wyświetlanie danych.mdx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/80. Update - aktualizacja.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/80. Update - aktualizacja.mdx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/90. Delete - usuwanie danych.mdx" beforeDir="false" afterPath="$PROJECT_DIR$/docs/10.XML i Kotlinie/30. Aplikacja z pamięcią/20. Aplikacja HelpDesk/90. Delete - usuwanie danych.mdx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="272" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -55,6 +58,10 @@
     <setting file="file://$PROJECT_DIR$/docs/7. Dodatkowe Biblioteki/MPAndroidChart.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/docs/test.mdx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
   </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -69,6 +76,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
@@ -188,7 +196,11 @@
       <workItem from="1770643542016" duration="874000" />
       <workItem from="1772482969387" duration="2242000" />
       <workItem from="1772563442782" duration="3794000" />
-      <workItem from="1772618160926" duration="9225000" />
+      <workItem from="1772618160926" duration="9639000" />
+      <workItem from="1773133147729" duration="41000" />
+      <workItem from="1773133198978" duration="1000" />
+      <workItem from="1773171562427" duration="1323000" />
+      <workItem from="1773404971785" duration="908000" />
     </task>
     <task id="LOCAL-00001" summary="Add First Tutorial folders">
       <option name="closed" value="true" />
