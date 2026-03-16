@@ -1,6 +1,10 @@
 # Dependencies
 /node_modules
+<<<<<<< HEAD
 .idea/*
+=======
+./.idea
+>>>>>>> 916ba2c6fd84ac30d5ea5a65a3125813553fb06b
 # Production
 /build
 
