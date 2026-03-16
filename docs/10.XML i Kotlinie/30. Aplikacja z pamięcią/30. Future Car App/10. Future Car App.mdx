@@ -2,39 +2,93 @@
 title: Future Car App
 ---
 
-Nauczymy się, jak pobierać obiekty (tekst i linki do zdjęć) z chmury (Firebase) \
-i prezentować je użytkownikowi w formie przewijanej listy w aplikacji *Future Car App*,
-używając technologii Kotlin i XML.
+
+- Utworzymy galerię samochodów przyszłości.
+- Wszystkie dane (też obrazki) będą pobierane z firestore.
+- Zróbmy nowy projekt i uruchommy go.
 
 
-:::tip Analogia: Kelner i Karta Menu (Adapter Pattern)
-Zanim napiszemy kod, musimy zrozumieć, że wyświetlanie listy to współpraca trzech elementów.
-Wyobraźcie sobie restaurację:
-- Kuchnia (Firebase): Tam są surowe dane – nazwy dań (tekst) i składniki (zdjęcia).
-- Karta Menu (ListView / RecyclerView):
-    - To tylko pusta ramka.
-    - Wie, że ma układać pozycje jedna pod drugą, ale nie wie, co w nich jest.
-- Kelner (Adapter):
-    - idzie do kuchni (Firebase),
-    - bierze surowe dane,
-    - wkłada je na czysty talerz (Makieta XML pojedynczego elementu) i
-    - podaje klientowi do rąk na stół.
+## Włączmy binding
 
-:::
+`build.gradle.kts` (Module)
+```kts
+android {
+//...
+
+  buildFeatures{
+        viewBinding=true
+    }
 
 
+}
+
+`MainActivity.kt`
+```kotlin
+: AppCompatActivity() {
+
+    lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+//...
+```
+
+## Instalujemy potrzebne biblioteki
+
+`lib.versions.toml`
+```toml
+[versions]
+//...
+firebaseBom = "34.10.0"
+googleServices = "4.4.1"
 
 
 
+[libraries]
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+//...
+
+[plugins]
+//...
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 
 
 
+```
 
 
+`build.gradle.kts` (Project)
+```kts
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.google.services) apply false //to dodajemy
+
+}
+
+```
+
+`buld.gradle.kts` (Modul)
+
+```kts
+plugins {
+    alias(libs.plugins.android.application)
+    //    alias(libs.plugins.google.services) // dodajemy, ale na razie jest zakomentowane
+}
+
+//...
 
 
+dependencies {
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+//...
 
+```
 
-
-
-
+- pamiętaj o synchronizacji projektu
+- zbuduj projekt
