@@ -1,0 +1,145 @@
+---
+title: Model danych
+---
+
+
+## Model danych w Android Studio
+
+```kotlin
+data class FutureCar(
+    val name: String = "",           // Nazwa samochodu (np. "AeroPod")
+    val imageUrl: String = "",       // Link do zdjęcia z GitHuba (nasz URL)
+    val productionYear: Int = 0,     // Rok produkcji (liczba całkowita - Int)
+    val topSpeed: Int = 0            // Prędkość maksymalna (liczba całkowita - Int)
+)
+```
+
+:::tip Dlaczego musimy dać wartość początkowe?
+- Do każdego pola dopisaliśmy domyślną wartość (= "" dla tekstu, = 0 dla liczb).
+- Jest to absolutnie kluczowe przy pracy z bazami z chmury (Firebase Firestore).
+- Firebase pobierając dane z internetu,
+    - najpierw tworzy "pusty" samochód,
+    - a dopiero ułamek sekundy później wypełnia go danymi.
+  - Jeśli nie damy mu tych domyślnych wartości (pustych rubryk), Firebase zgłosi błąd i aplikacja się zawiesi!
+
+:::
+
+## godność z Firestore!
+W naszym projekcie Firebase robimy FireStore (tryb testowy, lokalizacja Europa, reszta domyślnie).
+
+
+Upewnijcie się, że w Waszych dokumentach nazwy pól (Fields) co do jednej literki zgadzają się z tymi z Kotlina!
+
+Dla każdego auta w bazie musicie mieć dokładnie te pola:
+- `name` (typ: string)
+- `imageUrl` (typ: string)
+- `productionYear` (typ: number)
+- `topSpeed` (typ: number)
+
+(Jeśli w bazie nazwiecie pole speed, a w Kotlinie topSpeed, Firebase ich nie połączy!)
+
+### Pierwszy samochód
+- name: Prehisto-Glide
+- imageUrl:** `https://tie9-olsztyn-programmers.github.io/mobile/myImages/f_car_1.png`
+- productionYear: 2101
+- topSpeed: 155
+
+
+### Drugi samochód
+- name: AeroZenith
+- imageUrl:** `https://tie9-olsztyn-programmers.github.io/mobile/myImages/f_car_2.png`
+- productionYear: 2202
+- topSpeed: 1501
+
+
+### Automatyzacja wprowadzania danych
+W `MainActivity.kt` dodamy metodę :
+```kotlin
+private fun seeDataBase(){
+        val carsList = listOf(
+            FutureCar(
+                name="Neo-Tokyo Speeder",
+                imageUrl = "https://tie9-olsztyn-programmers.github.io/mobile/myImages/f_car_3.png",
+                productionYear = 2222,
+                topSpeed = 5050),
+
+            FutureCar(
+                name="Brass-Zeppelin X",
+                imageUrl = "https://tie9-olsztyn-programmers.github.io/mobile/myImages/f_car_4.png",
+                productionYear = 2199,
+                topSpeed = 2050),
+            FutureCar(
+                name="Cyber-Cab X",
+                imageUrl = "https://tie9-olsztyn-programmers.github.io/mobile/myImages/f_car_5.png",
+                productionYear = 2922,
+                topSpeed = 7654),
+            FutureCar(
+                name="Perun-Glide",
+                imageUrl = "https://tie9-olsztyn-programmers.github.io/mobile/myImages/f_car_6.png",
+                productionYear = 966,
+                topSpeed = 191050),
+
+            )
+
+        // 2. Łączymy się z bazą Firestore
+        val db =  Firebase.firestore
+
+        // 3. Uruchamiamy pętlę - wysyłamy każde auto po kolei
+        for (car in carsList) {
+            db.collection("cars")
+                .add(car) // Ta metoda automatycznie generuje ID dokumentu i wrzuca dane!
+                .addOnSuccessListener {
+                    Log.d("FIREBASE_TEST", "Sukces! Dodano auto: ${car.name}")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FIREBASE_TEST", "Błąd podczas dodawania: ", e)
+                }
+        }
+
+```
+
+I w `onCreate()` wywołamy tę metodę.
+
+Ale zanim to zrobimy musimy podłączyć naszą aplikację do Firestore.
+
+### Podłączanie aplikacji do Firestore
+#### Rejestracja w panelu
+- Na stronie głównej projektu Firebase (Project Overview) znajdźcie na środku ekranu białe ikony (iOS, Android, Web).
+- Kliknijcie ikonę Androida (zielony robocik).
+    - Otworzy się formularz rejestracyjny. Najważniejsze jest pierwsze pole: Android package name (Nazwa pakietu).
+    - Skąd to wziąć? Wejdźcie do Android Studio, po lewej stronie rozwińcie skrypty Gradle Scripts i
+  otwórzcie plik build.gradle.kts (Module :app).
+    - Znajdźcie tam linijkę `applicationId = "com.wasza.nazwa"`.
+    - To jest Wasza nazwa pakietu! Skopiujcie zawartość cudzysłowu i wklejcie do Firebase.
+    - Pozostałe pola (Nickname, SHA-1) możecie zostawić puste. Kliknijcie Register app (Zarejestruj aplikację).
+
+#### Pobranie Paszportu (Krok Krytyczny!)
+- W drugim kroku Firebase wygeneruje dla Was specjalny plik: google-services.json.
+- To jest nasz "Paszport"! Kliknijcie niebieski przycisk, aby go pobrać na komputer.
+- Teraz musicie wrzucić ten plik w dokładnie jedno, konkretne miejsce w Android Studio:
+- W Android Studio zmieńcie widok drzewa plików po lewej stronie z "Android" na "Project" (rozwijana lista na samej górze).
+- Rozwińcie główny folder projektu, a następnie znajdźcie folder o nazwie app.
+- Przeciągnijcie pobrany plik google-services.json i upuśćcie go dokładnie do środka folderu app.
+- Zmieńcie widok drzewa z powrotem na "Android".
+
+### Dodanie Bibliotek (Instalacja radia w rakiecie)
+Biblioteki mamy już zainstalowane w Android Studio.
+Musimy tylko odznaczyć zakomentowene linie w pliku build.gradle.kts:
+```kotlin
+plugins {
+    alias(libs.plugins.android.application)
+    //    alias(libs.plugins.google.services)
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
