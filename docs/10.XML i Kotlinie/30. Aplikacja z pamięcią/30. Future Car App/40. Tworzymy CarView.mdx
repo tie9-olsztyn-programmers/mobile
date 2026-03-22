@@ -1,0 +1,118 @@
+---
+title: Tworzymy CarView
+---
+
+Projektujemy pojedynczą Kartę (`item_car.xml`), czyli widok pojedynczego samochodu.
+
+
+W Android Studio klikamy prawym przyciskiem myszy na folder *res/layout*.
+- *New* -> *Layout Resource File*.
+- Nazwa: `item_car`.
+
+:::info `CardView`
+- to element wprowadzony przez Google jako część stylu Material Design.
+- Jest jak elegancka, fizyczna wizytówka lub karta do gry leżąca na stole.
+- "Za darmo" (bez pisania skomplikowanego kodu) daje nam piękny wygląd:
+    - zaokrąglone rogi (`cardCornerRadius`) oraz
+    - efekt 3D w postaci cienia rzucanego na tło (`cardElevation`).
+
+:::
+
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/carImageView"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Zdjęcie auta"
+            android:src="@mipmap/ic_launcher" />
+
+        <TextView
+            android:id="@+id/carNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Nazwa Auta"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000000" />
+
+        <TextView
+            android:id="@+id/carYearTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rok: 2024"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/carSpeedTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Prędkość: 300 km/h"
+            android:textSize="14sp"
+            android:textColor="#D32F2F"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
+```
+
+---
+## Tworzymy siatkę w widoku
+activity_main.xml (w folderze res/layout).
+Zamieńcie jego zawartość na ten prosty kod.
+Użyjemy tu LinearLayout, który na egzaminach jest zawsze najbezpieczniejszym i najbardziej przewidywalnym wyborem.
+
+
+
+```xml
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <GridView
+        android:id="@+id/carsGridView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:numColumns="2"
+        android:horizontalSpacing="8dp"
+        android:verticalSpacing="8dp" />
+
+</LinearLayout>
+
+
+```
+
+
+
+
+
+
+
+
+
+
+

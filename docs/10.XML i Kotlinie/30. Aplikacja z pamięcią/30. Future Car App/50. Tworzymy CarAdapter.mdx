@@ -1,0 +1,166 @@
+---
+title: Tworzymy CarAdapter
+---
+
+Android nie potrafi sam z siebie załadować zdjęcia z linku internetowego do ImageView.
+Gdybyśmy chcieli to napisać ręcznie, zajęłoby to nam dziesiątki linijek skomplikowanego kodu sieciowego.
+
+
+
+## Glide
+
+Dodajemy zależności `.toml`
+```toml
+[versions]
+...
+glide = "4.16.0"
+
+
+[libraries]
+...
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+
+
+```
+
+Dodajemy w `build.gradle.kts`
+```kotlin
+
+dependencies {
+  ...
+    implementation(libs.glide)
+```
+
+
+## CarAdapter
+
+
+:::note  *BaseAdapter*
+- W Androidzie istnieje wiele gotowych adapterów, np. ArrayAdapter.
+- Kiedy chcemy stworzyć własny, skomplikowany wygląd dla listy, musimy napisać nasz adapter od zera.
+- Dlatego dziedziczymy z klasy BaseAdapter (Adapter Bazowy).
+
+Dziedziczenie z BaseAdapter narzuca nam obowiązek (kontrakt) stworzenia czterech konkretnych metod:
+- `getCount() `
+    - Robociarz: "Szefie, ile w sumie tych kafelków mam przykleić na ścianę?"
+    - Adapter odpowiada: `carsList.size` (Tyle, ile aut pobraliśmy z bazy).
+- `getItem(position)`
+    - Murarz pyta: "Jakie dokładnie dane mam wziąć dla kafelka numer 3?"
+    - Adapter odpowiada: `carsList[3]` (Oto obiekt samochodu z trzeciej pozycji).
+-   `getItemId(position)`
+    - Murarz pyta: "Jaki jest unikalny numer seryjny tego kafelka?"
+    - Adapter odpowiada: (W prostych listach zazwyczaj podajemy po prostu jego pozycję, np. 3).
+- `getView(...)` – Serce Fabryki
+    - Murarz pyta: "Dobra, daj mi wreszcie gotowy, pomalowany kafelek do przyklejenia na ekran!"
+    - Adapter odpowiada: "Poczekaj sekundę. Biorę pusty szablon (`item_car.xml`),
+wklejam w niego nazwę i rok samochodu, każę Malarzowi (`Glide`) pobrać zdjęcie. Proszę, oto Twój gotowy `View`!".
+
+:::
+
+```kotlin
+
+class CarAdapter(
+    private val context: Context,
+    private val carsList: List<FutureCar>
+) : BaseAdapter() {
+
+    override fun getCount(): Int = carsList.size
+
+    override fun getItem(position: Int): Any = carsList[position]
+
+    override fun getItemId(position: Int): Long = position.toLong()
+
+    // Magia View Bindingu w Adapterze!
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val binding: ItemCarBinding
+        val view: View
+
+        if (convertView == null) {
+            //  Pompujemy widok używając Bindingu (tylko dla NOWYCH kart)
+            val inflater = LayoutInflater.from(context)
+            binding = ItemCarBinding.inflate(inflater, parent, false)
+            view = binding.root
+
+            //  SZTUCZKA: Chowamy nasz obiekt 'binding' do "kieszeni" widoku (tag),
+            // żeby go użyć ponownie, gdy ta karta będzie poddawana recyklingowi!
+            view.tag = binding
+        } else {
+            // RECYKLING: Karta wraca na ekran. Wyciągamy 'binding' z kieszeni!
+            view = convertView
+            binding = view.tag as ItemCarBinding
+        }
+
+        // Pobieramy auto z listy
+        val car = carsList[position]
+
+        // Wstrzykujemy dane bezpośrednio przez Binding (zero findViewById!)
+        binding.carNameTextView.text = car.name
+        binding.carYearTextView.text = "Rok: ${car.productionYear}"
+        binding.carSpeedTextView.text = "Prędkość: ${car.topSpeed} km/h"
+
+        Glide.with(context)
+            .load(car.imageUrl)
+            .placeholder(R.mipmap.ic_launcher)
+            .into(binding.carImageView)
+
+        return view
+    }
+}
+```
+
+:::tip Czym w ogóle jest view.tag? (Kieszeń w roboczych spodniach)
+- W systemie Android każdy element interfejsu (przycisk, tekst, czy nasz cały CardView reprezentowany przez zmienną view)
+ma wbudowaną specjalną, ukrytą właściwość o nazwie `tag`.
+
+Wyobraź sobie, że każdy widok na ekranie to robotnik na budowie, który ma jedną, dużą pustą kieszeń (właśnie ten `tag`).
+Do tej kieszeni programista może włożyć dosłownie wszystko –
+jakąś liczbę, tekst, a nawet cały skomplikowany obiekt.
+
+
+Dlaczego musimy użyć tej "kieszeni"? (Problem wydajności)
+- Wyobraź sobie, że przewijasz naszą siatkę samochodów bardzo szybko w dół.
+- `GridView` zaczyna szaleć i co ułamek sekundy wywołuje naszą metodę `getView()`.
+- Jeśli za każdym razem musielibyśmy od nowa tworzyć nasz obiekt `ItemCarBinding`
+(czyli "pompować" XML-a i szukać w nim miejsc na tekst i zdjęcie),
+procesor telefonu zacząłby się dławić.
+Animacja przewijania zaczęłaby klatkować (tzw. lagowanie), a bateria błyskawicznie by się rozładowała.
+
+
+Jak działa nasza sztuczka krok po kroku?
+- Dzięki `view.tag` zamieniamy ten ciężki proces w sprytny recykling:
+    - Scenariusz A:
+        - Tworzymy nową kartę (Gdy `convertView == null`)
+        - Na ekranie pojawia się zupełnie nowe miejsce na samochód.
+        - Tworzymy dla niego cały układ używając *View Bindingu* (`binding = ItemCarBinding.inflate(...)`).
+        - To ciężka praca dla telefonu.
+        - Ten obiekt binding trzyma w sobie gotowe, bezpośrednie "kable" do naszych pól tekstowych i obrazka.
+        - Magia (`view.tag = binding`):
+            - Zanim oddamy tę gotową kartę na ekran, bierzemy nasz cenny, wypracowany w pocie czoła obiekt binding (te "kable")
+            - i chowamy go do kieszeni naszej karty!
+    - Scenariusz B: Recykling! (Gdy wchodzimy do else)
+        - Użytkownik przewija ekran. Karta "Prehisto-Glide" zjeżdża za górną krawędź ekranu i znika.
+        - `GridView` łapie tę niewidoczną kartę, szybko czyści i rzuca nam ją z powrotem na dół ekranu, mówiąc:
+            > "Hej, użyj tego pustego kartonu dla nowego auta, nie rób nowego!".
+      - Ta stara karta przychodzi do nas jako zmienna `convertView`.
+      - Wyciągamy z kieszeni (`binding = view.tag as ItemCarBinding`):
+        - Wiemy, że ten "karton" był już wcześniej użyty.
+        - Wiemy też, że poprzednim razem schowaliśmy do jego kieszeni gotowe "kable" (binding).
+        - Zamiast budować wszystko od nowa, po prostu sięgamy do kieszeni (`view.tag`) i wyciągamy gotowy mechanizm!
+
+:::info Co oznacza to tajemnicze `as ItemCarBinding`?
+- Ponieważ wspomniana "kieszeń" (`tag`) może trzymać absolutnie wszystko
+(liczbę, tekst, inny obiekt), Kotlina trzeba upewnić, co z niej wyciągamy.
+- Słówko `as` to tak zwane rzutowanie.
+- Mówimy kompilatorowi:
+> "Hej, gwarantuję Ci, że w tej kieszeni siedzi dokładnie obiekt typu `ItemCarBinding`. Śmiało, potraktuj go jako ten typ"
+
+
+:::
+
+
+
+
+
+
+
+

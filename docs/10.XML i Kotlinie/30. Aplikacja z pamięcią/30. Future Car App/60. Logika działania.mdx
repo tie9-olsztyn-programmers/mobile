@@ -1,0 +1,84 @@
+---
+title: Logika działania
+---
+
+
+Zostało nam napisać logikę działania w `MainActivity.kt`:
+```kotlin
+class MainActivity : AppCompatActivity() {
+    lateinit var binding: ActivityMainBinding
+    lateinit var carsList: MutableList<FutureCar>
+    lateinit var adapter: CarAdapter
+    val db = FirebaseFirestore.getInstance()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+
+
+        setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+       // seeDataBase()
+
+        carsList = mutableListOf() // Tworzymy pustą listę, do której wpadną auta z chmury
+
+        //  Podpinamy naszego "Tłumacza" (Adapter) do siatki
+        adapter = CarAdapter(this, carsList)
+        binding.carsGridView.adapter = adapter
+
+        //  Łączymy się z chmurą Google
+        val db = FirebaseFirestore.getInstance()
+
+        //  Uruchamiamy pobieranie danych
+        fetchDataFromCloud()
+
+        // BONUS: Co ma się stać, gdy użytkownik kliknie w konkretne auto?
+        binding.carsGridView.setOnItemClickListener { _, _, position, _ ->
+            val clickedCar = carsList[position]
+            Toast.makeText(this, "Uruchamiam silniki w: ${clickedCar.name}!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun fetchDataFromCloud() {
+        // Pytamy Firestore: "Daj mi wszystkie dokumenty z kolekcji 'cars'"
+        db.collection("cars")
+            .get()
+            .addOnSuccessListener { documents ->
+                carsList.clear() // Czyścimy listę, by uniknąć dublowania przy odświeżaniu
+
+                // Pętla przechodzi przez każdy dokument pobrany z bazy
+                for (document in documents) {
+                    // Wyciągamy poszczególne wartości (podając nazwy pól, które wpisaliśmy w bazie)
+                    val name = document.getString("name") ?: "Nieznany pojazd"
+                    val imageUrl = document.getString("imageUrl") ?: ""
+                    // Używamy getLong i zmieniamy na Int (Firebase domyślnie liczby traktuje jako Long)
+                    val year = document.getLong("productionYear")?.toInt() ?: 0
+                    val speed = document.getLong("topSpeed")?.toInt() ?: 0
+
+                    // Tworzymy obiekt z wyciągniętych danych i dodajemy do naszej listy
+                    val car = FutureCar(name, imageUrl, year, speed)
+                    carsList.add(car)
+                }
+
+                // MAGIA: Mówimy Adapterowi "Hej, mam nowe dane! Odśwież ekran!"
+                adapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { exception ->
+                Log.e("FIREBASE_ERROR", "Błąd pobierania danych: ", exception)
+                Toast.makeText(this, "Błąd pobierania danych z chmury!", Toast.LENGTH_LONG).show()
+            }
+    }
+
+```
+
+
+
+
+
