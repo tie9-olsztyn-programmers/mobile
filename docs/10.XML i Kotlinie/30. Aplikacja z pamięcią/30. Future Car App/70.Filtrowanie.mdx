@@ -1,0 +1,254 @@
+---
+title: Filtrowanie
+---
+
+## Wprowadzamy dodatkową listę
+
+Potrzebujemy dwóch list:
+- `allCarsList` (Magazyn)
+    - ukryta lista, trzymająca w bezpiecznym miejscu WSZYSTKIE pobrane z Firebase auta.
+    - Nigdy jej nie kasujemy.
+- `carsList` (Wystawa Sklepowa)
+    - to nasza obecna lista, którą podajemy Adapterowi.
+    - Gdy użytkownik wpisuje tekst,
+        - opróżniamy wystawę i
+        - przynosimy z magazynu tylko te auta, które pasują do wyszukiwania.
+
+
+Dodajemy nową właściwość do klasy `MainActivity`
+```ktolin
+class MainActivity : AppCompatActivity() {
+    lateinit var binding: ActivityMainBinding
+    lateinit var carsList: MutableList<FutureCar>
+
+    private lateinit var allCarsList: MutableList<FutureCar> // NOWA linia
+
+    lateinit var adapter: CarAdapter
+    val db = FirebaseFirestore.getInstance()
+    //...
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        //..
+        // seeDataBase()
+
+        carsList = mutableListOf() // Tworzymy pustą listę, do której wpadną auta z chmury
+
+        allCarsList = mutableListOf() // Inicjalizujemy magazyn NOWA LINIA !!!!!!
+
+        // Reszta kodu  już była
+        adapter = CarAdapter(this, carsList)
+        binding.carsGridView.adapter = adapter
+    //...
+
+```
+
+## Funkcja filtrująca
+Do klasy `MainActivity` dodajemy nową funkcję
+```kotlin
+  private fun filterCars(query: String) {
+        carsList.clear() // Opróżniamy wystawę sklepową
+
+        if (query.isEmpty()) {
+            // Jeśli pole wyszukiwania jest puste, pokazujemy wszystko z magazynu
+            carsList.addAll(allCarsList)
+        } else {
+            // Zmieniamy wpisany tekst na małe litery, żeby ignorować wielkość liter (Glide = glide)
+            val lowerCaseQuery = query.lowercase()
+
+            // Przeszukujemy cały magazyn
+            for (car in allCarsList) {
+                // Jeśli nazwa auta zawiera wpisany tekst, dodajemy je na wystawę
+                if (car.name.lowercase().contains(lowerCaseQuery)) {
+                    carsList.add(car)
+                }
+            }
+        }
+        // Mówimy murarzowi: "Lista się zmieniła, przerysuj siatkę!"
+        adapter.notifyDataSetChanged()
+    }
+```
+
+## Modyfikujemy metodę `fetchDataFromCloud`
+Wystarczy zmodyfikować `.addOnSuccessListener`:
+
+```kotlin
+ .addOnSuccessListener { documents ->
+                allCarsList.clear() // Najpierw czyścimy nasz główny magazyn NOWE
+
+                for (document in documents) {
+                    val name = document.getString("name") ?: "Nieznany pojazd"
+                    val imageUrl = document.getString("imageUrl") ?: ""
+                    val year = document.getLong("productionYear")?.toInt() ?: 0
+                    val speed = document.getLong("topSpeed")?.toInt() ?: 0
+
+                    val car = FutureCar(name, imageUrl, year, speed)
+
+                    //  Dodajemy pojazd bezpośrednio do Magazynu
+                    allCarsList.add(car) // NOWE
+                }
+
+                // Dopiero teraz wykładamy towar z Magazynu na Wystawę Sklepową (carsList)
+                carsList.clear() // NOWE
+                carsList.addAll(allCarsList) // NOWE
+
+                // Szturchamy murarza
+                adapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { exception ->
+                Log.e("FIREBASE_ERROR", "Błąd pobierania danych: ", exception)
+                Toast.makeText(this, "Błąd pobierania danych z chmury!", Toast.LENGTH_LONG).show()
+            }
+    }
+```
+
+## Dodajemy `SearchView`
+
+### Widok
+W `activity_main.xml` dodajemy `SearchView`
+```xml
+  <androidx.appcompat.widget.SearchView
+        android:id="@+id/carsSearchView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        app:iconifiedByDefault="false"
+        app:queryHint="Szukaj samochodu..." />
+```
+
+`app:iconifiedByDefault`:
+- `false` pole wyszukiwania rozsunięte
+- `true` pole wyszukiwania ograniczone do ikonki
+
+
+### Logika
+W `MainActivity` w `OnCreate` dodajemy nasłuchiwacza:
+```kotlin
+ // --- NASŁUCHIWANIE w SearchView ---
+        binding.carsSearchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+
+            // Ta metoda odpala się, gdy użytkownik wciśnie "Lupę/Enter" na klawiaturze
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // Nie musimy tu nic robić, bo filtrujemy na żywo, ale musimy zwrócić 'false'
+                return false
+            }
+
+            // Ta metoda odpala się za każdym razem, gdy użytkownik wpisze lub skasuje literkę!
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // newText może być nullem, więc używamy operatora '?:' (Elvis), żeby podać pusty string w razie czego
+                filterCars(newText ?: "")
+                return true
+            }
+        })
+```
+
+---
+# Funckje rozszerzające
+Możemy nasz kod w nasłuchiwaczu nieco uprościć używając mechanizmu *Extension Functions*:
+
+## Definicja Metaforyczna: "Tuning fabrycznego auta"
+Wyobraź sobie, że oryginalna klasa z Androida (np. nasz SearchView napisany przez inżynierów Google) to samochód wyjeżdżający prosto z fabryki.
+
+Fabryka zamknęła maskę na kłódkę i zaplombowała silnik. Nie masz dostępu do planów konstrukcyjnych tego auta i nie możesz zmienić tego, jak zostało zbudowane wewnątrz. Jeśli brakuje Ci w nim jakiejś funkcji (np. uchwytu na kubek), w starych językach programowania (jak Java) musiałbyś założyć własną fabrykę, skopiować całe auto i zbudować jego nową wersję z dodanym uchwytem (czyli użyć dziedziczenia).
+
+Funkcja rozszerzająca to doczepiany gadżet.
+Zamiast budować auto od nowa, po prostu kupujesz w sklepie uchwyt na kubek i przyklejasz go do deski rozdzielczej na taśmę dwustronną. Z zewnątrz i dla pasażera wygląda to tak, jakby ten uchwyt był tam od zawsze. Auto nagle zyskało nową funkcję, mimo że nie tknąłeś jego oryginalnego silnika!
+
+
+## Definicja Techniczna (Dla inżyniera)
+Funkcje rozszerzające (Extension Functions) to mechanizm w języku Kotlin, który pozwala na dodawanie nowych metod (funkcji) do istniejących już klas, bez konieczności dziedziczenia po nich i bez modyfikowania ich kodu źródłowego.
+
+Jak to działa pod maską? To w 100% "magia kompilatora" (tzw. lukier syntaktyczny). Kiedy dopisujemy naszą nową funkcję onQueryTextChanged do klasy SearchView, Kotlin nie włamuje się do oryginalnego kodu Google. On po prostu tworzy obok niewidzialną, statyczną metodę pomocniczą.
+
+Dlaczego to jest genialne? Ponieważ pozwala nam rozszerzać możliwości klas, do których nie mamy dostępu (np. klas z systemu Android, klas z zewnętrznych bibliotek, a nawet standardowych typów jak String czy Int).
+
+
+:::info Syntaktyka funkcji rozszerzającej
+
+## Ogólnie
+```kotlin
+fun TypOdbiorcy.nazwaNowejFunkcji(parametry): TypZwracany {
+    // Ciało funkcji
+    // Słówko 'this' odnosi się tutaj do konkretnego obiektu TypuOdbiorcy!
+    return wynik
+}
+```
+
+
+
+## Przykład
+```kotlin
+// Definicja rozszerzenia:
+fun String.dodajKrzyk(): String {
+    return this + "!!!" // 'this' to tekst, na którym wywołamy funkcję
+}
+
+// Użycie w kodzie:
+val powitanie = "Dzień dobry".dodajKrzyk()
+// Wynik: "Dzień dobry!!!"
+```
+
+:::
+
+## Funkcja rozszerzająca dla SearchView
+
+### Definicja
+```kotlin
+    inline fun androidx.appcompat.widget.SearchView.onQueryTextChanged(crossinline listener: (String) -> Unit) {
+        this.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = true
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // Używamy .orEmpty() jako skrót dla `newText ?: ""`
+                listener(newText.orEmpty())
+                return true
+            }
+        })
+    }
+```
+
+:::tip Magiczne słowo: `inline`
+- to polecenie dla kompilatora:
+    > "Hej, podczas budowania aplikacji nie twórz z tego żadnych obiektów!
+    > Po prostu weź ten kod, który podał programista, i fizycznie skopiuj go (wklej) w miejscu wywołania".
+- to sprawia, że nasz kod działa bardzo szybko i zużywa równe zero dodatkowej pamięci.
+
+:::
+
+:::tip Strażnik bezpieczeństwa: `crossinline`
+Skoro `inline` dosłownie wyciąga kod z lambdy i wkleja go do pliku,
+pojawia się ryzyko:
+- co by było, gdyby programista wewnątrz klamerek `{ }` napisał nagle słówko return?
+- Ponieważ kod jest "wklejony", to return mogłoby przypadkowo zamknąć całe nasze `MainActivity` zamiast samej funkcji!
+
+
+Nasz `listener` wywołujemy z wewnątrz "czarnej skrzynki" (anonimowego obiektu `object : OnQueryTextListener`).
+
+
+- Słówko `crossinline` to taki strażnik.
+- Zgadza się na optymalizację, ale jednocześnie mówi:
+> "Zabronię programiście używania niebezpiecznego return wewnątrz tej lambdy,
+> bo ten kod będzie odpalany z głębin innego obiektu".
+
+:::
+
+:::tip `.orEmpty()`
+- to "lukier składniowy" Kotlina.
+- Jeśli `newText` jakimś cudem byłby `null`-em, to `.orEmpty()`
+bezpiecznie zamieni go w zwykły, bezpieczny pusty tekst `""`.
+:::
+
+### Użycie
+W metodzie `onCreate` nasz nasłuchiwacz teraz wygląda tak:
+```kotlin
+ // --- NASŁUCHIWANIE NOWEJ WYSZUKIWARKI (SearchView) ---
+        binding.carsSearchView.onQueryTextChanged { newText ->
+            filterCars(newText)
+        }
+}
+
+
+
+
+
