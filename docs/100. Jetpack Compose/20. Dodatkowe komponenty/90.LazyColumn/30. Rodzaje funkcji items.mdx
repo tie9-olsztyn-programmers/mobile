@@ -1,0 +1,62 @@
+---
+title: Rodzaje funkcji items
+---
+
+
+
+# Rodzaje funkcji `items`  wewnątrz LazyColumn,
+1. Wariant **"Szybki"** (Podstawowy)
+```kotlin
+items(myItems) { item -> ... }
+```
+    - Kiedy używać: Gdy robisz prosty prototyp lub bardzo krótką listę,
+    która się nie zmienia (jest statyczna).
+    - Zaleta: Najmniej pisania.
+    - Wada:
+        - Nie posiada parametru `key`.
+        - Jeśli usuniesz element z góry listy, Compose może nieprawidłowo "przesunąć" stan
+        (np. zaznaczenie Checkboxa) na inny element.
+
+2. Wariant **"Indeksowy"** (Precyzyjny)
+```
+items(
+    count = myItems.size,
+    key = { index -> users[index].id }) { index ->
+    ... }
+```
+    - Kiedy używać: Gdy Twoje dane nie są prostą listą obiektów albo gdy musisz operować bezpośrednio na indeksach.
+    - Zaleta: Pełna kontrola nad tym, co jest kluczem.
+    - Wada:
+        - Musisz ręcznie wyciągać obiekt z listy (`val user = users[index]`),
+        co zwiększa ryzyko błędu `IndexOutOfBoundsException`,
+        jeśli lista zmieni się w trakcie operacji.
+
+3. Wariant **"Profesjonalny"** (Zalecany)
+```
+items(
+    items = myItems,
+    key = { user -> user.id }) { user ->
+    ... }
+```
+- Kiedy używać: W 90% przypadków w prawdziwych aplikacjach.
+- Zaleta:
+    - Łączy wygodę (daje Ci gotowy obiekt user) z bezpieczeństwem i wydajnością (używa unikalnego key).
+    - Dlaczego jest najlepszy? Jeśli lista zostanie posortowana, Compose dzięki kluczowi
+    `id` po prostu "przesunie" wizualnie kartę użytkownika w nowe miejsce, zamiast rysować ją od zera.
+    - To oszczędza baterię i procesor!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

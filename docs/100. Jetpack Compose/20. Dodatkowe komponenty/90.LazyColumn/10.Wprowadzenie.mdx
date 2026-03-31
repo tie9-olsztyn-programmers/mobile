@@ -1,0 +1,68 @@
+---
+title: LazyColumn
+---
+
+
+##  Wstęp do `LazyColumn` – jak sprytnie wyświetlać długie listy
+W tej lekcji nauczysz się,
+jak optymalnie wyświetlać dziesiątki, setki,
+a nawet tysiące elementów na ekranie, nie zacinając przy tym telefonu użytkownika.
+
+## Analogię ze świata rzeczywistego)
+Wyobraź sobie, że pracujesz w ogromnej bibliotece, w której jest milion książek,
+a do Twojego biurka podchodzi czytelnik i prosi o pokazanie spisu wszystkich tytułów.
+
+- **Podejście naiwne** (`Column`):
+  - Znosisz na biurko absolutnie cały milion książek na raz.
+  - Biurko się łamie pod ich ciężarem, a Ty padasz z wyczerpania,
+zanim czytelnik w ogóle zdąży przeczytać pierwszą okładkę.
+- **Podejście sprytne** (LazyColumn):
+  - Kładziesz na biurku tylko te 5 książek, na które czytelnik aktualnie patrzy.
+  - Kiedy przesuwa wzrok (scrolluje) w dół, zabierasz górną książkę i dokładasz jedną na dole.
+  - Zawsze pracujesz tylko z kilkoma książkami naraz.
+
+:::tip
+
+To słowo „Lazy” (Leniwy) oznacza po prostu:
+> „Nie rób pracy, dopóki nie jest to absolutnie konieczne”.
+
+:::
+
+
+## Teoria: Zmiana paradygmatu (XML vs Compose)
+W starym systemie XML (View System), aby stworzyć wydajną listę, musieliśmy używać potężnego,
+ale skomplikowanego narzędzia o nazwie `RecyclerView`.
+Wymagało to stworzenia:
+- Pliku XML dla samej listy.
+- Pliku XML dla pojedynczego elementu na liście.
+- Klasy Adapter, która łączyła dane z widokami.
+- Klasy `ViewHolder`, która "trzymała" widoki, aby nie szukać ich za każdym razem w pamięci.
+To oznaczało dziesiątki linii powtarzalnego kodu (tzw. boilerplate code).
+
+W Jetpack Compose wszystko to zostało zastąpione jednym, eleganckim komponentem:
+`LazyColumn`.
+
+Pod maską Compose sam zarządza "recyklingiem" i rysuje tylko te elementy,
+które mieszczą się aktualnie na ekranie (w tzw. obszarze widoczności / viewport).
+
+
+## Prosty przykład
+Pamiętaj o koniecznym imporcie `import androidx.compose.foundation.lazy.items`.
+
+```kotlin
+@Composable
+fun SimpleListExample(modifier: Modifier = Modifier){
+    val myItems = List(1000){index -> "Element nr ${index+1}"}
+
+    LazyColumn(modifier=modifier.fillMaxSize()) {
+
+        // Blok 'items' to magiczna funkcja, która przyjmuje naszą listę danych
+        // i mówi Compose, jak narysować pojedynczy element
+        items(myItems){ item ->
+            Text(
+                text = item,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+```

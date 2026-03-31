@@ -138,6 +138,94 @@ Scaffold zarządza układem całego ekranu
 
 
 
+---
+# Toast
+
+Wyobraź sobie, że aplikacja to restauracja.
+
+Toast jest jak kelner, który przechodzi obok i rzuca krótkie: „Smacznego!”, nie czekając na Twoją reakcję.
+
+Snackbar jest jak kelner, który stawia sól na stole i mówi: „Gdyby było za mało słone, proszę użyć tej soli” – daje Ci informację i możliwość interakcji (przycisk akcji).
+
+:::info Toast
+- w Compose używamy niemal identycznie jak w starym systemie XML, ponieważ wywołujemy go poprzez Context.
+- Kluczową różnicą jest sposób pozyskiwania tego kontekstu.
+
+:::
+
+
+
+
+### W aplikacji z **XML**:
+```kotlin
+// Fragment kodu w starym stylu
+button.setOnClickListener {
+    Toast.makeText(this, "Wysłano wiadomość!", Toast.LENGTH_SHORT).show()
+}
+
+```
+
+### W aplikacji z **Compose**:
+```kotlin
+@Composable
+fun ToastExample(modifier: Modifier = Modifier){
+    val context = LocalContext.current // pobieramy kontekst
+
+    Column(modifier=modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+        ){
+        Button(onClick = {
+            Toast.makeText(
+                context,
+                "To jest Toast w Compose",
+                Toast.LENGTH_LONG
+            ).show()
+        }){
+            Text("Pokaż tosta!!!")
+        }
+    }
+}
+```
+
+
+### Czym jest Kontekst (Context) w systemie Android?
+#### Wyjaśnienie metaforyczne
+- Wyobraź sobie, że system Android to ogromna, luksusowa galeria handlowa,
+a Twoja aplikacja to jeden ze sklepów w tej galerii.
+- `context` to twój identyfikator pracowniczy (identyfikator dostępu) połączony z krótkofalówką.
+  - Identyfikator: Bez niego nie możesz wejść do magazynu, żeby pobrać zasoby
+(np. teksty tłumaczeń z pliku strings.xml czy obrazki z folderu drawable).
+  - Krótkofalówka: Bez niej nie możesz skontaktować się z dyrekcją galerii (systemem Android),
+aby poprosić o przysługę, np. o wyświetlenie globalnego powiadomienia (nasz wcześniejszy Toast),
+uruchomienie innej aplikacji (np. przeglądarki) czy sprawdzenie, czy telefon ma połączenie z internetem.
+
+Krótko mówiąc: `Context` mówi systemowi Android:
+- kim jesteś,
+- gdzie aktualnie się znajdujesz w aplikacji i
+- do czego masz prawo.
+
+#### Wyjaśnienie techniczne
+- Z inżynieryjnego punktu widzenia, Context to abstrakcyjna klasa bazowa w systemie Android.
+- Działa ona jako "pomost" (interfejs) między Twoim kodem a globalnym środowiskiem systemu operacyjnego.
+- Kontekst zapewnia dwie główne funkcjonalności:
+  - Dostęp do zasobów (Resources):
+  - Pozwala pobierać pliki, ciągi znaków (strings), kolory, style czy motywy przypisane do Twojej aplikacji.
+  - Dostęp do usług systemowych (System Services):
+  - Pozwala uruchamiać nowe ekrany (Activity),
+  - wysyłać intencje (Intent),
+  - zarządzać powiadomieniami, czy
+  - odczytywać stan baterii.
+
+W starym systemie XML (View System), widoki takie jak `Button` czy `TextView`
+"żyły" wewnątrz aktywności (Activity), która sama w sobie dziedziczyła po klasie Context.
+Dlatego często mogliśmy po prostu wpisać `this`.
+
+W Jetpack Compose funkcje kompozytowalne (`@Composable`) to zwykłe funkcje Kotlina,
+które nie wiedzą nic o cyklu życia systemu Android.
+Dlatego, aby uzyskać dostęp do tej "krótkofalówki",
+musimy jawnie poprosić o nią system, używając `LocalContext.current`.
+
 
 
 

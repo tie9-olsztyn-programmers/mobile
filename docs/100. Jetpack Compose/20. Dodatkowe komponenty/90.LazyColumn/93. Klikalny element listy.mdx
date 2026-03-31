@@ -1,0 +1,79 @@
+---
+title: Klikalny element listy
+---
+Kontynuujemy aplikację z poprzedniej lekcji.
+
+
+## Analogia z restauracyjnym menu
+- Wyobraź sobie menu w restauracji.
+- Stara, nieklikalna lista:
+    - To klasyczne, papierowe menu.
+    - Możesz je tylko przeglądać (scrollować wzrokiem).
+    - Aby złożyć zamówienie, musisz zawołać kelnera i wskazać mu palcem konkretną pozycję.
+
+- Klikalna lista w Compose:
+    - To nowoczesne menu na tablecie.
+    - Każda potrawa na liście jest interaktywnym przyciskiem.
+    - Kiedy dotykasz zdjęcia pizzy, tablet od razu wie, że ją wybrałeś i wysyła zamówienie do kuchni.
+
+## kilikanie w **Jetpack Compose**:
+- Nie ma czegoś takiego jak "klikalna lista".
+- Lista (`LazyColumn`) po prostu układa elementy.
+- To same elementy (komponenty) stają się klikalne, dzięki jednemu prostemu narzędziu:
+```kotlin
+Modifier.clickable { }.
+```
+
+:::tip Złota Zasada
+- Nigdy nie wykonuj logiki biznesowej (np. zapisu do bazy danych czy nawigacji)
+ bezpośrednio wewnątrz małego komponentu jak `UserCard`.
+- Zamiast tego użyj funkcji zwrotnej (tzw. *callback*), aby poinformować rodzica (listę lub cały ekran):
+ > "Hej, zostałem kliknięty!".
+- To podejście nazywa się wynoszeniem stanu *State Hoisting*.
+
+:::
+
+## Zmodyfikowany widok Karty - dodajemy parametr `onClick` (funkcję zwrotną)
+```kotlin
+
+@Composable
+fun UserCard(user: User, onClick: ()->Unit, modifier: Modifier = Modifier) {
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable{onClick()}, // DODAJEMY klikalność elementu
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Delikatny cień
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) { //...
+```
+
+## Zmodyfikowany kod ekranu listy
+```kotlin
+@Composable
+fun ClickableListExample(users: List<User>, modifier: Modifier = Modifier) {
+    val context = LocalContext.current // Pobieramy kontekst do Toastu
+
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(items = users, key = { it.id }) { user ->
+            // Rysujemy kartę i definiujemy, co ma się stać po jej kliknięciu
+            UserCard(
+                user = user,
+                onClick = {
+                    // Tutaj decydujemy o akcji! Karta nic o tym nie wie.
+                    Toast.makeText(
+                        context,
+                        "Kliknięto: ${user.name}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
+        }
+    }
+}
+```

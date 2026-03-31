@@ -1,0 +1,395 @@
+---
+title: Nowy ekran po  kliknięciu
+---
+
+Kontynuujemy aplikację z poprzedniej lekcji.
+
+
+## Od listy do szczegółów (*Master-Detail*)
+Nauczymy się, jak sprawić, by nasza aplikacja miała więcej niż jeden ekran.
+
+Stworzymy klasyczny wzorzec *Master-Detail*:
+- *Master*: Lista wszystkich użytkowników (`LazyColumn`).
+- *Detail*: Pełnoekranowy widok z danymi konkretnego użytkownika.
+
+
+## Analogia z folderami w komputerze
+Wyobraź sobie, że Twoja aplikacja to system folderów:
+- Ekran Listy to widok folderu, w którym widzisz tylko nazwy plików (ikony i tytuły).
+- Kliknięcie to dwukrotne kliknięcie w plik.
+- Ekran Szczegółów to otwarcie tego pliku w dedykowanym programie, gdzie widoczna jest cała treść.
+- W Androidzie do zarządzania tymi "przejściami" służy biblioteka *Navigation Compose*.
+- Myśli ona o ekranach jak o przystankach na trasie metra.
+
+
+## Jak działa nawigacja w Compose?
+Aby nawigacja zadziałała, potrzebujemy trzech elementów:
+- `NavController`:
+    - Twój "pilot".
+    - To on wydaje komendy: "Leć do ekranu szczegółów!".
+- `NavHost`:
+    - "Scena", na której zmieniają się ekrany.
+    - To tu system decyduje, który `@Composable` ma być teraz wyświetlony.
+- `Routes` (trast):
+    - Proste nazwy tekstowe (np. "list", "details") określające, gdzie jesteśmy.
+
+
+## Dodatkowa biblioteka
+Dlaczego musimy to instalować? (XML vs Compose)
+- W tradycyjnym podejściu XML (*View System*) nawigacja między osobnymi ekranami (czyli klasami Activity)
+była wbudowana głęboko w system operacyjny Android.
+    - Używaliśmy do tego tzw. Intencji (`Intent`).
+    - Później wprowadzono komponent nawigacji oparty na plikach XML (nav_graph.xml),
+  który pozwalał rysować ścieżki w edytorze wizualnym.
+
+- W Jetpack Compose filozofia jest inna.
+    - Aplikacje Compose to zazwyczaj aplikacje jednoekranowe (tzw. *Single Activity Architecture*).
+    - Wszystko dzieje się wewnątrz jednej Activity, a my po prostu podmieniamy wyświetlane komponenty
+  (`@Composable`).
+    - Ponieważ rdzeń *Compose* jest bardzo "odchudzony",
+  funkcje nawigacyjne zostały wydzielone do opcjonalnej biblioteki, którą musimy jawnie dodać.
+
+
+:::tip Jak działa `libs.versions.toml`?
+Katalog Wersji dzieli definicję biblioteki na dwie części:
+1. `[versions]` – tutaj trzymamy same numery (wersje), aby łatwo było je aktualizować.
+2. `[libraries]` – tutaj budujemy pełny "adres" biblioteki i łączymy go z wersją zdefiniowaną wyżej.
+
+Gradle bierze ten plik tekstowy i magicznie generuje z niego bezpieczny kod w Kotlinie
+(tzw. Type-Safe Accessors), dzięki czemu podczas dodawania biblioteki do projektu,
+Android Studio samo podpowiada nam jej nazwę!
+
+
+### Krok 1: Edycja książki telefonicznej (Plik .toml)
+Znajdź w swoim projekcie (zazwyczaj w folderze gradle/) plik libs.versions.toml.
+Otwórz go i dodaj dwa wpisy:
+```toml
+# Plik: gradle/libs.versions.toml
+
+[versions]
+# ... inne wersje ...
+# 1. Definiujemy numer wersji nawigacji
+navigationCompose = "2.7.7"
+
+[libraries]
+# ... inne biblioteki ...
+# 2. Definiujemy bibliotekę, łącząc "group", "name" i naszą wersję
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+
+```
+
+### Krok 2: Użycie w module aplikacji (Plik build.gradle.kts)
+Teraz wejdź do pliku `build.gradle.kts` (`Module :app`).
+Zauważ, co dzieje się z nazwą biblioteki:
+    - myślniki (`-`) z pliku TOML zamieniają się na kropki (`.`) w Kotlinie!
+
+
+:::caution Ważny krok: Synchronizacja!
+Za każdym razem, gdy edytujesz plik .toml lub .gradle.kts,
+musisz kliknąć przycisk Sync Now (Synchronizuj), który pojawi się na górze ekranu w Android Studio.
+
+Bez tego system nie wygeneruje Twojej "książki telefonicznej" i kod `libs.androidx...`
+będzie podkreślony na czerwono!
+:::
+
+## Przebudowa struktury aplikacji
+Nowa struktura powinna wyglądać tak:
+```
+com.example.twojaaplikacja/
+│
+├── MainActivity.kt                <-- Tylko uruchamia aplikację
+|                                    i ładuje AppNavigation
+│
+├── model/
+│   └── User.kt                    <-- Nasz model danych
+│
+├── data/
+│   └── MockData.kt                <-- Nasza "szafka"
+|                                    z testowymi użytkownikami
+│
+├── ui/
+│   ├── screens/
+│   │   ├── UserListScreen.kt      <-- Ekran listy
+│   │   └── UserDetailScreen.kt    <-- Ekran szczegółów
+│   │
+│   └── navigation/
+│       └── AppNavigation.kt       <-- NASZ NOWY PLIK!
+                                        Tutaj jest NavHost.
+```
+
+:::info Dlaczego stosujemy taką strukturę plików?
+W profesjonalnych aplikacjach Android trzymamy się **Zasady Pojedynczej Odpowiedzialności**
+(*Single Responsibility Principle*).
+Rozdzielenie danych, ekranów i nawigacji do osobnych folderów i plików daje trzy ogromne korzyści:
+1. **Skalowalność**:
+    - Gdy Twoja aplikacja urośnie z 2 do 50 ekranów, nadal będziesz dokładnie wiedział,
+  gdzie szukać błędu.
+
+2. **Bezkonfliktowa praca zespołowa**:
+    - Jeśli Ty dodajesz nowy ekran (plik `NewScreen.kt`),
+  a Twój kolega z zespołu zmienia trasę logowania (plik `AppNavigation.kt`),
+  unikacie konfliktów w systemie kontroli wersji (Git).
+    - Trzymając wszystko w `MainActivity`, ciągle nadpisywalibyście swoją pracę!
+
+3. **Przejrzystość**:
+- `MainActivity` staje się tylko prostym "włącznikiem" prądu, a
+cała skomplikowana maszyneria (widoki i nawigacja) jest bezpiecznie zamknięta w swoich własnych,
+dedykowanych modułach.
+
+:::
+
+
+### UserDetailScreen
+```kotlin
+
+@Composable
+fun UserDetailScreen(user: User) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "Szczegóły Użytkownika",
+            style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Imię: ${user.name}",
+            style = MaterialTheme.typography.titleLarge)
+        Text(text = "Email: ${user.email}",
+            style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserDetailScreenPreview(){
+    MaterialTheme{
+        UserDetailScreen( User(
+            "1",
+            "Jan Kowalski",
+            "jan.kowalski@example.com")
+        )
+    }
+}
+```
+
+### UserListScreen
+Przekopiujmy komponent, który występował w `MainActivity` do naszego nowego komponentu.
+
+Musimy zmienić nazwę tego "starego" komponentu na `UserListScreen`:
+```kotlin
+@Composable
+fun UserListScreen(users: List<User>,
+                   onUserClick: (String) -> Unit, // Odbieramy akcję kliknięcia z zewnątrz!
+                   modifier: Modifier = Modifier,
+                   ) {
+    val context = LocalContext.current // Pobieramy kontekst do Toastu
+
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(items = users, key = { it.id }) { user ->
+            // Rysujemy kartę i definiujemy, co ma się stać po jej kliknięciu
+            UserCard(
+                user = user,
+                // Karta została kliknięta ->
+                // przekazujemy ID użytkownika wyżej
+                onClick = { onUserClick(user.id) }
+            )
+        }
+    }
+}
+
+```
+
+### AppNavigation
+:::tip Czym jest `NavController`? (Analogia z GPS-em)
+Wyobraź sobie, że Twoja aplikacja to samochód, a ekrany to różne miasta.
+- `NavController` to Twój pokładowy GPS. *
+- To on przechowuje historię Twojej trasy (tzw. Back Stack - stos ekranów).
+- To do niego krzyczysz:
+    - "Jedź do ekranu szczegółów!" (`navController.navigate(...)`) albo
+    - "Zgubiłem się, wracajmy!" (`navController.popBackStack()`).
+
+:::
+
+:::note `NavHost` – Scena główna naszej aplikacji
+To on decyduje, co w danym momencie widzi użytkownik.
+
+Wyobraź sobie, że Twoja aplikacja to budynek teatru:
+- `NavController` (Reżyser):
+    - Posiada scenariusz i decyduje, kto teraz wchodzi na scenę, a kto z niej schodzi.
+- `NavHost` (Scena):
+    - To fizyczne miejsce (deski teatru), na którym stają aktorzy.
+    - Sama w sobie jest pusta, ale to na niej wyświetla się całe przedstawienie.
+- `startDestination` (Akt Pierwszy):
+    - To informacja dla reżysera:
+  > "Gdy tylko podniesie się kurtyna, na scenie ma stać ten konkretny aktor".
+
+:::
+
+:::info `composable()` – Rysujemy pokoje na planie budynku
+Łączą abstrakcyjne adresy URL (trasy) z fizycznymi widokami, które widzi użytkownik.
+
+### Analogia z architektem
+Wyobraź sobie, że `NavHost` to pusty plan Twojego nowego domu, a funkcja `composable()` to ołówek architekta:
+- Pisząc `composable("user_list") { ... }`, mówisz:
+> "Narysuj tutaj pokój, na drzwiach zawieś tabliczkę 'user_list',
+> a w środku wstaw meble w postaci mojego ekranu listy użytkowników".
+- Kiedy użytkownik poprosi Pilota (`NavController`) o zabranie go do "user_list",
+system wie dokładnie, które drzwi otworzyć i co za nimi pokazać.
+
+### Jak działa konstruktor grafu (`NavGraphBuilder`)?
+Funkcja `composable()` nie jest zwykłym komponentem interfejsu
+(nie rysuje od razu niczego na ekranie).
+Jest to funkcja budująca (`Builder`), która dodaje nowy "przystanek" do mapy nawigacji.
+
+Składa się z dwóch głównych elementów:
+- Trasy (`route: String`): Unikalny adres tego ekranu (np. "user_list").
+- Zawartości (`content: @Composable () -> Unit`):
+    - Blok kodu w klamrach `{ ... }`, który mówi systemowi, co ma narysować,
+  gdy użytkownik dotrze pod ten adres.
+
+
+:::
+
+```kotlin
+
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "user_list") {
+        composable("user_list") {
+            UserListScreen(
+                users = MocData.sampleUsers,
+                onUserClick = { userId ->
+                    navController.navigate("user_details/$userId")
+                }
+            )
+        }
+        composable("user_details/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            val selectedUser = MocData.sampleUsers.find { it.id == userId }
+
+            if (selectedUser != null) {
+                UserDetailScreen(user = selectedUser)
+            } else {
+                Text("Nie znaleziono użytkownika!")
+            }
+        }
+    }
+}
+```
+
+Komponentu tego używamy w `MainActivity`
+```kotlin
+ Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    AppNavigation()
+                }
+```
+
+---
+## Użycie `innerPadding`
+
+Zmienna `innerPadding` jest typu `PaddingValues`.
+Aby jej użyć, musimy zamienić ją na modyfikator i "nałożyć" na nasz główny kontener.
+W naszym przypadku tym kontenerem jest scena nawigacji, czyli `NavHost`.
+
+
+Zmiany w `AppNavigator`
+```kotlin
+@Composable
+fun AppNavigation(
+    modifier: Modifier = Modifier // NOWE
+) {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "user_list",
+        modifier = modifier         // NOWE
+
+    ) {
+        //....
+
+
+```
+
+Teraz zmienimy wywołanie tego komponentu w `MainActivity`
+```kotlin
+AppNavigation(
+    modifier = Modifier.padding(innerPadding)
+)
+```
+
+
+---
+## Powrót z *detail* do *master*
+ Na koniec zdefiniujemy przycisk, który pozwoli nam powrócić z ekranu szczegółów na ekran z listą.
+
+### Przycisk w `UserDetailScreen`
+```kotlin
+@Composable
+fun UserDetailScreen(
+    user: User,
+    onBackClick: () -> Unit // funkcja obsługująca powrót
+) {
+    Column(
+       //....
+
+        // PRZYCISK POWROTU
+        Button(
+            onClick = onBackClick,
+            modifier = Modifier
+                .fillMaxWidth(0.7f) // Przycisk zajmie 70% szerokości ekranu
+                .height(50.dp),     // Ustawiamy sztywną, wygodną wysokość
+            shape = RoundedCornerShape(16.dp), // Mocno zaokrąglone rogi
+            colors = ButtonDefaults.buttonColors(
+
+                // Metoda 1: Użycie własnego kodu HEX (np. firmowy fioletowy)
+                // Pamiętaj o prefiksie 0xFF dla pełnej nieprzezroczystości!
+                containerColor = Color(0xFF660FDE),
+
+                // Metoda 2: Użycie wbudowanych, podstawowych kolorów z klasy Color
+                contentColor = Color.White
+            ),
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 8.dp,     // Cień, gdy przycisk "leży"
+                pressedElevation = 2.dp      // Cień mniejszy podczas kliknięcia (efekt wciskania)
+            )
+            ) {
+            Text("Powrót do listy")
+        }
+    }
+}
+```
+
+
+W nawigatorze (`AppNavigationa`) musimy zmienić wywołanie tego komponentu:
+```kotlin
+ composable("user_details/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            val selectedUser = MocData.sampleUsers.find { it.id == userId }
+
+            if (selectedUser != null) {
+                UserDetailScreen(
+                    user = selectedUser,
+                    onBackClick = {
+                        // Rozkazujemy nawigatorowi powrót na poprzedni ekran
+                        navController.popBackStack()
+                    }
+                )
+            } else {
+                Text("Nie znaleziono użytkownika!")
+            }
+        }
+```
+
+
+
+
+
+
+
+

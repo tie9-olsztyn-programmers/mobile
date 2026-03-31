@@ -1,0 +1,227 @@
+---
+title: Optymalizacja items
+---
+
+
+## Analogia z szatnią teatralną
+Wyobraź sobie szatnię w teatrze, w której wisi rząd płaszczy:
+- Domyślne zachowanie (Bez kluczy):
+  - Szatniarz wiesza płaszcze na wieszakach numer 1, 2, 3 i pamięta je tylko po pozycji.
+  - Jeśli gość z płaszczem nr 1 wyjdzie, szatniarz musi przesunąć wszystkie pozostałe płaszcze o jedno miejsce w lewo.
+  - Płaszcz z wieszaka nr 2 staje się płaszczem nr 1.
+  - To rodzi chaos i mnóstwo niepotrzebnej pracy.
+
+- Podejście zaawansowane (Z kluczami):
+  - Szatniarz przypina do każdego płaszcza unikalny numerek z nazwiskiem (np. ID z bazy danych).
+  - Kiedy ktoś zabiera swój płaszcz, szatniarz nie przesuwa reszty.
+  - System dokładnie wie, który płaszcz to który, niezależnie od jego pozycji.
+
+## Teoria
+W Jetpack Compose wszystko to rozwiązujemy deklaratywnie, przekazując proste parametry do komponentu LazyColumn:
+- `verticalArrangement`:
+  - Automatycznie wstawia równe odstępy między elementami (koniec z ręcznym dodawaniem komponentów Spacer!).
+- `contentPadding`:
+  - Dodaje bezpieczny margines na górze i dole listy.
+  - Dzięki temu elementy nie przyklejają się do krawędzi ekranu,
+a podczas przewijania (scrollowania) znikają estetycznie poza tym marginesem.
+- `key`:
+  - Unikalny identyfikator elementu, który instruuje mechanizm rekompozycji,
+aby śledził konkretne dane, a nie ich pozycję na liście.
+
+## Przykład
+### Model danych
+Utwórzmy w folderze, gdzie jest `MainActivity.kt` nowy folder/package `model`.
+Wewnątrz niego utwórzmy plik `User.kt`:
+```kotlin
+data class User(
+    val id: String,
+    val name: String,
+    val email: String
+)
+
+```
+
+### Dane
+Utwórzmy w folderze, gdzie jest `MainActivity.kt` nowy folder/package `data`.
+Wewnątrz niego utwórzmy plik `MocData.kt`:
+```kotlin
+object MocData {
+    val sampleUsers = listOf(
+        User("1", "Jan Kowalski", "jan.kowalski@example.com"),
+        User("2", "Anna Nowak", "anna.nowak@example.com"),
+        User("3", "Piotr Wiśniewski", "piotr.wisniewski@example.com"),
+        User("4", "Katarzyna Wójcik", "katarzyna.wojcik@example.com"),
+        User("5", "Michał Kamiński", "michal.kaminski@example.com")
+    )
+
+}
+```
+
+:::tip[Wzorzec projektowy: Singleton i słowo kluczowe object]
+
+W Kotlinie używamy słowa kluczowego **object** do stworzenia tzw. Singletona.
+
+### Co to jest Singleton?
+To wzorzec projektowy, który gwarantuje, że
+w całej Twojej aplikacji istnieje tylko jedna, ta sama instancja danej klasy.
+
+### Dlaczego używamy go do MockData?
+- Oszczędność pamięci:
+  - Nie musisz tworzyć nowej listy użytkowników za każdym razem, gdy jej potrzebujesz.
+  - Cała aplikacja korzysta z tej jednej "szafki z danymi".
+- Globalny punkt dostępu:
+  - Możesz odwołać się do danych z dowolnego pliku w projekcie, wpisując po prostu `MockData.users`.
+- Leniwe ładowanie (*Lazy Initialization*):
+  - Obiekt `object` zostanie powołany do życia dopiero w momencie,
+gdy pierwszy raz go użyjesz (np. gdy użytkownik wejdzie na ekran listy).
+  - Jeśli nigdy tam nie wejdzie – obiekt nie zajmie ani bajta w pamięci RAM.
+
+:::caution
+W Androidzie `object` jest idealny dla danych testowych,
+stałych konfiguracyjnych czy narzędzi (Utils),
+ale unikaj przechowywania w nim danych, które często się zmieniają i zależą od kontekstu ekranu!
+
+:::
+
+
+:::tip Czym jest Mockowanie?
+W programowaniu "mockowanie" (od ang. *mock* – udawać, kpić) to technika tworzenia
+„atrap” lub „symulatorów” obiektów, których potrzebuje nasz kod,
+aby mógł działać, ale
+których nie chcemy lub nie możemy użyć w danej chwili w ich prawdziwej formie.
+
+1. **Metafora**: Plan filmowy
+- Wyobraź sobie, że kręcisz film o napadzie na bank.
+- Czy musisz budować prawdziwy, pancerny sejf z milionem dolarów w środku?
+- Nie. Używasz atrapy (mocka) ze sklejki i pomalowanego styropianu.
+- Z zewnątrz wygląda tak samo, pozwala aktorom odegrać scenę, ale nie kosztuje fortuny i
+nie wymaga ochrony.
+
+W kodzie `sampleUsers` to właśnie taki styropianowy sejf.
+
+2. Dlaczego mockujemy?
+Jako programiści używamy mocków z trzech głównych powodów:
+- Niezależność (Izolacja):
+ - Możesz pracować nad wyglądem listy użytkowników, nawet jeśli
+Twoi koledzy z zespołu nie skończyli jeszcze pisać serwera (Backendu), który te dane wysyła.
+- Szybkość:
+  - Prawdziwe pobieranie danych z internetu trwa sekundy.
+  - Odczyt mocka z pamięci trwa milisekundy.
+  - Podczas budowania UI (*Preview* w *Compose*) chcemy widzieć efekty natychmiast.
+- Testowanie:
+  - Możesz stworzyć "złośliwego mocka", który symuluje błąd serwera
+(np. pustą listę lub błąd 404), aby sprawdzić, czy
+  - Twoja aplikacja nie "wywali się" w trudnych warunkach.
+
+:::
+
+## Zbudujmy komponent `UserCard`:
+
+```kotlin
+@Composable
+fun UserCard(user: User, modifier: Modifier = Modifier) {
+    // Używamy standardowej karty z Material 3
+    Card(
+        modifier = modifier.fillMaxWidth(), // Karta zajmie całą dostępną szerokość
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Delikatny cień
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        // Row układa elementy poziomo (obok siebie)
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically // Centrujemy zawartość w pionie
+        ) {
+            // Tymczasowy "Awatar" - kółko z pierwszą literą imienia
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = user.name.first().toString(), // Pobiera pierwszą literę
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+            // Pusty odstęp między awatarem a tekstem
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Kolumna układa teksty pionowo (jeden pod drugim)
+            Column {
+                Text(
+                    text = user.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = user.email,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+```
+
+
+## `MainActivity.kt`
+:::caution PAMIĘTAJ
+Pamiętaj o koniecznych importach!
+:::
+
+```kotlin
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            ToastJCTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    AdvancedListExample(
+                        users= sampleUsers,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AdvancedListExample(users: List<User>, modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier,
+        // 1. Odstęp 12.dp między każdą kartą użytkownika
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        // 2. Wewnętrzny margines listy (16.dp z każdej strony)
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        // 3. Zaawansowane wywołanie items z użyciem klucza (key)
+        items(
+            items = users,
+            // KLUCZ: Wskazujemy, że unikalnym identyfikatorem jest ID użytkownika.
+            // Zabezpiecza to listę przed błędami podczas usuwania/sortowania!
+            key = { user -> user.id }
+        ) { user ->
+            // Rysujemy komponent dla konkretnego użytkownika
+            UserCard(user = user)
+        }
+
+        /* * ALTERNATYWA: Możesz też użyć wariantu z count (jak w poprzednim przykładzie):
+         * items(count = users.size, key = { index -> users[index].id }) { index ->
+         * UserCard(user = users[index])
+         * }
+         */
+    }
+}
+
+```
