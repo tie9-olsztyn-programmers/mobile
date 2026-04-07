@@ -1,0 +1,28 @@
+---
+title: Dodajemy zdjęcia do bazy danych
+---
+
+
+Firestore vs Storage
+1. Analogia: Wystawa Samochodowa i Katalog (Gdzie trzymamy zdjęcia?)
+Wyobraźcie sobie, że organizujecie wielką wystawę samochodów przyszłości.
+
+Firebase Storage (Magazyn Plików): To Wasz fizyczny, ogromny Garaż. To tutaj wstawiacie prawdziwe, ciężkie samochody (czyli w naszym przypadku pliki graficzne .jpg lub .png). Garaż jest pojemny, ale trudno w nim szybko wyszukiwać informacje.
+
+Cloud Firestore (Baza Danych): To elegancki Katalog na recepcji. W tym katalogu nie ma fizycznych samochodów! Są tam tylko lekkie karteczki (Dokumenty), na których napisane jest: "Samochód nazywa się AeroPod, a jego fizyczne zdjęcie znajdziesz w Garażu pod adresem URL: https://...".
+
+Złota zasada programisty: Nigdy nie wrzucamy całych plików (zdjęć, wideo) bezpośrednio do tekstowej bazy danych (Firestore)! Pliki trzymamy w Storage, a w Firestore zapisujemy tylko linki (adresy URL) do tych plików.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

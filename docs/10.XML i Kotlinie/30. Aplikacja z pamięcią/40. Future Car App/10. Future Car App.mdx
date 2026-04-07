@@ -1,0 +1,106 @@
+---
+title: Future Car App
+---
+
+Zrobimy aplikację wyświetlającą samochody z katalogu "Twój samochód z przyszłości".
+
+
+## Potrzebne zależności
+
+`libs.versions.toml`
+```toml
+[version]
+firebaseBom = "34.10.0"
+googleServices = "4.4.1"
+
+[librarie]
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+
+
+
+[plugins]
+//...
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+
+```
+
+`build.gradle.kts` (Project)
+```kts
+plugins {
+    // ...
+    alias(libs.plugins.google.services) apply false
+
+}
+```
+
+`build.gradle.kts`(Module)
+```kts
+plugins {
+ //..
+   // alias(libs.plugins.google.services) // na razie zostawimy wyłączony
+
+}
+//...
+
+dependencies {
+//...
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+
+
+```
+
+## Włączamy binding
+1. `build.gradle.kts` (Module app):
+```kts
+//...
+android{
+//...
+
+
+buildFeatures {
+        viewBinding = true
+    }
+
+```
+
+2. `MainActivity.kt`
+```kotlin
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
