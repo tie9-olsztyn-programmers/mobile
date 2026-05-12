@@ -1,0 +1,218 @@
+---
+title: LazyColumn
+---
+
+
+##  Wstęp do `LazyColumn` – jak sprytnie wyświetlać długie listy
+W tej lekcji nauczysz się,
+jak optymalnie wyświetlać dziesiątki, setki,
+a nawet tysiące elementów na ekranie, nie zacinając przy tym telefonu użytkownika.
+
+## Analogię ze świata rzeczywistego)
+Wyobraź sobie, że pracujesz w ogromnej bibliotece, w której jest milion książek,
+a do Twojego biurka podchodzi czytelnik i prosi o pokazanie spisu wszystkich tytułów.
+
+- **Podejście naiwne** (`Column`):
+  - Znosisz na biurko absolutnie cały milion książek na raz.
+  - Biurko się łamie pod ich ciężarem, a Ty padasz z wyczerpania,
+zanim czytelnik w ogóle zdąży przeczytać pierwszą okładkę.
+- **Podejście sprytne** (LazyColumn):
+  - Kładziesz na biurku tylko te 5 książek, na które czytelnik aktualnie patrzy.
+  - Kiedy przesuwa wzrok (scrolluje) w dół, zabierasz górną książkę i dokładasz jedną na dole.
+  - Zawsze pracujesz tylko z kilkoma książkami naraz.
+
+:::tip
+
+To słowo „Lazy” (Leniwy) oznacza po prostu:
+> „Nie rób pracy, dopóki nie jest to absolutnie konieczne”.
+
+:::
+
+
+## Teoria: Zmiana paradygmatu (XML vs Compose)
+W starym systemie XML (View System), aby stworzyć wydajną listę, musieliśmy używać potężnego,
+ale skomplikowanego narzędzia o nazwie `RecyclerView`.
+Wymagało to stworzenia:
+- Pliku XML dla samej listy.
+- Pliku XML dla pojedynczego elementu na liście.
+- Klasy Adapter, która łączyła dane z widokami.
+- Klasy `ViewHolder`, która "trzymała" widoki, aby nie szukać ich za każdym razem w pamięci.
+To oznaczało dziesiątki linii powtarzalnego kodu (tzw. boilerplate code).
+
+W Jetpack Compose wszystko to zostało zastąpione jednym, eleganckim komponentem:
+`LazyColumn`.
+
+Pod maską Compose sam zarządza "recyklingiem" i rysuje tylko te elementy,
+które mieszczą się aktualnie na ekranie (w tzw. obszarze widoczności / viewport).
+
+
+## Prosty przykład
+Pamiętaj o koniecznym imporcie `import androidx.compose.foundation.lazy.items`.
+
+```kotlin
+@Composable
+fun SimpleListExample(modifier: Modifier = Modifier){
+    val myItems = List(1000){index -> "Element nr ${index+1}"}
+
+    LazyColumn(modifier=modifier.fillMaxSize()) {
+
+        // Blok 'items' to magiczna funkcja, która przyjmuje naszą listę danych
+        // i mówi Compose, jak narysować pojedynczy element
+        items(myItems){ item ->
+            Text(
+                text = item,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+```
+
+## LazyColumn - optymalizacja
+
+### Analogia z szatnią teatralną
+Wyobraź sobie szatnię w teatrze, w której wisi rząd płaszczy:
+- Domyślne zachowanie (Bez kluczy):
+    - Szatniarz wiesza płaszcze na wieszakach numer 1, 2, 3 i pamięta je tylko po pozycji.
+    - Jeśli gość z płaszczem nr 1 wyjdzie, szatniarz musi przesunąć wszystkie pozostałe płaszcze o jedno miejsce w lewo.
+    - Płaszcz z wieszaka nr 2 staje się płaszczem nr 1.
+    - To rodzi chaos i mnóstwo niepotrzebnej pracy.
+
+- Podejście zaawansowane (Z kluczami):
+    - Szatniarz przypina do każdego płaszcza unikalny numerek z nazwiskiem (np. ID z bazy danych).
+    - Kiedy ktoś zabiera swój płaszcz, szatniarz nie przesuwa reszty.
+    - System dokładnie wie, który płaszcz to który, niezależnie od jego pozycji.
+
+### Teoria
+W Jetpack Compose wszystko to rozwiązujemy deklaratywnie, przekazując proste parametry do komponentu LazyColumn:
+- `verticalArrangement`:
+    - Automatycznie wstawia równe odstępy między elementami (koniec z ręcznym dodawaniem komponentów Spacer!).
+- `contentPadding`:
+    - Dodaje bezpieczny margines na górze i dole listy.
+    - Dzięki temu elementy nie przyklejają się do krawędzi ekranu,
+  a podczas przewijania (scrollowania) znikają estetycznie poza tym marginesem.
+- `key`:
+    - Unikalny identyfikator elementu, który instruuje mechanizm rekompozycji,
+  aby śledził konkretne dane, a nie ich pozycję na liście.
+
+### Przykład
+
+Zbudujmy komponent UserCard:
+
+```kotlin
+@Composable
+fun UserCard(user: User, modifier: Modifier = Modifier) {
+    // Używamy standardowej karty z Material 3
+    Card(
+        modifier = modifier.fillMaxWidth(), // Karta zajmie całą dostępną szerokość
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Delikatny cień
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        // Row układa elementy poziomo (obok siebie)
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically // Centrujemy zawartość w pionie
+        ) {
+            // Tymczasowy "Awatar" - kółko z pierwszą literą imienia
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = user.name.first().toString(), // Pobiera pierwszą literę
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+            // Pusty odstęp między awatarem a tekstem
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Kolumna układa teksty pionowo (jeden pod drugim)
+            Column {
+                Text(
+                    text = user.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = user.email,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+```
+
+
+MainActivity.kt:
+```kotlin
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            ToastJCTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    AdvancedListExample(
+                        users= sampleUsers,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+}
+
+// Model danych
+data class User(
+    val id: String,
+    val name: String,
+    val email: String
+)
+val sampleUsers = listOf(
+    User("1", "Jan Kowalski", "jan.kowalski@example.com"),
+    User("2", "Anna Nowak", "anna.nowak@example.com"),
+    User("3", "Piotr Wiśniewski", "piotr.wisniewski@example.com"),
+    User("4", "Katarzyna Wójcik", "katarzyna.wojcik@example.com"),
+    User("5", "Michał Kamiński", "michal.kaminski@example.com")
+)
+@Composable
+fun AdvancedListExample(users: List<User>, modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier,
+        // 1. Odstęp 12.dp między każdą kartą użytkownika
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        // 2. Wewnętrzny margines listy (16.dp z każdej strony)
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        // 3. Zaawansowane wywołanie items z użyciem klucza (key)
+        items(
+            items = users,
+            // KLUCZ: Wskazujemy, że unikalnym identyfikatorem jest ID użytkownika.
+            // Zabezpiecza to listę przed błędami podczas usuwania/sortowania!
+            key = { user -> user.id }
+        ) { user ->
+            // Rysujemy komponent dla konkretnego użytkownika
+            UserCard(user = user)
+        }
+
+        /* * ALTERNATYWA: Możesz też użyć wariantu z count (jak w poprzednim przykładzie):
+         * items(count = users.size, key = { index -> users[index].id }) { index ->
+         * UserCard(user = users[index])
+         * }
+         */
+    }
+}
+
+```
+
