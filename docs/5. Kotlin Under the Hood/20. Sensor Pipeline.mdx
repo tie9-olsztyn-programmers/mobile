@@ -1,0 +1,171 @@
+---
+id: project-02-sensor-pipeline
+title: "Project 01: The Sensor Pipeline (Data & Primitives)"
+sidebar_label: "02 Data & Primitives"
+---
+
+# Project 01: The Sensor Pipeline
+
+Welcome to the engineering approach to Kotlin. In modern software architecture,
+we don't just "store" data in variables; we build **pipelines** where data flows, transforms, and
+is eventually consumed by a user interface or a database.
+
+Before we dive into the theory, let's look at a working micro-program: a **Sensor Data Normalizer**.
+
+## 1. The Black Box: Sensor Pipeline
+
+Imagine an industrial temperature sensor that sends raw, highly precise, but messy data as text.
+Our application needs to receive it, convert it, compress it (by dropping decimals), and apply a random calibration factor.
+
+Run the code below in your mind (or your IDE):
+
+```kotlin
+fun main() {
+    // 1. Receiving raw data from a sensor
+    val rawSensorData: String = "2345.324231231"
+
+    // 2. Transforming text into a high-precision number
+    val preciseData: Double = rawSensorData.toDouble()
+
+    // 3. Downcasting to save memory (losing some precision)
+    val compressedData: Float = preciseData.toFloat()
+
+    // 4. Formatting for a simple UI (whole numbers only)
+    val uiDisplayData: Int = compressedData.toInt()
+
+    // 5. Generating a random noise factor (1 to 6)
+    val noiseFactor: Int = (1..6).random()
+
+    println("Raw Input: $rawSensorData")
+    println("UI Ready: $uiDisplayData")
+    println("With Noise: ${uiDisplayData + noiseFactor}")
+}
+
+```
+
+Output
+```
+Raw Input: 2345.324231231
+UI Ready: 2345
+With Noise: 2349
+```
+How did we go from a messy text string to a clean, mathematically processed integer without breaking the application?
+Let's deconstruct the pipeline.
+
+
+## Deconstruction: Under the Hood
+
+:::info **payload**
+Co to oznacza w programowaniu i IT?
+
+W inżynierii oprogramowania (szczególnie w sieciach, REST API i architekturze danych) `payload` to właściwe dane,
+na których nam zależy, po odrzuceniu całego technicznego "opakowania".
+
+Wyobraź sobie, że aplikacja mobilna pobiera z serwera dane o pogodzie.
+
+Paczka danych (np. plik JSON) zawiera mnóstwo technicznych informacji:
+- nagłówki HTTP,
+- statusy bezpieczeństwa,
+- tokeny autoryzacyjne.
+
+To wszystko to infrastruktura. Ale sama informacja `{"temperatura": 22}` to właśnie payload.
+
+:::
+
+
+### The Payload: Primitive Types
+In our pipeline, the data itself is the payload.
+Primitive types represent the **most basic, indivisible values in programming**.
+
+They are not complex objects; they hold direct values in memory.
+
+- Whole Numbers: Byte, Short, Int (default), Long.
+- Floating-Point Numbers: Float, Double (default, higher precision).
+- Booleans: Boolean (true or false).
+- Characters & Text: Char (single character, e.g., 'D'), String (text, e.g., "Fido").
+
+### The Valves: `val` vs `var`
+To create a data source, the compiler needs a name, a type, and a mutability modifier.
+
+:::tip Engineering Best Practice: Immutability
+In the code above, notice that we only used val.
+We never mutated (changed) existing data;
+we transformed it and passed it to a new val.
+This is crucial for building predictable data streams.
+:::
+
+- `val` (Value): The reference is frozen. Once assigned, it cannot be changed. This acts as a safe, unalterable source of data.
+- `var` (Variable): The reference is mutable. The data in this "cup" can be poured out and replaced. Use this sparingly to avoid side effects in complex algorithms.
+
+### Type Inference
+You don't always have to explicitly write the type.
+Kotlin is smart enough to deduce the type from the assigned value:
+
+```kotlin
+// The compiler automatically knows this is an Int
+val x = 5
+
+```
+
+## Data Transformation (Casting)
+Our pipeline relies on transforming one type of data into another.
+In older languages, the compiler might try to guess and do this automatically (often causing bugs).
+Kotlin enforces explicit conversion.
+
+## String to Number
+When receiving data from UI inputs, network requests, or text sensors, it arrives as a String. We must explicitly map it:
+
+```kotlin
+val stringAge: String = "22"
+val intAge: Int = stringAge.toInt()
+
+```
+
+### The "Leaky Bucket" Concept (Precision Loss)
+Look at steps 2, 3, and 4 in our app. We cast Double -> Float -> Int.
+
+:::warning Data Truncation
+Trying to save a large, precise value into a smaller memory container is like pouring a huge jug of coffee into an espresso cup.
+Some of it will fit, but the rest (the decimals) will spill over and be lost forever.
+:::
+
+When we cast `2345.324231231` to `Int`, the `.324231231` is completely truncated.
+
+
+### Generating Sources: Randomness
+Sometimes we don't receive data; we generate it on the fly.
+
+The old way (Java style):
+```kotlin
+// Generates a Double between 0.0 and 1.0 (e.g., 0.530186)
+println("${Math.random()}")
+
+// Math required to get an integer between 1 and 6
+println((Math.random() * 6).toInt() + 1)
+
+```
+The Modern Kotlin way:
+Using ranges `(..)` makes the code incredibly readable and eliminates off-by-one errors.
+```kotlin
+// Generates a random Int from 1 to 6 inclusive
+println((1..6).random())
+
+```
+
+## Looking Forward: The Transport Layer
+Today, we learned about the payload—individual drops of water (`Int`, `String`, `Boolean`).
+But in real-world applications, we process millions of these drops simultaneously.
+
+In the upcoming lessons, we will explore the three main paradigms for transporting our data payload:
+
+
+| Paradigm | How it handles data | Real-world Analogy | Kotlin Structure |
+| :--- | :--- | :--- | :--- |
+| **Eager** | Computes everything at once, storing it all in RAM. | A massive water tank. | `List`, `Array` |
+| **Lazy** | Computes elements sequentially, strictly on demand. | On-demand water pump. | `Sequence` |
+| **Stream** | Receives and processes data asynchronously over time. | A continuous river. | `Flow` |
+
+
+
+
+

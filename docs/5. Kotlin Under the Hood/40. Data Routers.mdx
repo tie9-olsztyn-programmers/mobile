@@ -1,0 +1,181 @@
+---
+id: project-02-data-routers
+title: "Project 02: Data Routers (Expressions)"
+sidebar_label: "04. Data Routers"
+---
+
+# Project 02: Data Routers (Expressions)
+
+In Project 01, we learned how to define our data **payload** (Primitive Types). But data sitting in a variable is useless. In modern software architecture, data must flow and transform based on specific conditions.
+
+Today, we will build **Data Routers**. We will learn how to intercept a piece of data, analyze its shape or value, and safely map it to a new result.
+
+## 1. The Black Box: The Smart Gateway
+
+Imagine an API gateway that receives incoming network requests. It needs to check the user's role and the server's status code to return a formatted message to the UI.
+
+Look at this concise piece of routing logic:
+
+```kotlin
+fun main() {
+    val userAge = 65
+    val httpStatus: Any = 404
+
+    // 1. Mapping a value based on a condition
+    val discountMultiplier = if (userAge < 18) 0.5 else if (userAge >= 65) 0.7 else 1.0
+
+    // 2. Routing based on patterns and types
+    val uiMessage = when (httpStatus) {
+        in 200..299 -> "🟢 Success! Discount applied: $discountMultiplier"
+        401, 403 -> "🟡 Error: Unauthorized."
+        404 -> "🔴 Error: Not Found."
+        is String -> "⚪ System Message: $httpStatus"
+        else -> "⚫ Critical: Unknown error."
+    }
+
+    println(uiMessage)
+}
+
+```
+Notice something missing? There are no curly braces `{ }` mutating variables. There is no v`var`.
+The data flows smoothly from the condition directly into our unalterable val containers. How does this work?
+
+## Deconstruction: Statements vs. Expressions
+To understand Kotlin's architecture, you must understand the difference between issuing an order and transforming data.
+
+### Statements (Instrukcje - The Old Way)
+A statement is a command that does something but returns nothing.
+It usually forces you to use var because it modifies data via "side effects".
+```kotlinvar status: String // 🔴 Warning: Mutable state
+if (score > 50) {
+    status = "Passed" // Mutating the variable
+} else {
+    status = "Failed"
+}
+
+```
+
+### Expressions (Wyrażenia - The Engineering Way)
+An expression is a piece of code that evaluates to a value.
+It acts like a pure machine in our pipeline:
+- input goes in,
+- result comes out.
+
+You can assign the entire block directly to a val.
+
+```kotlin // 🟢 Safe, immutable pipeline
+val status = if (score > 50) "Passed" else "Failed"
+
+```
+
+:::tip Expression-Oriented Syntax
+Kotlin is an expression-oriented language. This means almost every control structure
+(`if`, `when`, `try`-`catch`) returns a value.
+This drastically reduces boilerplate code and eliminates bugs caused by mutable states.
+:::
+
+
+## The if Valve (Data Mapping)
+In Kotlin, `if` is rarely used just to control the flow of the program.
+It is used as an `$O(1)$` mapping algorithm.
+If you have a more complex logic that requires multiple lines,
+the last line of the block is automatically returned as the result.
+
+```kotlin
+val age = 65
+
+val discount = if (age < 18) {
+    println("Log: Youth discount applied")
+    50  // This value is returned
+} else if (age >= 65) {
+    println("Log: Senior discount applied")
+    30  // This value is returned
+} else {
+    0   // Default return
+}
+
+```
+
+## The when Router (Pattern Matching)
+The when expression is Kotlin's ultimate data router.
+It replaces the clunky switch statements from older languages.
+It acts as an advanced State Machine for your UI or data streams.
+
+### Routing by Exact Match
+Used when your application is in a specific, known state (e.g., day of the week).
+
+```kotlin
+val dayOfWeek = 3
+val dayName = when (dayOfWeek) {
+1 -> "Monday"
+2 -> "Tuesday"
+3 -> "Wednesday"
+6, 7 -> "Weekend" // You can group cases!
+else -> "Invalid Day"
+}
+
+```
+
+
+### Routing by Ranges
+In data science or game logic, you rarely check for exact numbers.
+You check for ranges. when makes this algorithmic check completely readable.
+
+```kotlin
+val score = 85
+val grade = when (score) {
+    in 90..100 -> "A"
+    in 80..89 -> "B"
+    in 70..79 -> "C"
+    else -> "Failed"
+}
+```
+
+### Routing by Data Types (Polymorphism)
+When receiving data from the internet (e.g., JSON),
+you don't always know what type of payload arrived. when combined with is safely extracts
+and routes the data based on its physical shape in memory.
+
+
+```kotlinval payload: Any = "Hello"
+
+val typeDescription = when (payload) {
+    is Int -> "It's an Integer, we can multiply it: ${payload * 2}"
+    is String -> "It's Text, we can uppercase it: ${payload.uppercase()}"
+    is Boolean -> "It's a logical valve."
+    else -> "Unknown Type"
+}
+
+```
+
+:::info Under the Hood: Performance
+For exact matches, the Kotlin compiler optimizes `when` expressions
+into highly efficient bytecode (tableswitch or lookupswitch).
+This means finding the correct route often takes `$O(1)$` or `$O(\log n)$` time,
+making it significantly faster than a long chain of if-else statements.
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

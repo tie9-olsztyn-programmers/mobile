@@ -1,0 +1,58 @@
+---
+id: project-03-data-logistics-intro
+title: "Project 03: The Buffet, The Drive-Thru, and The River"
+sidebar_label: "03. Data Logistics (Intro)"
+---
+
+# Project 03: Data Logistics (A First Look)
+
+In the previous lesson, we learned about the **payload**—primitive data like `Int` or `String`. But an application rarely handles just one piece of data. Usually, we deal with hundreds, thousands, or even millions of items.
+
+Before we learn how to write the code for large datasets, we need to understand the **architecture of data flow**. In modern software engineering, there are three main ways to transport data.
+
+Let's step away from the code for a moment and look at how a restaurant serves food. This is exactly how your computer's RAM and CPU serve data.
+
+---
+
+## 1. The Eager Paradigm (The All-You-Can-Eat Buffet)
+
+Imagine a massive hotel breakfast buffet. The chefs wake up at 4:00 AM and cook exactly 100 scrambled eggs, 50 pancakes, and 200 sausages. They put everything on huge tables before the first guest even wakes up.
+
+* **How it works in programming:** The computer calculates and loads **all the data** at once.
+* **The Cost:** It takes a lot of time upfront (the CPU works hard before the app starts) and requires a massive table (it uses a lot of **RAM memory**).
+* **When to use it:** When the dataset is small and you need to access it instantly.
+* **Kotlin Structure:** `List`, `Array`.
+
+## 2. The Lazy Paradigm (The Drive-Thru)
+
+Now imagine a fast-food Drive-Thru. When you pull up to the window, the burgers are not ready. The chef is waiting for your order. You say "I want one burger," and the chef cooks exactly *one burger*. If you ask for a second one, they cook a second one.
+
+* **How it works in programming:** The computer does **nothing** until the application explicitly asks for the next item. It generates data strictly on demand, item by item.
+* **The Cost:** It saves a massive amount of table space (**low RAM** usage), but the application has to wait a millisecond for the CPU to "cook" each item when requested.
+* **When to use it:** When processing massive databases (e.g., 1,000,000 user records) where loading everything into RAM would crash the application.
+* **Kotlin Structure:** `Sequence`.
+
+## 3. The Stream Paradigm (The Sushi Conveyor Belt)
+
+Finally, imagine a sushi restaurant with a moving conveyor belt (or a river). The chef makes random plates of sushi and puts them on the belt. You just sit there. You don't ask for food; you just watch the belt. When a plate you like passes by, you react and grab it.
+
+* **How it works in programming:** The application doesn't control when the data arrives. It just sets up a "trap" (a listener) and waits asynchronously. The data source "pushes" new information whenever it wants.
+* **The Cost:** It requires modern, reactive architecture so the application doesn't freeze while waiting.
+* **When to use it:** This is the foundation of **modern User Interfaces**. Listening to button clicks, receiving live chat messages, or reading a live temperature sensor.
+* **Kotlin Structure:** `Flow`.
+
+---
+
+## Summary Checklist
+
+Even without writing the complex code yet, as a software engineer, you must know how to choose the right tool for the job:
+
+| Paradigm | How it works | Memory (RAM) | Good for... |
+| :--- | :--- | :--- | :--- |
+| **Eager** | All at once | 🔴 High | Small, static lists. |
+| **Lazy** | One by one, on demand | 🟢 Low | Massive databases. |
+| **Stream** | Whenever it arrives | 🟢 Low | Live sensors, UI clicks, Chat apps. |
+
+:::tip What's Next?
+For the next few lessons, we will focus exclusively on the **Eager** approach. We will learn how to build arrays and lists (our "buffet tables") before moving on to the more advanced Drive-Thru and Conveyor Belt architectures.
+:::
