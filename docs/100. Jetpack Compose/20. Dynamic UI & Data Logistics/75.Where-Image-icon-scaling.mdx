@@ -1,0 +1,125 @@
+---
+id: module-02-visual-payload
+title: "02. The Visual Payload: Image, Icon & Scaling"
+sidebar_label: "02. Visuals & ContentScale"
+---
+import useBaseUrl from "@docusaurus/useBaseUrl";
+
+# Loading the Visual Payload
+
+In Jetpack Compose, handling visuals isn't just about throwing a picture on the screen. It is an engineering problem:
+How do you fit a randomly sized, rectangular image into a perfectly structured UI frame without making it look terrible?
+
+Following the Top-Down methodology, before we look at the theory, let's look at the solution.
+
+## The Goal: The Dragon Scale Lab
+
+Imagine you are building a profile screen.
+You have a fixed 200x200 dp box, but you have no control over the shape of the image the user uploads.
+It might be extremely wide, extremely tall, or perfectly square.
+
+Create a new `Empty Activity` project. Here is a complete Compose screen that handles all three scenarios.
+Read the code and try to deduce how the `contentScale` parameter changes the behavior of the image.
+
+:::info Fetch images
+
+- <a href={useBaseUrl("/myImages/img_dragon_horizontal.png")} target="_blank" download className="button button--primary button--lg"> Pobierz Smoka </a>
+- <a href={useBaseUrl("/myImages/img_pacifier_vertical.png")} target="_blank"  download className="button button--primary button--lg"> Pobierz Smoczka </a>
+- <a href={useBaseUrl("/myImages/img_she_dragon_square.png")} target="_blank"  download className="button button--primary button--lg"> Pobierz Smoczycę </a>
+
+:::
+
+### Code
+
+```kotlin
+@Composable
+fun DragonScaleLesson() {
+    // 1. A Column that allows scrolling if items go off-screen
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+
+        // CASE 1: Wide Dragon + CROP
+        Text("1. Wide Dragon + CROP", fontWeight = FontWeight.Bold)
+        Image(
+            painter = painterResource(id = R.drawable.img_dragon_horizontal),
+            contentDescription = "Wide dragon",
+            contentScale = ContentScale.Crop, // Cuts the sides
+            modifier = Modifier
+                .size(200.dp)
+                .background(Color.Red)
+        )
+        Text("The head and tail might be cropped, but the frame is fully covered.", fontSize = 12.sp)
+
+        // CASE 2: Tall Pacifier + FIT
+        Text("2. Tall Pacifier + FIT", fontWeight = FontWeight.Bold)
+        Image(
+            painter = painterResource(R.drawable.img_pacifier_vertical),
+            contentDescription = "Tall pacifier",
+            contentScale = ContentScale.Fit, // Packs the whole image inside
+            modifier = Modifier
+                .size(200.dp)
+                .background(Color.Yellow)
+        )
+        Text("You see the whole pacifier, but there are empty yellow spaces.", fontSize = 12.sp)
+
+        // CASE 3: Square She-Dragon + FILL BOUNDS
+        Text("3. She-Dragon + FILL BOUNDS", fontWeight = FontWeight.Bold)
+        Image(
+            painter = painterResource(id = R.drawable.img_she_dragon_square),
+            contentDescription = "Square she-dragon",
+            contentScale = ContentScale.FillBounds, // Stretches like a rubber band
+            modifier = Modifier
+                .width(200.dp)
+                .height(100.dp) // Forcefully changing the frame to a flat rectangle
+                .background(Color.Green)
+        )
+        Text("The face is squashed and deformed.", fontSize = 12.sp)
+    }
+}
+```
+To see this in action, call DragonScaleLesson() inside your default Greeting component.
+But why does this work, and what tools are we actually using? Let's deconstruct the code backward.
+
+
+The Image component is designed for displaying "heavy" graphics. To use it, you must provide
+a Painter (the instruction on where to fetch the picture from) and a mandatory contentDescription for accessibility.
+
+
+### Deconstruction: The contentScale Parameter
+In our lab, we faced the core problem: How to put a differently shaped image into a rigid 200x200 pixel frame.
+Do you cut the sides off? Do you shrink it, accepting empty borders? Or do you stretch it and deform it?
+
+In Jetpack Compose, this decision is controlled by the contentScale parameter.
+
+
+| Mode (`ContentScale`) | XML Equivalent | How it works | When to use it? |
+| :--- | :--- | :--- | :--- |
+| **`ContentScale.Crop`** | `centerCrop` | **"Fill the frame"**. Scales the image to completely fill the container. Excess parts (top/bottom or sides) are cut off. | Backgrounds, avatars, decorative photos where cropping doesn't ruin the context. |
+| **`ContentScale.Fit`** | `fitCenter` | **"Show everything"**. Scales the image so it is fully visible, maintaining original proportions. Often creates empty bars (*letterboxing*). | Charts, logos, important diagrams that cannot be cropped. |
+| **`ContentScale.FillBounds`** | `fitXY` | **"Stretch it"**. Ignores proportions. Stretches the image horizontally and vertically to fill the frame exactly. | **Avoid!** It causes massive distortion (stretching/squashing). |
+| **`ContentScale.Inside`** | `centerInside` | Similar to `Fit`, but if the image is physically **smaller** than the frame, it does **not** enlarge it. It stays in its original size in the center. | Small icons inside large buttons or large containers holding small assets. |
+
+
+:::tip What is rememberScrollState()?
+In our code, we attached .verticalScroll(rememberScrollState()) to the main Column. A standard Column cannot be scrolled. This function:
+
+Creates a special ScrollState object.
+
+"Remembers" it across UI recompositions.
+
+This object acts as a counter that stores one crucial number: "How many pixels has the user scrolled down?"
+:::
+
+
+
+
+
+
+
+

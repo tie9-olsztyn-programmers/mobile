@@ -1,0 +1,146 @@
+---
+id: module-01-where-infrastructure
+title: "01. WHERE: The Infrastructure & Payload"
+sidebar_label: "01. WHERE: Architecture"
+---
+
+# WHERE: Designing the UI Infrastructure
+
+In the previous chapters, you learned the basic tools like `Row`, `Column`, and `Text`.
+Today, we are stepping up from building simple lines of text to designing complete, professional application screens.
+
+We are introducing the first rule of the **3 W's of Data Logistics: WHERE**.
+
+Before we explain the theory, let's look at the end result.
+
+## The Goal: A Professional User Card
+
+Imagine your boss asks you to build a screen that displays a User Profile.
+It shouldn't just be floating text; it needs a proper background, an app bar, a polished card with shadows, and an avatar.
+
+Here is the complete code for that screen. Read through it—even if you don't recognize every single component yet, try to guess what they do based on their names.
+
+```kotlin
+@Composable
+fun UserProfileScreen() {
+    // 1. The main floor plan
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Profile") }) }
+    ) { paddingValues ->
+
+        // 2. The main background
+        Surface(modifier = Modifier.padding(paddingValues)) {
+
+            // 3. The isolated container
+            Card(modifier = Modifier.padding(16.dp), elevation = CardDefaults.cardElevation(4.dp)) {
+
+                Row(modifier = Modifier.padding(16.dp)) {
+                    // 4. The Cargo (Payload)
+                    Image(
+                        painter = painterResource(id = R.drawable.avatar),
+                        contentDescription = "User Avatar"
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column {
+                        Text(text = "John Doe", style = MaterialTheme.typography.titleLarge)
+                        Text(text = "Software Engineer")
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+
+If you run this code, you get a beautiful, elevated card with an image and text, sitting perfectly below a top navigation bar.
+
+**But why did we write it this way?** Why didn't we just throw a `Column` on the screen and put an `Image` and `Text` inside?
+
+Let's deconstruct this code backward to understand the **"WHERE" architecture**.
+
+---
+
+## Deconstruction: The "WHERE" Architecture
+
+When handling data on a screen, you must separate the **Infrastructure** (WHERE the data lives) from the **Payload**
+(WHAT the data is).
+
+Think of your screen as an empty warehouse.
+You don't just dump cargo on the floor; you build the floor plan and sturdy shelves first.
+
+### Level 1: The Blueprint (`Scaffold`)
+If you build a full screen in Android, a `Column` is not enough. You need to know **WHERE** the top navigation goes, **WHERE** the bottom menu sits, and **WHERE** the main content belongs.
+* **What it does:** `Scaffold` is your master floor plan. It calculates the padding for system bars (like the camera notch) and provides dedicated slots for UI elements.
+* **Why we need it:** It ensures your app looks like a real app with standard Material Design boundaries, not just floating text.
+
+### Level 2: The Warehouse Floor (`Surface`)
+Inside the `Scaffold`, we used a `Surface`.
+* **What it does:** It defines the fundamental background of your app.
+* **Why we need it:** It sets the baseline rules for WHERE things are drawn. For example, if the user's phone is in Dark Mode, `Surface` automatically turns its background black and forces all the text inside it to turn white.
+
+### Level 3: The Shelf (`Card`)
+We didn't put the User Data directly on the `Surface`. We wrapped it in a `Card`.
+* **What it does:** A `Card` is a specialized, upgraded container. It adds rounded corners and a shadow (elevation / Z-index).
+* **Why we need it:** By putting the user data inside a `Card`, we visually detach it from the background, telling the user's brain: *"Everything inside this box belongs to one single logical entity."*
+
+### Level 4: The Payload (`Image` & `Icon`)
+Finally, we load the cargo onto our shelf. Text (`String`) is a common payload, but visual data is crucial for modern UIs.
+* **`Image` (Heavy Cargo):** These are bitmaps, photos, or complex illustrations (like the user's avatar). They consume a lot of RAM, which is why placing them properly on our "shelves" is so important for performance.
+* **`Icon` (Lightweight Cargo):** (Not used in the snippet, but part of the payload family). These are lightweight, vector-based, mathematical symbols, perfect for small buttons like a "Settings" gear.
+
+| Feature | Image (Heavy Cargo) | Icon (Lightweight Cargo) |
+| :--- | :--- | :--- |
+| **Source** | Pixels (JPG, PNG, WebP) | Vectors (SVG, XML) |
+| **Coloring** | Hard (requires color filters) | Easy (using the `tint` parameter) |
+| **Quality** | Loses quality when zoomed in | Always perfectly sharp |
+| **Best for...** | Product photos, user avatars, backgrounds | "Back" arrows, trash cans, UI symbols |
+
+
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Summary Checklist
+
+By using the Top-Down approach, we see that modern UI development isn't just about placing data on a screen. It's about designing the **WHERE**:
+
+* **WHERE** does the screen start and end? → `Scaffold`
+* **WHERE** is the background? → `Surface`
+* **WHERE** is the boundary of the user profile? → `Card`
+* **WHAT** is inside? → The Payload (`Text`, `Image`, `Icon`)
+
+:::tip Next Step
+We now know **WHERE** to put the data. But what if the boss asks you to display **10,000 User Cards** instead of just one?
+If we load them all at once, the phone will crash out of memory.
+In the next lesson, we will introduce the second rule of Data Logistics: **WHEN** (Evaluation).
+:::
+
+
+
+:::tip Next Step
+We now know **WHERE** to put the data. But before we worry about loading **10,000 User Cards** at once (the **WHEN** rule),
+we have one more architectural problem to solve.
+
+How do we make sure our visual cargo (`Image`) perfectly fits the physical shelves (`Card`)
+we just built without breaking the UI? In the next section, we will learn the rules of Image Scaling (`ContentScale`).
+:::
+
+
+
+
+
+
