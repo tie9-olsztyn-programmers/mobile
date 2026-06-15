@@ -6,13 +6,19 @@ sidebar_label: "04. Data Routers"
 
 # Project 02: Data Routers (Expressions)
 
-In Project 01, we learned how to define our data **payload** (Primitive Types). But data sitting in a variable is useless. In modern software architecture, data must flow and transform based on specific conditions.
+In Project 01, we learned how to define our data **payload** (Primitive Types).
+But data sitting in a variable is useless.
+In modern software architecture, data must flow and transform based on specific conditions.
 
-Today, we will build **Data Routers**. We will learn how to intercept a piece of data, analyze its shape or value, and safely map it to a new result.
+Today, we will build **Data Routers**.
+We will learn how to intercept a piece of data, analyze its shape or value,
+and safely map it to a new result.
 
 ## 1. The Black Box: The Smart Gateway
 
-Imagine an API gateway that receives incoming network requests. It needs to check the user's role and the server's status code to return a formatted message to the UI.
+Imagine an API gateway that receives incoming network requests.
+It needs to check the user's role and the server's status code to return
+a formatted message to the UI.
 
 Look at this concise piece of routing logic:
 
@@ -37,11 +43,14 @@ fun main() {
 }
 
 ```
-Notice something missing? There are no curly braces `{ }` mutating variables. There is no v`var`.
-The data flows smoothly from the condition directly into our unalterable val containers. How does this work?
+Notice something missing? There are no curly braces `{ }` mutating variables.
+There is no v`var`.
+The data flows smoothly from the condition directly into our unalterable val containers.
+How does this work?
 
 ## Deconstruction: Statements vs. Expressions
-To understand Kotlin's architecture, you must understand the difference between issuing an order and transforming data.
+To understand Kotlin's architecture, you must understand the difference between
+issuing an order and transforming data.
 
 ### Statements (Instrukcje - The Old Way)
 A statement is a command that does something but returns nothing.
@@ -155,9 +164,30 @@ This means finding the correct route often takes `$O(1)$` or `$O(\log n)$` time,
 making it significantly faster than a long chain of if-else statements.
 :::
 
+----
 
 
+## Summary Checklist: Expressions and The 3 W's
 
+By moving from old-school *Statements* (mutating data) to modern *Expressions* (transforming data),
+we are upgrading our Data Logistics. Here is how `if` and `when` routers fit into our
+**3 W's Architecture**:
+
+* **WHERE (The Infrastructure):** Expressions allow us to route data directly into
+secure, unalterable `val` containers. We no longer need empty, vulnerable `var` variables
+lying around waiting to be mutated. The result is safely locked in its final destination.
+* **WHEN (The Evaluation):** Standard `if` and `when` expressions evaluate *eagerly* ($O(1)$ time). The CPU reaches the router, instantly calculates the condition, and produces the final payload before moving to the next line of code.
+* **WHO (The Flow):** As we move into building interactive UIs, `when` becomes the ultimate
+brain of our *Push* streams. When the system pushes a new state
+(e.g., "Loading", "Success", "Error"), a `when` router intercepts that event and
+instantly pushes the correct visual payload to the screen.
+
+:::tip Next Step
+Now that we know how to define our payload and route it safely,
+it's time to build the actual warehouse.
+In the next project, we will dive into **Eager Structures** (`List`, `Array`)
+and learn how to store and organize thousands of items in memory.
+:::
 
 
 

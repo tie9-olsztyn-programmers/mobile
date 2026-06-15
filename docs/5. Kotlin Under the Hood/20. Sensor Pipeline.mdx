@@ -152,20 +152,34 @@ println((1..6).random())
 
 ```
 
-## Looking Forward: The Transport Layer
-Today, we learned about the payload—individual drops of water (`Int`, `String`, `Boolean`).
-But in real-world applications, we process millions of these drops simultaneously.
+## Looking Forward: The 3 W's of Data Logistics
 
-In the upcoming lessons, we will explore the three main paradigms for transporting our data payload:
+Today, we learned about the **payload**—individual pieces of data like an `Int`, a `String`,
+or a single `Image`.
 
+But in real-world applications, you rarely deal with just one item.
+You process thousands or millions of them simultaneously. If you try to load 10,000 images at once,
+your application will immediately crash out of memory.
 
-| Paradigm | How it handles data | Real-world Analogy | Kotlin Structure |
+To solve this, modern software engineering relies on strict architectural rules.
+In the upcoming lessons, we will explore the architecture of data flow using
+**The 3 W's of Data Logistics**:
+
+| The Rule | The Architectural Question | Real-world Analogy | Compose & Kotlin Tools |
 | :--- | :--- | :--- | :--- |
-| **Eager** | Computes everything at once, storing it all in RAM. | A massive water tank. | `List`, `Array` |
-| **Lazy** | Computes elements sequentially, strictly on demand. | On-demand water pump. | `Sequence` |
-| **Stream** | Receives and processes data asynchronously over time. | A continuous river. | `Flow` |
+| **1. WHERE** <br/>*(Structures)* | **Where** is the data physically organized on the screen and in memory? | The Warehouse (Floor plan & sturdy shelves) | `Scaffold`, `Card`, `List` |
+| **2. WHEN** <br/>*(Evaluation)* | **When** does the CPU actually process the data? (All at once vs. On-demand) | The Buffet (Eager) vs. <br/> The Drive-Thru (Lazy) | `Column` (Eager) vs. <br/> `LazyColumn` (Lazy) |
+| **3. WHO** <br/>*(Data Flow)* | **Who** controls the pace of new data arriving? (You vs. The System) | The Waiter (Pull) vs. <br/> The Conveyor Belt (Push) | Sync Streams vs. <br/> Async `Flow` |
 
+:::tip Next Module
+So far, we have been working in the console, handling single pieces of data like
+one `Int` or one `String`. But what happens when your application needs to process 10,000
+user records at the same time?
 
-
+Before we write the code for massive datasets, we need a proper mental model.
+In the next lesson, we will step away from the console for a moment
+to explore **The 3 W's of Data Logistics**—the fundamental rules of how data is
+stored, evaluated, and transported inside your computer's memory.
+:::
 
 

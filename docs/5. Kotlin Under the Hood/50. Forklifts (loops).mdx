@@ -1,0 +1,152 @@
+---
+id: project-03-manual-loops
+title: "Project 03: The Data Forklifts (Loops)"
+sidebar_label: "05. Manual Loops"
+---
+
+# Project 03: The Data Forklifts (Loops)
+
+In the previous lesson, we built Data Routers using `if` and `when` expressions.
+We can successfully intercept and route a *single* piece of data.
+
+But what if we need to repeat an action 100 times?
+What if we need to scan through thousands of records?
+Writing the same line of code over and over is not an option.
+
+Before we dive into building massive data warehouses (**WHERE**),
+we need to learn how to drive the forklifts.
+We need **Loops**—the engines that automate repetitive tasks.
+
+## The Goal: System Boot Sequence
+
+Following our Top-Down approach, let's look at a complete, automated system boot sequence.
+Read the code and try to guess how the program repeats tasks, counts down, and skips specific steps.
+
+```kotlin
+fun main() {
+    println("--- 🚀 System Boot Sequence ---")
+
+    // 1. Counting down
+    for (i in 5 downTo 1) {
+        println("Booting in $i...")
+    }
+
+    println("\n--- 📡 Scanning Frequencies ---")
+
+    // 2. Scanning with jumps and skipping
+    for (freq in 1..10 step 2) {
+        if (freq == 7) {
+            println("⚠️ Interference at $freq MHz. Skipping...")
+            continue // Emergency override
+        }
+        println("Scanning frequency: $freq MHz")
+    }
+
+    println("\n--- 🔋 Charging Battery ---")
+
+    // 3. Conditional repeating
+    var charge = 10
+    while (charge < 50) {
+        println("Battery at $charge%. Charging...")
+        charge += 20
+    }
+
+    println("✅ System Ready.")
+}
+
+```
+
+If you run this code, the console will print a dynamic, multi-step process without us having to write println() thirty times.
+Let's deconstruct the three main types of loops Kotlin offers to achieve this.
+
+
+## Deconstruction: The Loop Engines
+In Kotlin, we have three main types of loops:
+- `for`,
+- `while`, and
+- `do-while`.
+
+They allow us to execute the same block of code multiple times until a specific condition is met.
+
+
+### 1. The Predictable Worker: `for` Loop
+The `for` loop is used when you know exactly how many times you want to repeat an action,
+or when you are moving through a known range of items.
+
+```kotlin
+for (element in collection) {
+    // Code executed for each element
+}
+```
+
+**Modifiers in action**:
+As seen in our boot sequence, Kotlin's `for` loop has incredibly readable English-like syntax
+for ranges:
+- `1..5` -> Counts up: 1, 2, 3, 4, 5.
+- `5 downTo 1` -> Counts strictly backward: 5, 4, 3, 2, 1.
+- `1..10 step 2` -> Jumps by two: 1, 3, 5, 7, 9.
+
+(Sneak Peek: Soon, we will use `for` loops to iterate over actual Data Structures like `Array`s:
+`for (name in names)`).
+
+### 2. The Conditional Worker: while Loop
+The `while` loop doesn't care about ranges.
+It runs continuously as long as a specific condition remains true.
+Think of it as an if statement that keeps repeating itself.
+```kotlin
+var i = 5
+while (i > 0) {
+    println(i)
+    i-- // Don't forget to change the state, or it will run forever!
+}
+```
+
+
+### 3. "Shoot First, Ask Later": `do-while` Loop
+The `do-while` loop is almost identical to the while loop, with one massive difference:
+it guarantees the code will run at least once,
+even if the condition is false from the very beginning.
+It executes the block first, and checks the condition after.
+```kotlin
+var i = 5
+do {
+    println(i)
+    i--
+} while (i > 0)
+```
+
+
+## Valve Overrides: break and continue
+Sometimes, you need to alter the flow of a loop from the inside.
+We use two emergency keywords for this:
+- `break`: The kill switch.
+It instantly destroys the loop and stops all future iterations, no matter what.
+- `continue`: The skip button.
+As seen in our frequency scanner (freq == 7), it stops the current iteration and instantly jumps to the next one.
+
+---
+
+Summary Checklist and The 3 W's
+How do manual loops fit into our 3 W's of Data Logistics?
+
+Loops are our primitive engine for the WHO (Data Flow).
+Right now, we are manually writing code to "pull" numbers from a range, one by one.
+
+Later, we will use these loops to navigate the WHERE (Data Structures),
+scanning through thousands of stored elements.
+
+:::tip Next Step
+We have the data (`payload`), we can route it (`when`), and we can process it in bulk (`loops`).
+Now, it is finally time to build the actual warehouse.
+In the next project, we will dive into Eager Structures (`Array`, `List`) and
+learn how to store multiple items in memory safely!
+:::
+
+
+
+
+
+
+
+
+
