@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmobile=globalThis.webpackChunkmobile||[]).push([[8491],{8491(e,a,b){b.d(a,{createPacketServices:()=>c.$});var c=b(9773);b(1400)}}]);
