@@ -1,0 +1,148 @@
+---
+id: project-07-processing-pipelines
+title: "Project 07: The Assembly Line (Filter & Map)"
+sidebar_label: "09. Filter & Map Pipelines (4W2H)"
+---
+
+# 1. Top-Down: The Assembly Line
+
+Imagine a factory that produces smartphones.
+At the end of the production line, there is a basket full of devices. Some are perfectly fine,
+but some have cracked screens.
+
+Before we send them to the store, we need to do two things:
+1. **Throw away** the broken phones.
+2. **Package** the good phones into boxes with price tags.
+
+Instead of writing complex, nested `for` loops to do this,
+modern programming gives us an elegant **Assembly Line** (a pipeline).
+We just put two "Bots" (Arrow Functions) on the conveyor belt.
+
+```kotlin
+val phones = listOf("Good Phone", "Broken Phone", "Good Phone", "Broken Screen")
+
+fun main() {
+    val readyForStore = phones
+        .filter { it.startsWith("Good") } // Step 1: The Bouncer (Keep only good ones)
+        .map { "[$it in a Box - $999]" }  // Step 2: The Packager (Wrap them up)
+
+    // Let's see the final result:
+    readyForStore.forEach { println(it) }
+    // Prints:
+    // [Good Phone in a Box - $999]
+    // [Good Phone in a Box - $999]
+}
+
+```
+What just happened? We took raw data and passed it through two processing stations.
+Let's break down exactly what filter and map do,
+because confusing them is the #1 mistake made by beginners.
+
+
+## 1. The Bouncer: `filter { }`
+The `filter` function acts like a strict bouncer at a club.
+It looks at every single item in your list and asks one simple question: "Should I keep this?"
+
+:::tip The Golden Rules of `filter`:
+- The **Input**: A collection of items.
+- The Lambda (The Bot): MUST return a Boolean (`true` or `false`).
+- If `true`: The item goes into the new list.
+- If `false`: The item is permanently dropped.
+- The **Output**: A list that is smaller than or equal to the original list.
+- **The Rule of Identity**:
+    - filter never changes the items themselves.
+    - An `Int` goes in, an `Int` comes out.
+    - It only decides who survives.
+
+:::
+
+### Practical Examples:
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+fun main() {
+    // Keep only numbers that divide by 2 without a remainder
+    val evens = numbers.filter { it % 2 == 0 }
+    println("Evens: $evens")  // Prints: [2, 4, 6, 8]
+
+    // Keep only big numbers
+    val greaterThanFive = numbers.filter { it > 5 }
+    println("Bigger than 5: $greaterThanFive")  // Prints: [6, 7, 8, 9]
+}
+```
+
+## 2. The Transformer: map { }
+
+If `filter` is the Bouncer, `map` is the Translator or Factory Worker.
+It does not care if the item is good or bad.
+It takes every single item and transforms it into something completely new.
+
+
+:::tip The Golden Rules of map:
+- The **Input**: A collection of items.
+- The Lambda (The Bot): Takes the item and returns a **new value** (often a completely different type).
+- The **Output**:
+    - A list that is EXACTLY the same size as the original list.
+    - If 5 items go in, 5 items come out.
+- The **Rule of Identity**:
+    - `map` changes the WHAT.
+    - You can put `Int`s in, and get `String`s out.
+
+:::
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5)
+
+fun main() {
+    // Transform: Multiply every number by 2
+    val doubled = numbers.map { it * 2 }
+    println("Doubled: $doubled")  // Prints: [2, 4, 6, 8, 10]
+
+    // Transform: Change Numbers (Int) into text (String)
+    val asStrings = numbers.map { "Number: $it" }
+    println("Strings: $asStrings")
+    // Prints: [Number: 1, Number: 2, Number: 3, Number: 4, Number: 5]
+}
+
+```
+
+## 3. The Ultimate Cheat Sheet
+
+If you are ever confused about which one to use, look at this table:
+
+| Feature | `filter { }` (The Bouncer) | `map { }` (The Transformer) |
+| :--- | :--- | :--- |
+| **Goal** | To remove unwanted items. | To change items into something else. |
+| **Output Size** | Usually **smaller** than input. | **Always exactly the same** as input. |
+| **Lambda Must Return** | `Boolean` (`true` / `false`) | Anything (The new transformed value) |
+| **Changes the Type?** | **NO.** (List of `Int` remains List of `Int`) | **YES.** (List of `Int` can become List of `String`) |
+
+
+
+
+## 4. Architecture Check: Pipelines in the 4W2H Model
+How do standard collection pipelines (`filter` and `map`)
+fit into our 4W2H Data Logistics framework? They are the ultimate tools for manipulating
+the WHAT and standardizing the WHEN, but they also impact memory and state.
+
+| Dimension | Question | The Architectural Impact of Pipelines (`filter` & `map`) |
+| :--- | :--- | :--- |
+| **0. WHAT** <br/>*(Domain)* | What are we passing? | **The Shape Shifters.** `map` is specifically designed to change the *WHAT*. It bridges layers (e.g., converting a raw database DTO into a clean Domain Object for the UI). |
+| **1. WHERE** <br/>*(State)* | Where does it live? | **Temporary RAM (The Pocket).** Standard pipelines *never* modify the original list. They create brand-new, independent lists in memory for every step. |
+| **2. WHEN** <br/>*(Evaluation)* | When is it processed? | **The Buffet Strategy (Eager).** Standard `.filter` and `.map` process the *entire list immediately*. If you have 10,000 items, `.map` cooks all 10,000 before moving to the next line. |
+| **3. WHO** <br/>*(Data Flow)* | Who initiates? | **Sequential Pull (The Assembly Line).** The CPU pulls the raw data synchronously through each station (`filter` then `map`) until the final product is completely ready. |
+| **4. HOW** <br/>*(Reactivity)* | How does UI react? | **Passive Execution (The Silent Ledger).** Running a pipeline doesn't automatically redraw the screen. To make it reactive, you must assign the pipeline's final result to a reactive holder (like `State<T>` in Compose). |
+| **5. HOW LONG** <br/>*(Lifecycle)* | How long does it survive? | **Extremely Volatile (Garbage Collection).** Intermediate lists created between chained operators (e.g., the output of `filter` right before `map` takes it) live only for a few milliseconds before being permanently destroyed. |
+
+## Summary
+You now have the two most important tools in modern data processing.
+
+Use `filter` to clean your data and remove the garbage.
+
+Use `map` to shape the remaining data into exactly the format your application needs.
+
+Once you master chaining them together, you will rarely need to write a traditional for loop again.
+
+
+
+

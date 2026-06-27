@@ -1,91 +1,129 @@
 ---
-id: project-03-data-logistics-intro
-title: "Project 03: The Warehouse, The Kitchen, and The Conveyor Belt"
-sidebar_label: "03. Data Logistics (Intro)"
+id: project-03-data-4w2h-intro
+title: "Project 03: 4W2H Data Logistics – What, Where, and How Data Flows"
+sidebar_label: "03. 4W2H Data Flow"
 ---
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
-# Project 03: Data Logistics (A First Look)
+# Project 03: The 4W2H of Data Logistics
 
-In the previous lesson, we learned about the **payload**—primitive data like `Int` or `String`.
-But an application rarely handles just one piece of data. Usually, we deal with hundreds, thousands, or even millions of items.
+W poprzedniej lekcji poznaliśmy **ładunek (payload)** — proste dane, takie jak `Int` czy `String`. Jednak aplikacja rzadko operuje na pojedynczych informacjach. Zazwyczaj mamy do czynienia z setkami, tysiącami, a nawet milionami elementów.
 
-Before we learn how to write the code for large datasets, we need to understand the **architecture of data flow**.
-A common mistake in programming is mixing up *where* data lives, *when* it's processed, and *how* it travels.
+Zanim przejdziemy do pisania kodu dla tak dużych zbiorów, musimy zrozumieć **architekturę przepływu danych**. Jednym z najczęstszych błędów popełnianych przez początkujących programistów jest mylenie tego, *w jakiej formie* są dane, *gdzie* one żyją, *kiedy* są przetwarzane i *jak* podróżują.
 
-Let's step away from the code for a moment and look at how a massive restaurant operates.
-This is exactly how your computer's RAM and CPU serve data. We need to answer three fundamental questions:
-- **Where**,
-- **When**,
-- **Who**.
+Odejdźmy na chwilę od kodu i spójrzmy, jak funkcjonuje potężna restauracja lub centrum logistyczne. Dokładnie w ten sam sposób Twój procesor i pamięć RAM obsługują dane. Jako inżynierowie musimy odpowiedzieć na 6 fundamentalnych pytań, znanych jako model **4W2H**:
+- **What** (Co?), **Where** (Gdzie?), **When** (Kiedy?), **Who** (Kto?), **How** (Jak?), **How Long** (Jak długo?).
 
 ---
 
-## 1. Data Structures: The Warehouse (WHERE is the data?)
-Before you can cook, you need to store your ingredients.
-Data structures define how bits are physically or logically organized in the computer's **RAM memory**.
+## 0. The Domain: WHAT are we processing?
+Zanim cokolwiek ugotujemy, musimy wiedzieć, z jakim składnikiem pracujemy. Ten wymiar określa stopień skomplikowania naszych danych.
+* **The Sticky Note (Prymitywy):** Krótka, prosta informacja, np. `true/false` lub pojedyncza liczba. Ulotna i prosta w obsłudze.
+* **The Organized Binder (Obiekty Złożone):** Kompletny przepis (np. obiekt `Student` zawierający imię, nazwisko i oceny). Musi być uporządkowany i mieć ścisłą strukturę.
+* **The Sealed Package (DTO - Data Transfer Object):** Paczka kurierska z surowymi składnikami prosto z hurtowni (z serwera/bazy danych). Zanim jej użyjemy w kuchni, musimy ją rozpakować (zdeserializować).
 
-* **Linear Structures (The Aisle):** Ingredients are placed sequentially on a long shelf, one after another. You walk down the aisle from start to finish.
-  * *Kotlin Examples:* `Array`, `List`.
-* **Non-Linear Structures (The Recipe Tree):** Ingredients are organized in complex relationships, like a hierarchy of sub-recipes or a web of categories.
-  * *Kotlin Examples:* `Map`, `Set`, Trees.
+## 1. State & Storage: WHERE does the data live?
+Zanim zaczniesz gotować, musisz przechować składniki. Ten wymiar definiuje, jak i gdzie dane są fizycznie zorganizowane.
+* **The Pocket (Zmienne Lokalne):** Kucharz trzyma przepis w kieszeni fartucha. Dostęp ma tylko on, a dane znikają, gdy kończy zmianę.
+* **The Office (ViewModel / Stan Globalny):** Tablica korkowa w biurze menadżera. Wielu kucharzy i kelnerów ma do niej dostęp, a dane przetrwają krótkie zamieszanie na sali.
+* **The Archive (Baza Danych):** Główny magazyn w piwnicy. Nawet jeśli restauracja straci prąd, dane tam zostaną.
 
-## 2. Evaluation Strategies: The Kitchen (WHEN do we cook?)
-This defines when the **CPU** actually does the work to process or calculate the data.
+## 2. Evaluation Strategies: WHEN do we cook?
+To definiuje, kiedy **CPU** faktycznie wykonuje pracę polegającą na przetworzeniu danych.
 
 ### The Eager Paradigm (The All-You-Can-Eat Buffet)
-The chefs wake up at 4:00 AM and cook exactly 100 scrambled eggs and 50 pancakes. They put everything on huge tables before the first guest even wakes up.
-* **How it works:** The computer calculates and loads **all the data** at once. If you filter a list of 10,000 items, it processes all 10,000 before moving to the next line of code.
-* **The Cost:** It takes a lot of time upfront and requires a massive table (high **RAM** usage).
-* **When to use it:** Small, static datasets that need instant access.
+Kucharze wstają o 4:00 rano i smażą dokładnie 100 jajecznic i 50 naleśników. Wykładają wszystko na ogromne stoły, zanim pierwszy gość w ogóle się obudzi.
+* **Jak to działa:** Komputer oblicza i ładuje **wszystkie dane** od razu. Jeśli filtrujesz listę 10 000 elementów, procesor przetwarza wszystkie 10 000 przed przejściem do kolejnej linijki kodu.
+* **Koszt:** Wymaga dużo czasu na start i gigantycznego stołu (wysokie zużycie **RAM**).
+* **Kiedy używać:** Małe, statyczne zbiory danych, które wymagają natychmiastowego dostępu (np. załadowane z góry menu restauracji).
 
 ### The Lazy Paradigm (The Drive-Thru)
-When you pull up to the window, the burgers are not ready.
-The chef is waiting for your order. You say "I want one burger," and the chef cooks exactly *one burger*.
-* **How it works:** The computer does **nothing** until the application explicitly asks for the next item. It generates data strictly on demand.
-* **The Cost:** It saves a massive amount of table space (low RAM), but the app waits a millisecond for the CPU to "cook" each requested item.
-* **When to use it:** Processing massive datasets where loading everything at once would crash the application.
-* **Kotlin Structure:** `Sequence`.
+Kiedy podjeżdżasz do okienka, burgery nie są gotowe. Kucharz czeka na Twoje zamówienie. Mówisz "chcę jednego burgera", a kucharz smaży dokładnie *jednego burgera*.
+* **Jak to działa:** Komputer **nie robi nic**, dopóki aplikacja wyraźnie nie poprosi o kolejny element. Generuje dane ściśle na żądanie.
+* **Koszt:** Oszczędza mnóstwo miejsca na stołach (niski RAM), ale aplikacja czeka ułamek sekundy na "usmażenie" każdego kolejnego elementu.
+* **Kiedy używać:** Przetwarzanie potężnych zbiorów danych (np. nieskończona lista postów), gdzie załadowanie wszystkiego od razu zawiesiłoby system.
 
-## 3. Data Flow & Streams: The Delivery (WHO sets the pace?)
-A **Stream** is not a storage warehouse; it is the transportation system (the pipeline).
-Pipelines can be driven in two very different ways based on who controls the flow.
+## 3. Data Flow: WHO sets the pace?
+Strumień (Stream) to nie magazyn; to system transportowy. Rurociągi mogą być napędzane na dwa zupełnie różne sposoby, w zależności od tego, kto kontroluje przepływ.
 
-### Sync Stream / Pull Model (The Waiter)
-You sit at the table. You are in control. You say, "Bring me the next dish," and the waiter brings it. You eat it, then ask for the next.
-* **How it works:** The application "pulls" data from a static source (like a large database) one by one, dragging it through lazy filters. You control the pace.
-* **Kotlin Structure:** Standard Kotlin `Sequence` chains.
+### Pull Model (The Waiter)
+Siedzisz przy stoliku. Jesteś w pełni decyzyjny. Mówisz: "Przynieś mi kolejne danie", a kelner to robi. Zjadasz i prosisz o następne.
+* **Jak to działa:** Aplikacja synchronicznie "wyciąga" dane ze źródła jedna po drugiej. Ty kontrolujesz tempo (np. klikając "Pokaż więcej").
 
-### Async Stream / Push Model (The Sushi Conveyor Belt)
-The chef makes random plates of sushi and puts them on a moving belt. You just sit there and watch. When a plate you like passes by, you react and grab it.
-* **How it works:** The application doesn't control when the data arrives. It sets up a listener and waits asynchronously. The outside world "pushes" new information whenever it wants.
-* **When to use it:** Listening to a Discord bot waiting for a `/` slash command, reading live temperature from a BME280 sensor, or reacting to UI button clicks in Jetpack Compose.
-* **Kotlin Structure:** `Flow`.
+### Push Model (The Sushi Conveyor Belt)
+Kucharz robi losowe talerze sushi i kładzie je na ruchomej taśmie. Ty po prostu siedzisz i obserwujesz. Kiedy przejeżdża talerz, który Ci się podoba, reagujesz i go łapiesz.
+* **Jak to działa:** Aplikacja nie kontroluje, kiedy przyjdą dane. Ustawia "nasłuchiwacza" i czeka asynchronicznie. Zewnętrzny świat "wpycha" nowe informacje, kiedy tylko chce.
+* **Kiedy używać:** Odbieranie wiadomości na czacie, odczyt temperatury z czujnika, reagowanie na kliknięcia użytkownika.
+
+## 4. Reactivity: HOW does the UI know?
+Kiedy w kuchni kończy się łosoś, jak sala dowiaduje się o zmianie w menu?
+* **The Silent Ledger (Zwykła zmienna):** Trzeba samemu pójść do kuchni i zapytać. Interfejs się nie zaktualizuje, dopóki ręcznie go nie odświeżysz.
+* **The PA System (Stan / Radiowęzeł):** Kucharz krzyczy przez głośnik: "Brak łososia!". Interfejs aplikacji natychmiast, automatycznie i samodzielnie podmienia pozycję w menu na ekranach wszystkich klientów.
+
+## 5. Lifecycle: HOW LONG does it survive?
+* **Short-term Memory (Pamięć ulotna):** Zamówienie, które kelner ma tylko w głowie. Obrócenie ekranu telefonu (lub restart aplikacji) to potknięcie kelnera – dane przepadają na zawsze.
+* **The Safe (Trwałość):** Zapisanie zamówienia na twardym dysku lub w chmurze. Nawet wymiana telefonu na nowy pozwoli odzyskać te informacje.
 
 ---
 
-## Summary Checklist
+## The 4W2H Framework in Practice
 
-Even without writing the complex code yet, as a software engineer, you must know how to choose the right tool for the job:
+Jako inżynier oprogramowania, musisz potrafić dobrać odpowiednie narzędzie do każdego z tych 6 wymiarów. Wybierz swój stos technologiczny poniżej, aby zobaczyć, jak te koncepcje przekładają się na konkretny kod:
 
-| Concept | The Question | Examples & Tools |
-| :--- | :--- | :--- |
-| **Data Structure** | **WHERE** is it stored? | Linear (`List`), Non-linear (`Map`). |
-| **Evaluation** | **WHEN** is it computed? | Eager (Buffet), Lazy (Drive-thru). |
-| **Flow (Pull)** | **WHO** controls the pace? | You pull data when ready (Sync Streams). |
-| **Flow (Push)** | **WHO** controls the pace? | Source pushes data to you (Async `Flow`). |
+<Tabs>
+    <TabItem value="concept" label="Zrozum Koncepcję" default>
 
+        | Wymiar | Pytanie Architektoniczne | Metafora (Świat Rzeczywisty) |
+        | :--- | :--- | :--- |
+        | **0. WHAT** | Co dokładnie przetwarzasz? | Notatka na dłoni vs Uporządkowany Skoroszyt |
+        | **1. WHERE** | Gdzie żyją te dane? | Kieszeń (Prywatne) vs Magazyn (Globalne) |
+        | **2. WHEN** | Kiedy ładujemy dane? | Bufet (Wszystko na raz) vs Drive-Thru (Na żądanie) |
+        | **3. WHO** | Kto inicjuje transport? | Kelner (Ty pytasz) vs Taśmociąg (Samo przyjeżdża) |
+        | **4. HOW** | Jak UI wie o zmianie? | Cichy Rejestr (Sprawdź sam) vs Radiowęzeł (Automatycznie) |
+        | **5. HOW LONG** | Jak długo to przetrwa? | Pamięć Krótka (Ulotne) vs Sejf (Odporne) |
+
+    </TabItem>
+    <TabItem value="kotlin" label="Kotlin & Compose">
+
+        | Wymiar | Pytanie | Narzędzia w Kotlin / Jetpack Compose |
+        | :--- | :--- | :--- |
+        | **0. WHAT** | Typ danych | `Boolean` / `Int` vs `data class` vs `@Serializable` |
+        | **1. WHERE** | Przechowywanie | Zmienna w `@Composable` vs `ViewModel` vs `Room`/`Firebase` |
+        | **2. WHEN** | Przetwarzanie | `List` / `Column` (Eager) vs `Sequence` / `LazyColumn` (Lazy) |
+        | **3. WHO** | Przepływ | `suspend fun` (Pull) vs `Flow` / `StateFlow` (Push) |
+        | **4. HOW** | Reaktywność | Zwykła zmienna `var` vs `State<T>` (State Hoisting) |
+        | **5. HOW LONG** | Cykl życia | `remember` vs `rememberSaveable` / Datastore |
+
+    </TabItem>
+    <TabItem value="react" label="React, Node & Mongo">
+
+        | Wymiar | Pytanie | Narzędzia w React / Node.js |
+        | :--- | :--- | :--- |
+        | **0. WHAT** | Typ danych | `boolean` / `number` vs TypeScript `interface` / Obiekt JSON |
+        | **1. WHERE** | Przechowywanie | `useState` (Lokalnie) vs `Redux`/`Context` vs `MongoDB` |
+        | **2. WHEN** | Przetwarzanie | `db.find()` (Eager) vs `limit/skip` / Virtual DOM (Lazy) |
+        | **3. WHO** | Przepływ | `fetch` API (Pull) vs WebSockets / `Socket.io` (Push) |
+        | **4. HOW** | Reaktywność | Zwykła zmienna `let` vs Hooki (`useState`, `useEffect`) |
+        | **5. HOW LONG** | Cykl życia | Pamięć komponentu vs `localStorage` / Kolekcja BSON |
+
+    </TabItem>
+    <TabItem value="csharp" label="C# & Avalonia">
+
+        | Wymiar | Pytanie | Narzędzia w C# / Avalonia UI |
+        | :--- | :--- | :--- |
+        | **0. WHAT** | Typ danych | `bool` / `int` vs `record` / `class` vs Klasa DTO |
+        | **1. WHERE** | Przechowywanie | Właściwość widoku vs `ViewModel` (MVVM) vs `Entity Framework` |
+        | **2. WHEN** | Przetwarzanie | `List<T>` (Eager) vs `IEnumerable<T>` / Wirtualizacja `ListBox` (Lazy) |
+        | **3. WHO** | Przepływ | `async/await` (Pull) vs `IObservable<T>` / SignalR (Push) |
+            | **4. HOW** | Reaktywność | Zwykła właściwość vs `INotifyPropertyChanged` / ReactiveUI |
+            | **5. HOW LONG** | Cykl życia | Stan w pamięci RAM vs Plik konfiguracyjny JSON / SQLite |
+
+    </TabItem>
+</Tabs>
 
 :::tip What's Next?
-For the next few lessons, we will focus exclusively on the **Eager** approach and **Linear Structures**. We will learn how to build arrays and lists (our "buffet tables") before moving on to the more advanced Drive-Thru and Conveyor Belt architectures.
-:::::
+Przez kilka najbliższych lekcji skupimy się wyłącznie na lewej stronie tabeli: podejściu **Eager** oraz fundamentach **WHERE** i **WHAT**. Nauczymy się budować proste listy i tablice (nasze "stoły bufetowe" i "skoroszyty"), zanim przejdziemy do bardziej zaawansowanych architektur typu Drive-Thru czy Taśmociąg.
+:::
 
-![data flow](/myImages/data_flow_stream.png)
-
-
-
-
-
-
-
-
-
+![4w2h](/myImages/4w2h.png)

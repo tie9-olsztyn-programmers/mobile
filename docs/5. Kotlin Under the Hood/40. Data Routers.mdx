@@ -1,18 +1,16 @@
 ---
 id: project-02-data-routers
 title: "Project 02: Data Routers (Expressions)"
-sidebar_label: "04. Data Routers"
+sidebar_label: "04. Data Routers (4W2H)"
 ---
 
 # Project 02: Data Routers (Expressions)
 
-In Project 01, we learned how to define our data **payload** (Primitive Types).
-But data sitting in a variable is useless.
-In modern software architecture, data must flow and transform based on specific conditions.
+In Project 01, we learned how to define our data payload (Primitive Types) — this gave us the **WHAT**.
+But data sitting quietly in a variable is useless. In modern software architecture, data must flow and transform based on specific conditions.
 
-Today, we will build **Data Routers**.
-We will learn how to intercept a piece of data, analyze its shape or value,
-and safely map it to a new result.
+Today, we will build **Data Routers** to answer the **HOW**.
+We will learn how to intercept a piece of data, analyze its shape or value, and safely map it to a new result using the 4W2H logistics model.
 
 ## 1. The Black Box: The Smart Gateway
 
@@ -43,48 +41,58 @@ fun main() {
 }
 
 ```
-Notice something missing? There are no curly braces `{ }` mutating variables.
-There is no v`var`.
+
+Notice something missing? There are no curly braces { } mutating variables.
+There is no var.
 The data flows smoothly from the condition directly into our unalterable val containers.
 How does this work?
 
+
 ## Deconstruction: Statements vs. Expressions
+
+
 To understand Kotlin's architecture, you must understand the difference between
 issuing an order and transforming data.
+
 
 ### Statements (Instrukcje - The Old Way)
 A statement is a command that does something but returns nothing.
 It usually forces you to use var because it modifies data via "side effects".
-```kotlinvar status: String // 🔴 Warning: Mutable state
+
+```kotlin
+var status: String // 🔴 Warning: Mutable state
 if (score > 50) {
     status = "Passed" // Mutating the variable
 } else {
     status = "Failed"
 }
+````
 
-```
 
 ### Expressions (Wyrażenia - The Engineering Way)
+
 An expression is a piece of code that evaluates to a value.
 It acts like a pure machine in our pipeline:
+
 - input goes in,
 - result comes out.
 
-You can assign the entire block directly to a val.
+You can assign the entire block directly to a `val`.
 
-```kotlin // 🟢 Safe, immutable pipeline
+```kotlin
+// 🟢 Safe, immutable pipeline
 val status = if (score > 50) "Passed" else "Failed"
-
 ```
 
 :::tip Expression-Oriented Syntax
 Kotlin is an expression-oriented language. This means almost every control structure
-(`if`, `when`, `try`-`catch`) returns a value.
+(if, when, try-catch) returns a value.
 This drastically reduces boilerplate code and eliminates bugs caused by mutable states.
 :::
 
 
 ## The if Valve (Data Mapping)
+
 In Kotlin, `if` is rarely used just to control the flow of the program.
 It is used as an `$O(1)$` mapping algorithm.
 If you have a more complex logic that requires multiple lines,
@@ -102,29 +110,28 @@ val discount = if (age < 18) {
 } else {
     0   // Default return
 }
-
 ```
 
-## The when Router (Pattern Matching)
-The when expression is Kotlin's ultimate data router.
+## The `when` Router (Pattern Matching)
+
+The `when` expression is Kotlin's ultimate data router.
 It replaces the clunky switch statements from older languages.
 It acts as an advanced State Machine for your UI or data streams.
 
-### Routing by Exact Match
-Used when your application is in a specific, known state (e.g., day of the week).
 
+### Routing by Exact Match
+
+Used `when` your application is in a specific, known state (e.g., day of the week).
 ```kotlin
 val dayOfWeek = 3
 val dayName = when (dayOfWeek) {
-1 -> "Monday"
-2 -> "Tuesday"
-3 -> "Wednesday"
-6, 7 -> "Weekend" // You can group cases!
-else -> "Invalid Day"
+    1 -> "Monday"
+    2 -> "Tuesday"
+    3 -> "Wednesday"
+    6, 7 -> "Weekend" // You can group cases!
+    else -> "Invalid Day"
 }
-
 ```
-
 
 ### Routing by Ranges
 In data science or game logic, you rarely check for exact numbers.
@@ -138,15 +145,17 @@ val grade = when (score) {
     in 70..79 -> "C"
     else -> "Failed"
 }
+
 ```
 
 ### Routing by Data Types (Polymorphism)
+
 When receiving data from the internet (e.g., JSON),
-you don't always know what type of payload arrived. when combined with is safely extracts
+you don't always know what type of payload arrived. `when` combined with is safely extracts
 and routes the data based on its physical shape in memory.
 
-
-```kotlinval payload: Any = "Hello"
+```kotlin
+val payload: Any = "Hello"
 
 val typeDescription = when (payload) {
     is Int -> "It's an Integer, we can multiply it: ${payload * 2}"
@@ -158,36 +167,78 @@ val typeDescription = when (payload) {
 ```
 
 :::info Under the Hood: Performance
-For exact matches, the Kotlin compiler optimizes `when` expressions
+For exact matches, the Kotlin compiler optimizes when expressions
 into highly efficient bytecode (tableswitch or lookupswitch).
-This means finding the correct route often takes `$O(1)$` or `$O(\log n)$` time,
+This means finding the correct route often takes `$O(1)$` or `$O(log n)$` time,
 making it significantly faster than a long chain of if-else statements.
 :::
 
-----
 
+## Summary Checklist: Expressions and The 4W2H Model
 
-## Summary Checklist: Expressions and The 3 W's
+By moving from old-school Statements (mutating data) to modern Expressions (transforming data),
+we are upgrading our Data Logistics. Here is how `if` and `when` routers fit perfectly into our 4W2H Architecture:
 
-By moving from old-school *Statements* (mutating data) to modern *Expressions* (transforming data),
-we are upgrading our Data Logistics. Here is how `if` and `when` routers fit into our
-**3 W's Architecture**:
+- 1W. WHAT (The Payload): Expressions guarantee that a specific,
+ calculated payload is successfully generated from an input.
+- 2W. WHERE (The Destination): Expressions allow us to route data directly into secure,
+ unalterable val containers. We no longer need empty, vulnerable var variables waiting to be mutated.
+- 3W. WHEN (The Timing): Standard `if` and when expressions evaluate eagerly.
+ The CPU reaches the router, instantly calculates the condition, and produces the payload without waiting.
+- 4W. WHO (The Trigger): The router acts as a silent interceptor.
+ When a system or user pushes a new state, the router reads it and dictates the flow.
+- 1H. HOW (The Mechanism): We achieve transformation through Expressions (Data Mapping)
+ rather than Statements (Side Effects). It’s a clean pipeline, not a messy rewrite.
+- 2H. HOW LONG (The Lifespan): These localized routers operate in short-term memory (RAM).
+ They evaluate the state quickly to pass the data further down the conveyor belt.
 
-* **WHERE (The Infrastructure):** Expressions allow us to route data directly into
-secure, unalterable `val` containers. We no longer need empty, vulnerable `var` variables
-lying around waiting to be mutated. The result is safely locked in its final destination.
-* **WHEN (The Evaluation):** Standard `if` and `when` expressions evaluate *eagerly* ($O(1)$ time). The CPU reaches the router, instantly calculates the condition, and produces the final payload before moving to the next line of code.
-* **WHO (The Flow):** As we move into building interactive UIs, `when` becomes the ultimate
-brain of our *Push* streams. When the system pushes a new state
-(e.g., "Loading", "Success", "Error"), a `when` router intercepts that event and
-instantly pushes the correct visual payload to the screen.
 
 :::tip Next Step
 Now that we know how to define our payload and route it safely,
 it's time to build the actual warehouse.
-In the next project, we will dive into **Eager Structures** (`List`, `Array`)
+In the next project, we will dive into Eager Structures (List, Array)
 and learn how to store and organize thousands of items in memory.
 :::
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
