@@ -1,0 +1,192 @@
+---
+sidebar_position: 2
+title: 2. ViewModel & StateFlow
+description: Fixing the screen rotation bug by moving state to the ViewModel.
+---
+
+# 2. The Vault: ViewModel & StateFlow
+
+In the previous lesson, our **Classroom Check-in** app hit a wall. It worked beautifully until we rotated the screen. Because we used `remember` (our "Short-term Memory"), the Android system destroyed the screen and rebuilt it, taking all our data down with it.
+
+Today, we fix this. We are moving our data out of the UI's fragile "Pocket" and into a robust "Vault" called a **ViewModel**. To transmit data safely from the Vault to the UI, we will use a reactive stream called **StateFlow**.
+
+:::info Gradle Dependencies
+If you get an error about API 37, remember to change `compileSdk = 37` in your Gradle file!*
+:::
+
+## The Top-Down Code: The Refactored App
+
+Copy this updated code. Run it, and try the **Crash Test** again: add students and rotate the screen. The data survives!
+
+```kotlin
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+// 1. Defining the State Object (WHAT)
+data class ClassroomState(
+    val studentName: String = "",
+    val presentStudents: List<String> = emptyList()
+)
+
+// 2. The Vault (WHERE)
+class ClassroomViewModel : ViewModel() {
+
+    // Internal mutable state (Private to the ViewModel)
+    private val _uiState = MutableStateFlow(ClassroomState())
+
+    // Public read-only state (Exposed to the UI)
+    val uiState = _uiState.asStateFlow()
+
+    // 3. The Actions (WHO)
+    fun updateName(newName: String) {
+        _uiState.update { currentState ->
+            currentState.copy(studentName = newName)
+        }
+    }
+
+    fun checkInStudent() {
+        _uiState.update { currentState ->
+            if (currentState.studentName.isNotBlank()) {
+                currentState.copy(
+                    presentStudents = currentState.presentStudents + currentState.studentName,
+                    studentName = "" // Clear the field after checking in
+                )
+            } else {
+                currentState
+            }
+        }
+    }
+}
+
+// 4. The UI (HOW)
+@Composable
+fun ClassroomCheckInScreen(
+    viewModel: ClassroomViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
+    // Listening to the radio station
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Students Present: ${state.presentStudents.size}",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = state.studentName,
+            onValueChange = { viewModel.updateName(it) }, // Trigger action
+            label = { Text("Enter student name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { viewModel.checkInStudent() }, // Trigger action
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Check In")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(state.presentStudents) { student ->
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    elevation = CardDefaults.cardElevation(2.dp)
+                ) {
+                    Text(text = student, modifier = Modifier.padding(16.dp))
+                }
+            }
+        }
+    }
+}
+```
+
+---
+# Breaking it down: The 4W2H Data Logistics
+Let's look at how the logistics of our data flow have fundamentally changed compared to Lesson 1.
+
+
+## 0. WHAT (What exactly are we processing?)
+In the code: We grouped our two variables into a single `data class ClassroomState`.
+
+Real-world Metaphor: *The Organized Binder*. Instead of carrying loose sheets of paper (a random String here, a List there),
+we put everything into one neatly labeled binder.
+This is known as the **UI State pattern**.
+
+## 1. WHERE (Where does this data live?)
+In the code: Inside `ClassroomViewModel`, wrapped in a `MutableStateFlow`.
+
+Real-world Metaphor: *The Warehouse (Global)*. The ViewModel exists entirely outside the UI components.
+It is a separate building.
+The UI is just a display window showing what's inside the warehouse.
+
+## 2. WHEN (When do we load the data?)
+In the code: `LazyColumn` (Unchanged).
+
+Real-world Metaphor: *The Drive-Thru*. Only what is visible is rendered.
+
+## 3. WHO (Who initiates the transport?)
+In the code: The UI no longer modifies the data directly.
+It calls functions: `viewModel.updateName(it)` and `viewModel.checkInStudent()`.
+
+Real-world Metaphor: *The Waiter*.
+The UI takes the user's order (a click or a keyboard tap) and passes the request to the kitchen (the ViewModel).
+The UI does not cook the meal. The ViewModel handles all the logic.
+
+
+## 4. HOW (How does the UI know about the change?)
+In the code: `val state by viewModel.uiState.collectAsStateWithLifecycle()`
+
+Real-world Metaphor: *The Radio Receiver*.
+The `StateFlow` is a radio broadcast constantly transmitting the **latest** `ClassroomState`.
+By calling `collectAsStateWithLifecycle()`, our Composable tunes into this frequency.
+Whenever the ViewModel updates the state, the Composable hears the new broadcast and redraws itself automatically.
+
+
+## 5. HOW LONG (How long will it survive?)
+In the code: Bound to the ViewModel lifecycle.
+
+Real-world Metaphor: *The Safe*.
+A ViewModel is explicitly designed by the Android system to outlive configuration changes.
+When you rotate the screen, the Activity is destroyed and the UI is blown away.
+However, the ViewModel stands perfectly still. When the UI rebuilds a millisecond later,
+it instantly reconnects to the ViewModel's radio broadcast and retrieves the exact data it had before the rotation.
+
+:::tip The Golden Rule of Architecture
+State flows down, events flow up.
+The ViewModel pushes the uiState down to the Composable.
+The Composable sends user events (clicks, typing) up to the ViewModel.
+They never cross paths in the middle.
+:::
+
+
+
+
+
+
+
+
+
+
+
+
+
