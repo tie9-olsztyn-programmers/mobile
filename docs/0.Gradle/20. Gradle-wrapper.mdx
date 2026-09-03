@@ -1,0 +1,30 @@
+---
+title: Gradle-Wrapper
+---
+
+
+
+## 📦 Gradle Wrapper jako Osobisty Kurier
+Wyobraź sobie, że:
+- Dajesz komuś swój świetny plan domu, ale ten ktoś wynajmuje innego Kierownika Budowy,
+który używa starych, niesprawdzonych narzędzi.
+- Dom może się zawalić.
+
+
+Gradle Wrapper to specjalny kurier, który jest na stałe dołączony do Twojego planu.
+Jego jedynym zadaniem jest pilnowanie, aby budową pokierowała odpowiednia osoba.
+Gdy ktoś na innym komputerze otwiera Twój projekt, Wrapper mówi:
+"Do zbudowania tego domu potrzebujesz Kierownika (Gradle) dokładnie w wersji 9.5.0.
+Poczekaj, sam pobiorę go dla ciebie z hurtowni".
+
+## Ujęcie techniczne Gradle Wrapper:
+-  to skrypt, który hermetyzuje proces pobierania i instalacji Gradle:
+ - eliminuje ręczną instalację: Środowisko programistyczne konfiguruje i pobiera się samo.
+ - Gwarantuje powtarzalność: Wymusza uruchomienie dokładnie tej wersji Gradle, na której aplikacja została zaprojektowana.
+ - Plik `gradle-wrapper.properties`:
+  - To "dowód tożsamości" Wrappera.
+  - Właśnie w nim zapisany jest adres internetowy, z którego środowisko próbuje pobrać pliki.
+  - Gdy szkolna sieć blokuje ten konkretny adres, aplikacja nie może się zbudować.
+
+
+

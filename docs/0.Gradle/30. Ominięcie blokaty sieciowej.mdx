@@ -1,0 +1,30 @@
+---
+title: Jak ominąć blokadę sieciową?
+---
+
+
+## Jak ominąć blokadę sieciową (Instrukcja krok po kroku)
+- Gdy główny serwer jest zablokowany przez szkolny firewall, musimy podać Wrapperowi adres nowej "hurtowni" (serwera lustrzanego),
+która nie jest zablokowana:
+  1. Otwórz plik konfiguracyjny Wrappera:
+ - Wewnątrz Android Studio, po lewej stronie ekranu rozwiń sekcję Gradle Scripts, a następnie
+ - kliknij dwukrotnie w plik o nazwie `gradle-wrapper.properties`.
+  2. Podmień zablokowany adres na nowy:
+ - Znajdź linijkę zaczynającą się od `distributionUrl=` i
+ - zamień cały adres na działający link z serwerów MacPorts.
+ - Ważne: zwróć uwagę na ukośnik `\` przed dwukropkiem!
+ - Linijka ma wyglądać dokładnie tak:
+
+  ```
+  distributionUrl=https\://distfiles.macports.org/gradle/gradle-9.5.0-bin.zip
+    ```
+
+  3. Zsynchronizuj projekt:
+ - Na pasku na górze ekranu pojawi się powiadomienie.
+ - Kliknij `Sync Now` (lub znajdź małą ikonę słonika ze strzałkami w prawym górnym rogu).
+ - Projekt pobierze pakiety z nowego, odblokowanego źródła.
+
+
+
+
+
