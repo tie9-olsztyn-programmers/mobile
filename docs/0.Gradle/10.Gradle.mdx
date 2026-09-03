@@ -1,0 +1,77 @@
+---
+title: Gradle
+----
+
+
+
+## Gadle
+### 🏗️ Gradle jak Kierownik Budowy
+Wyobraź sobie, że pisanie aplikacji to budowa domu:
+- Ty (programista) jesteś architektem – tworzysz plany (kod) i wybierasz materiały (przyciski, funkcje).
+- Nie budujesz jednak własnoręcznie.
+- Od tego masz Kierownika Budowy, czyli narzędzie Gradle.
+
+
+Dajesz mu swój plan, a on:
+- Dzwoni do hurtowni: Zamawia potrzebne materiały (pobiera biblioteki z internetu).
+- Organizuje pracę: Pilnuje, by najpierw wylać fundamenty, a potem stawiać ściany (ustala właściwą kolejność zadań programistycznych).
+- Kontroluje jakość: Zleca inspektorowi sprawdzenie, czy ściany są proste (uruchamia automatyczne testy kodu).
+- Oddaje klucze: Na sam koniec generuje gotowy produkt – plik instalacyjny aplikacji (np. APK).
+
+### Gradle - ujęcie techniczne
+W świecie IT Gradle to system automatyzacji budowania oprogramowania (*build automation tool*).
+Służy do przekształcania czystego kodu źródłowego napisanego w Javie lub Kotlinie w działającą aplikację.
+Jego najważniejsze zadania to zarządzanie zależnościami (automatyczne pobieranie obcych bibliotek),
+kompilacja kodu oraz pakowanie zasobów (grafik, dźwięków, kodu) w jeden spójny plik.
+
+
+## Gradle Wrapper
+
+### 📦 Gradle Wrapper jako Osobisty Kurier
+Wyobraź sobie, że:
+- Dajesz komuś swój świetny plan domu, ale ten ktoś wynajmuje innego Kierownika Budowy,
+który używa starych, niesprawdzonych narzędzi.
+- Dom może się zawalić.
+
+
+Gradle Wrapper to specjalny kurier, który jest na stałe dołączony do Twojego planu.
+Jego jedynym zadaniem jest pilnowanie, aby budową pokierowała odpowiednia osoba.
+Gdy ktoś na innym komputerze otwiera Twój projekt, Wrapper mówi:
+"Do zbudowania tego domu potrzebujesz Kierownika (Gradle) dokładnie w wersji 9.5.0.
+Poczekaj, sam pobiorę go dla ciebie z hurtowni".
+
+### Ujęcie techniczne Gradle Wrapper:
+-  to skrypt, który hermetyzuje proces pobierania i instalacji Gradle:
+    - eliminuje ręczną instalację: Środowisko programistyczne konfiguruje i pobiera się samo.
+    - Gwarantuje powtarzalność: Wymusza uruchomienie dokładnie tej wersji Gradle, na której aplikacja została zaprojektowana.
+    - Plik `gradle-wrapper.properties`:
+        - To "dowód tożsamości" Wrappera.
+        - Właśnie w nim zapisany jest adres internetowy, z którego środowisko próbuje pobrać pliki.
+        - Gdy szkolna sieć blokuje ten konkretny adres, aplikacja nie może się zbudować.
+
+---
+
+## Jak ominąć blokadę sieciową (Instrukcja krok po kroku)
+- Gdy główny serwer jest zablokowany przez szkolny firewall, musimy podać Wrapperowi adres nowej "hurtowni" (serwera lustrzanego),
+która nie jest zablokowana:
+    1. Otwórz plik konfiguracyjny Wrappera:
+        - Wewnątrz Android Studio, po lewej stronie ekranu rozwiń sekcję Gradle Scripts, a następnie
+        - kliknij dwukrotnie w plik o nazwie `gradle-wrapper.properties`.
+    2. Podmień zablokowany adres na nowy:
+        - Znajdź linijkę zaczynającą się od `distributionUrl=` i
+        - zamień cały adres na działający link z serwerów MacPorts.
+        - Ważne: zwróć uwagę na ukośnik `\` przed dwukropkiem!
+        - Linijka ma wyglądać dokładnie tak:
+
+    ```
+    distributionUrl=https\://distfiles.macports.org/gradle/gradle-9.5.0-bin.zip
+    ```
+
+    3. Zsynchronizuj projekt:
+        - Na pasku na górze ekranu pojawi się powiadomienie.
+        - Kliknij `Sync Now` (lub znajdź małą ikonę słonika ze strzałkami w prawym górnym rogu).
+        - Projekt pobierze pakiety z nowego, odblokowanego źródła.
+
+
+
+
