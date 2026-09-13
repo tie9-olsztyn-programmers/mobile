@@ -1,0 +1,229 @@
+---
+title: 03. Card and Surface
+---
+
+# Designing the UI Infrastructure
+
+When handling data on a screen, you must separate the UI infrastructure from the actual payload.
+Think of your screen as an empty warehouse. You don't just dump cargo onto the bare dirt;
+you build a sturdy floor and specialized shelves first to hold it properly.
+
+Review this fully working Compose screen. Try to deduce what the Surface and Card configuration parameters are doing to the UI
+before reading further.
+
+## The Goal: A Professional User Card
+
+Imagine your boss asks you to build a screen that displays a User Profile.
+It shouldn't just be floating text; it needs a proper background, an app bar, a polished card with shadows, and an avatar.
+
+Here is the complete code for that screen. Read through it—even if you don't recognize every single component yet, try to guess what they do based on their names.
+
+```kotlin
+@Composable
+fun UserProfileScreen() {
+    // 1. The main floor plan
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Profile") }) }
+    ) { paddingValues ->
+
+        // 2. The main background
+        Surface(modifier = Modifier.padding(paddingValues),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                contentColor = MaterialTheme.colorScheme
+                    .contentColorFor(Color(0xFFE0C20F)),
+                shape = CircleShape
+        ) {
+
+            // 3. The isolated container
+            Card(modifier = Modifier.padding(16.dp),
+                elevation = CardDefaults.cardElevation(4.dp),
+                colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFE7B2AE)
+                ),
+                border = BorderStroke(10.dp, Color.Gray),
+                shape = RoundedCornerShape(124.dp),
+            ) {
+
+                Row(modifier = Modifier.padding(16.dp)) {
+                    // 4. The Cargo (Payload)
+                    Image(
+                        painter = painterResource(id = R.drawable.person),
+                        contentDescription = "User Avatar"
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column {
+                        Text(text = "John Doe",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color(0xFF9C27B0)
+                            )
+                        Text(text = "Software Engineer")
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+
+If you run this code, you get a beautiful, elevated card with an image and text, sitting perfectly below a top navigation bar.
+
+**But why did we write it this way?** Why didn't we just throw a `Column` on the screen and put an `Image` and `Text` inside?
+
+Let's deconstruct this code backward to understand the **"WHERE" architecture**.
+
+
+:::tip Missing the person icon?
+To make `painterResource(id = R.drawable.person)` work, you need to generate the vector asset in Android Studio first:
+
+1. Right-click the **`res/drawable`** folder in your project panel and select **New > Vector Asset**.
+2. Click the **Clip Art** icon (the square button), search for **"person"**, and select the icon.
+3. Change the **Name** field exactly to **`person`** (lowercase).
+4. Click **Next**, then **Finish**.
+:::
+
+:::note Using Custom HEX Colors
+In Jetpack Compose, you don't use web-style strings like `"#E7B2AE"`.
+Instead, you use the `Color` class with a specific hexadecimal integer format: `Color(0xFFE7B2AE)`.
+
+Here is how to read it:
+* **`0x`** – tells Kotlin this is a hexadecimal number.
+* **`FF`** – represents the Alpha channel (100% opacity).
+* **`E7B2AE`** – is your standard 6-character RGB hex code.
+:::
+
+---
+
+## The 4W2H Data Logistics Breakdown
+
+Before analyzing the visual containers, we must understand the logistics of the data living inside them using the 4W2H framework.
+- **0. WHAT are we processing?** The hardcoded text "John Doe" represents "The Sticky Note" (Primitives).
+It is a short, simple piece of information.
+- **1. WHERE does the data live?** Currently, this layout data lives strictly in "The Pocket" (Local Variables).
+The cook (the function) keeps it in their apron, and the data disappears entirely when the shift ends.
+- **2. WHEN do we cook?** Because this is a single, static profile screen, the CPU operates on "The Eager Paradigm"
+(The All-You-Can-Eat Buffet).
+The system calculates and loads all of this data immediately when the UI is rendered.
+- **3. WHO sets the pace?** Drawing this static data acts as the "Pull Model" (The Waiter).
+The application synchronously pulls the text to display it on the screen.
+- **4. HOW does the UI know?** This static layout operates as "The Silent Ledger".
+If you were to change the "John Doe" text in the background, the UI would not automatically update without a manual refresh.
+- **5. HOW LONG does it survive?** The rendered pixels live entirely in "Short-term Memory".
+If the user rotates their phone, it is the equivalent of the waiter tripping—the data is lost forever and
+the screen redraws from scratch.
+
+
+
+
+## Deconstruction of Architecture
+
+When handling data on a screen, you must separate the **Infrastructure** (WHERE the data lives) from the **Payload**
+(WHAT the data is).
+
+Think of your screen as an empty warehouse.
+You don't just dump cargo on the floor; you build the floor plan and sturdy shelves first.
+
+### Level 1: The Blueprint (`Scaffold`)
+If you build a full screen in Android, a `Column` is not enough. You need to know **WHERE** the top navigation goes, **WHERE** the bottom menu sits, and **WHERE** the main content belongs.
+* **What it does:** `Scaffold` is your master floor plan. It calculates the padding for system bars (like the camera notch) and provides dedicated slots for UI elements.
+* **Why we need it:** It ensures your app looks like a real app with standard Material Design boundaries, not just floating text.
+
+### Level 2: The Warehouse Floor (`Surface`)
+Inside the `Scaffold`, we used a `Surface`.
+* **What it does:** It defines the fundamental background of your app.
+* **Why we need it:** It sets the baseline rules for WHERE things are drawn.
+For example, if the user's phone is in Dark Mode, `Surface` automatically turns its background black and forces all the text inside it to turn white.
+
+:::tip Customizing the Surface Component
+Here is exactly what each parameter does to your `Surface` canvas:
+
+* **`modifier`**: `Modifier.padding(paddingValues)` applies spacing around the surface.
+This is typically used when inside a `Scaffold` to ensure your content doesn't accidentally hide behind the phone's
+status bar or bottom navigation.
+* **`color`**: `MaterialTheme.colorScheme.onPrimaryContainer` sets the background color.
+Instead of hardcoding a hex value, this pulls a semantic color directly from your app's Material 3 theme,
+ensuring it looks cohesive and adapts to Light/Dark modes.
+* **`contentColor`**: `MaterialTheme.colorScheme.contentColorFor(Color(0xFF151513))` sets the default text and icon
+color inside the surface. It asks the Material theme to automatically calculate the most readable, high-contrast text
+color that pairs well with that specific dark hex value.
+* **`shape`**: `CircleShape` forcefully clips the entire surface into a perfect circle (or an ellipse, if the width
+and height are not equal) rather than the default sharp rectangle.
+:::
+
+
+### Level 3: The Shelf (`Card`)
+We didn't put the User Data directly on the `Surface`. We wrapped it in a `Card`.
+* **What it does:** A `Card` is a specialized, upgraded container. It adds rounded corners and a shadow (elevation / Z-index).
+* **Why we need it:** By putting the user data inside a `Card`, we visually detach it from the background,
+telling the user's brain: *"Everything inside this box belongs to one single logical entity."*
+
+:::tip Customizing the Card Component
+Here is exactly what each styling parameter does to your `Card`:
+
+* **`elevation`**: `CardDefaults.cardElevation(4.dp)` raises the card along the Z-axis. This casts a realistic drop
+shadow beneath the card, making it visually "pop" off the background surface.
+* **`colors`**: `CardDefaults.cardColors(containerColor = Color(0xFFE7B2AE))` overrides the app's default Material theme
+just for this component. It sets the card's internal background to that specific custom hex color.
+* **`border`**: `BorderStroke(10.dp, Color.Gray)` draws a solid, 10.dp thick gray outline around the absolute edge of the card.
+* **`shape`**: `RoundedCornerShape(124.dp)` modifies the physical geometry of the container. Note that an extremely high
+value like `124.dp` will drastically curve the corners, likely turning your rectangular card into a pill shape or an oval!
+:::
+
+### Level 4: The Payload (`Image` & `Icon`)
+Finally, we load the cargo onto our shelf. Text (`String`) is a common payload, but visual data is crucial for modern UIs.
+* **`Image` (Heavy Cargo):** These are bitmaps, photos, or complex illustrations (like the user's avatar).
+They consume a lot of RAM, which is why placing them properly on our "shelves" is so important for performance.
+* **`Icon` (Lightweight Cargo):** (Not used in the snippet, but part of the payload family). These are lightweight,
+vector-based, mathematical symbols, perfect for small buttons like a "Settings" gear.
+
+
+| Feature | Image (Heavy Cargo) | Icon (Lightweight Cargo) |
+| :--- | :--- | :--- |
+| **Source** | Pixels (JPG, PNG, WebP) | Vectors (SVG, XML) |
+| **Coloring** | Hard (requires color filters) | Easy (using the `tint` parameter) |
+| **Quality** | Loses quality when zoomed in | Always perfectly sharp |
+| **Best for...** | Product photos, user avatars, backgrounds | "Back" arrows, trash cans, UI symbols |
+
+## Evolution: Legacy XML vs. Jetpack Compose
+If you have ever built an Android app using the older XML View system,
+you will immediately appreciate the evolution of these structural components.
+
+| Feature | Legacy Android (XML) | Jetpack Compose |
+|---|---|---|
+| **Component Name** | `CardView` | `Card` |
+| **Dependency** | Required importing a heavy, separate AndroidX library into your `build.gradle` file. | Natively built-in to the standard Compose Material 3 library. |
+| **Shadows & Elevation** | Often rendered incorrectly on older Android versions, requiring custom background XML hacks to fake drop shadows. | Perfectly consistent drop shadows across all Android versions using `CardDefaults.cardElevation()`. |
+| **Dark Mode Handling** | Required creating duplicate XML color files (`colors.xml` vs `colors-night.xml`). | `Surface` automatically flips text colors using the internal `MaterialTheme` color scheme. |
+
+
+By separating the visual containers (Surface and Card) from the layout arrangement (Column),
+Compose gives you immense power to style your infrastructure safely and consistently.
+
+## Summary
+
+`Surface` and `Card` are the structural containers of Jetpack Compose, serving two distinct architectural roles:
+
+- `Surface` (The Foundation): The basic canvas or "wall" of your app. It defines the primary background color,
+automatically calculates the most readable default text color for its children (contentColor), and
+handles basic shape clipping. Use it to build the main background or large structural sections of your screen.
+
+- `Card` (The Display Case): A specialized, upgraded Surface. It is pre-configured with standard Material Design
+aesthetics—specifically rounded corners and drop shadows (elevation). Use it to group a single, logical piece of
+data (like a user profile, a news article, or a product) to visually isolate it and lift it off the background.
+
+**Next Steps: From One to Ten Thousand**
+
+
+You have just built a stunning, perfectly elevated, custom-shaped Card.
+You proudly show it to your boss. Your boss loves it. "This is beautiful," they say.
+"Now, fetch 10,000 of them from the database and put them on the screen."
+
+If you try to shove 10,000 of these heavy, shadow-casting Cards into a standard Column,
+your app will crash out of memory, and the user's phone might physically melt. In the next lesson,
+we will learn how to display a massive list of items without blowing up the CPU.
+Enter LazyColumn—the ultimate, infinitely scrolling conveyor belt.
+
+
+

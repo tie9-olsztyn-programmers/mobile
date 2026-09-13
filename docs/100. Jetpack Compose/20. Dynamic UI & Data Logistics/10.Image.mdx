@@ -1,7 +1,5 @@
 ---
-id: module-02-visual-payload
-title: "02. The Visual Payload: Image, Icon & Scaling"
-sidebar_label: "02. Visuals & ContentScale"
+title: 01. Image. The Dragon Scale Lab
 ---
 import useBaseUrl from "@docusaurus/useBaseUrl";
 
@@ -9,8 +7,6 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 
 In Jetpack Compose, handling visuals isn't just about throwing a picture on the screen. It is an engineering problem:
 How do you fit a randomly sized, rectangular image into a perfectly structured UI frame without making it look terrible?
-
-Following the Top-Down methodology, before we look at the theory, let's look at the solution.
 
 ## The Goal: The Dragon Scale Lab
 
@@ -88,7 +84,26 @@ But why does this work, and what tools are we actually using? Let's deconstruct 
 
 
 The Image component is designed for displaying "heavy" graphics. To use it, you must provide
-a Painter (the instruction on where to fetch the picture from) and a mandatory contentDescription for accessibility.
+a Painter (the instruction on where to fetch the picture from) and a mandatory `contentDescription` for accessibility.
+
+
+## The 4W2H Breakdown: Image Logistics
+Loading an image is significantly heavier than passing a string.
+Let's analyze how the CPU and RAM handle this visual payload using the 6 dimensions of the 4W2H model.
+- **0. WHAT are we processing?** An image resource is "The Sealed Package" (DTO/Raw Asset).
+It is a courier package containing raw binary data straight from the system warehouse.
+Before it can be displayed in the kitchen, the CPU must unpack (decode) it into a Bitmap.
+- **1. WHERE does the data live?** The physical graphic files are safely stored in "The Archive" (the res/drawable folder of your APK).
+Even if the app loses power, the source data remains intact.
+- **2. WHEN do we cook?** Standard Image components utilize "The Eager Paradigm" (The All-You-Can-Eat Buffet).
+The CPU calculates and loads the entire image into RAM at once before the user ever sees a single pixel.
+- **3. WHO sets the pace?** Drawing the image acts as "The Waiter" (Pull Model).
+You (the UI) sit at the table and synchronously pull the data from the Android OS by explicitly asking for it via `painterResource`.
+- **4. HOW does the UI know?** A static image operates as "The Silent Ledger".
+The image is a fixed asset; it will not magically update or animate on its own unless you manually swap the resource ID.
+- **5. HOW LONG does it survive?** While the original file lives in the safe, the decoded pixels currently visible on screen live
+in "Short-term Memory". If you rotate the phone (the waiter trips), the UI resets and the OS must fetch and decode the image into RAM all over again.
+
 
 
 ### Deconstruction: The contentScale Parameter
@@ -106,8 +121,8 @@ In Jetpack Compose, this decision is controlled by the contentScale parameter.
 | **`ContentScale.Inside`** | `centerInside` | Similar to `Fit`, but if the image is physically **smaller** than the frame, it does **not** enlarge it. It stays in its original size in the center. | Small icons inside large buttons or large containers holding small assets. |
 
 
-:::tip What is rememberScrollState()?
-In our code, we attached .verticalScroll(rememberScrollState()) to the main Column. A standard Column cannot be scrolled. This function:
+:::tip What is `rememberScrollState()`?
+In our code, we attached `.verticalScroll(rememberScrollState())` to the main Column. A standard Column cannot be scrolled. This function:
 
 Creates a special ScrollState object.
 
@@ -116,6 +131,25 @@ Creates a special ScrollState object.
 This object acts as a counter that stores one crucial number: "How many pixels has the user scrolled down?"
 :::
 
+## Evolution: Legacy XML vs. Jetpack Compose
+
+Before Jetpack Compose, handling visuals required navigating a clunky, imperative View system.
+| Feature | Legacy Android (XML) | Jetpack Compose |
+|---|---|---|
+| **The Component** | `ImageView` | `Image` or `Icon` |
+| **Asset Loading** | `android:src="@drawable/image"` | `painter = painterResource(id = R.drawable.image)` |
+| **Accessibility** | Optional. Developers frequently ignored `contentDescription`, leading to poor app accessibility. | Mandatory. The `Image` composable physically forces you to provide a `contentDescription` as a parameter. |
+| **Scaling** | Set via `android:scaleType` directly in the XML layout, which often behaved unpredictably with constraints. | Controlled cleanly via the strongly-typed `contentScale` enum. |
+
+
+
+
+By forcing developers to explicitly provide a Painter and a contentDescription, Compose ensures that your UI is both performant and accessible by default.
+
+We have successfully rendered a static visual payload using "The Waiter" Pull Model.
+The data is drawn on demand, but what happens if we need to load a 10-megabyte 4K image from a remote server instead of our local archive?
+How would we transition our architecture from "The Waiter" to "The Sushi Conveyor Belt" to ensure the UI doesn't freeze
+while waiting for the massive file to download?
 
 
 

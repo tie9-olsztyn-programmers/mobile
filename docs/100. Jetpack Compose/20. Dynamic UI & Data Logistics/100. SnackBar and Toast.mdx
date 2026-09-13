@@ -1,0 +1,197 @@
+---
+title: 06. Toast & Snackbar
+description: How to elegantly notify users without ruining their day.
+---
+
+Review this fully functional implementation of both transient notification systems in Jetpack Compose.
+Consider why one requires a complex architectural skeleton, while the other can be fired off with a single line of code.
+
+
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            MaterialTheme {
+                // 1. The Global State & Scope
+                val snackbarHostState = remember { SnackbarHostState() }
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current
+
+                // 2. The Architectural Skeleton
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+                ) { innerPadding ->
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+
+                        // 3. The Snackbar Trigger
+                        Button(onClick = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "File saved successfully.",
+                                    actionLabel = "UNDO",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }) {
+                            Text(text = "Show Snackbar")
+                        }
+
+                        // 4. The Toast Trigger
+                        Button(onClick = {
+                            Toast.makeText(
+                                context,
+                                "This is a simple Toast!",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }) {
+                            Text("Show Toast")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+> Think about it: Why do we need to launch a CoroutineScope to show a Snackbar,
+> but a Toast just fires instantly without any threading logic?
+
+## The Notification Metaphor
+Imagine your application is a bustling restaurant.
+
+- A **Toast** is like a waiter walking past your table who quickly says "Enjoy your meal!" without breaking stride or
+waiting for your response. It is a brief, non-interruptive message.
+- A **Snackbar** is like a waiter who places a salt shaker on your table and says, "If the soup needs more flavor, use this."
+It provides information and an optional action (like an "Undo" button), persisting just long enough for you to interact with it
+before disappearing.
+
+
+:::info When to use which?
+- `Toast`: Simple system-level confirmations ("Message sent").
+- `Snackbar`: Contextual app actions ("Item deleted") where providing an "Undo" or "Retry" action is useful.
+:::
+
+## The 4W2H Data Logistics Breakdown
+Let's dissect how these notifications operate within the system architecture using the 4W2H framework.
+
+- **0. WHAT are we processing?** Both notifications handle "The Sticky Note".
+They process short, primitive strings that are highly volatile and simple to manage.
+- **1. WHERE does the data live?**
+    - A Toast relies on "The Pocket". It fires locally and the app instantly forgets about it.
+    - A Snackbar utilizes "The Office". The `SnackbarHostState` acts as the manager's global corkboard, managing a strict queue
+  so multiple Snackbars don't overlap on the screen.
+- **2. WHEN do we cook?** Both utilize "The Drive-Thru" paradigm. The message is strictly generated on demand when the user clicks the button.
+- **3. WHO sets the pace?** The interaction is driven by the user acting as "The Waiter" in a Pull Model.
+You explicitly trigger the event.
+- **4. HOW does the UI know?**
+    - A Toast operates via "The Silent Ledger". It bypasses Compose entirely and asks the Android OS to draw a bubble.
+    - The Snackbar is heavily reliant on "The PA System". `SnackbarHostState` actively broadcasts its visibility status to the Scaffold,
+  forcing the UI to redraw and animate the component into view.
+- **5. HOW LONG does it survive?** Both live strictly in "Short-term Memory".
+If you rotate the device (the waiter trips), an active Snackbar will vanish entirely.
+
+## The Architectural Pillars
+To make the Snackbar work, we rely on specific structural components that might seem like magic initially.
+
+### The Scaffold
+`Scaffold` is the foundational blueprint of your screen. Metaphorically, it provides the load-bearing walls, window frames, and doorways.
+Instead of manually calculating where a floating button or a bottom navigation bar should go, `Scaffold` has dedicated slots for them.
+The `SnackbarHost` must be injected directly into the Scaffold so it knows exactly how to animate upwards from the bottom of
+the screen without covering your navigation tabs.
+
+
+### Coroutines & Scope
+Jetpack Compose enforces a strict rule: **No coroutine without a scope**.
+A CoroutineScope is like a strict project manager. It allows you to start an asynchronous task (like showing a Snackbar that needs
+to wait 3 seconds before disappearing), monitors its progress, and forcefully cleans it up if the user navigates away from the screen.
+Without `scope.launch {}`, the 3-second delay of the Snackbar would freeze your entire application interface.
+
+:::tip Coroutines
+- A "lightweight thread", an efficient mechanism for executing concurrent tasks
+- Allows you to "wait for something" in code without freezing the user interface
+- *Co-operative routines* – collaborative procedures
+- A way to write asynchronous code sequentially
+- Example (`launch` starts a coroutine):
+```kotlin
+scope.launch {
+    delay(2000)
+    println("2 seconds have passed")
+}
+```
+:::
+
+:::tip CoroutineScope
+- The "area" boundary where coroutines can run safely
+- Kotlin's rule: No coroutine without a scope
+- Metaphor: CoroutineScope is like a supervisor who:
+    - authorizes a task to start,
+    - determines when to cancel it,
+    - handles the cleanup when it finishes.
+    - A coroutine cannot simply run "in the wild."
+
+:::
+
+### LocalContext (The Mall Badge)
+To display a Toast, we need a Context. Imagine the Android OS is a massive, luxurious shopping mall,
+and your app is just one store inside it.
+- The `Context` is your employee badge paired with a walkie-talkie.
+- Without the badge, you cannot enter the back warehouse to grab strings or images.
+- Without the walkie-talkie, you cannot contact mall security (the Android OS) to trigger global events like a Toast.
+
+In the old XML system, your UI lived inside an Activity, which was a Context. In Compose, your UI functions are detached from the OS lifecycle.
+You must explicitly ask the system for your walkie-talkie using LocalContext.current.
+
+
+## Evolution: Legacy XML vs. Jetpack Compose
+| Feature | Legacy Android (XML) | Jetpack Compose |
+|---|---|---|
+| **Toast Context** | Implicit. Usually just passed `this` inside an Activity. | Explicit. Requires `LocalContext.current` to bridge Compose with the OS. |
+| **Snackbar UI** | Imperative. `Snackbar.make(view, "Text", Snackbar.LENGTH_SHORT).show()` | Declarative. Requires a `SnackbarHostState` hoisted to a `Scaffold`. |
+| **Concurrency** | Handled implicitly under the hood by the View System. | Requires an explicit `CoroutineScope` to manage the lifecycle of the visibility delay. |
+| **Positioning** | Frequently collided with Floating Action Buttons (FABs) unless manually padded. | Handled automatically by `Scaffold`. The FAB will beautifully slide up when the Snackbar appears. |
+
+
+While a Toast remains a simple fire-and-forget OS tool,
+the Snackbar in Compose represents a masterclass in state management.
+It forces you to think about UI not as a sequence of commands, but as a reflection of state.
+
+If `SnackbarHostState` operates as "The PA System" to queue multiple messages, what would happen if a user rapidly tapped the
+"Show Snackbar" button 50 times in a row?
+
+
+
+Jeśli każde kliknięcie uruchamia nową korutynę w standardowy sposób (`scope.launch { snackbarHostState.showSnackbar(...) }`),
+wszystkie 50 powiadomień ustawi się w kolejce i wyświetli jedno po drugim.
+
+
+
+---
+## Summary & Next Steps
+
+Toasts and Snackbars are the polite whisperers of Android UX—delivering brief,
+lightweight feedback without interrupting whatever the user is doing. A Toast behaves like a gentle system ghost,
+fading in and out with zero friction or interactivity. A Snackbar takes things one step further: tied neatly to your Scaffold,
+it provides context-aware status updates and can offer a handy "Undo" button before quietly sliding away.
+
+
+Politeness is wonderful, but what happens when a user recklessly taps "Delete Account and Purge Everything"?
+
+
+Whispering a three-second Toast at the bottom of the screen isn't going to cut it.
+Sometimes your app needs to drop the courteous act, freeze time, grab the user by the shoulders, and demand full attention.
+That is where Dialog and AlertDialog take the stage—the modal bouncers of Jetpack Compose designed to block the entire screen and
+force a decision before anyone does something they will regret.
+
+
+
+
