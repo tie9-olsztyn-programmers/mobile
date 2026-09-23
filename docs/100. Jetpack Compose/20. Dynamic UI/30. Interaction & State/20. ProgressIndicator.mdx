@@ -1,0 +1,183 @@
+---
+title: Progress Indicators
+---
+Welcome to Gargamel's laboratory! Our favorite wizard is constructing a brand-new, digital Smurf
+trap and needs a precise user interface to track his capturing progress.
+We are going to build a system utilizing both `CircularProgressIndicator `
+and `LinearProgressIndicator` in Jetpack Compose.
+
+Following our Top-Down methodology, let's start with a fully working solution.
+
+
+
+## 1. Top-Down: The Smurf Trap Blueprint
+Here is the complete, functional code for Gargamel's interface.
+
+```kotlin
+@Composable
+fun GargamelsTrapTracker() {
+    // Stan to dokładny Int (od 0 do 10)
+    var capturedSmurfs by remember { mutableIntStateOf(0) }
+
+    // UI wylicza ułamek na bieżąco, bez błędów akumulacji
+    val captureProgress = capturedSmurfs / 10f
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(
+            text = "Smurf Capture Progress: ${capturedSmurfs * 10}%",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        CircularProgressIndicator(
+            progress = { captureProgress },
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = { capturedSmurfs++ },
+                enabled = capturedSmurfs < 10 // Prosty i bezpieczny warunek
+            ) {
+                Text("Lure a Smurf!")
+            }
+
+            if (capturedSmurfs == 10) {
+                Button(onClick = { capturedSmurfs = 0 }) {
+                    Text("Empty the cage")
+                }
+            }
+        }
+
+        if (capturedSmurfs == 10) {
+            Text(
+                text = "I'll get you, I'll get all of you! Hahaha!",
+                color = Color.Red,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        } else if (captureProgress >= 0.5f) {
+        Text(
+            text = "Halfway there... Azrael, get the net ready!",
+            color = Color.DarkGray,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+    }
+    }
+}
+
+
+
+```
+
+:::note 🧠Azrael's Challenge:
+Imagine Gargamel has successfully lured 50% of the Smurfs into the cage.
+Suddenly, his cat Azrael jumps on the desk and knocks the device, causing the screen to rotate
+horizontally. Why does the progress meter instantly reset to 0%, letting all the captured Smurfs escape?
+The answer lies in our data logistics.
+
+
+:::
+
+:::tip 🚨 Beware of Floating-Point Accumulation Errors!
+Computers store floating-point numbers (`Float`, `Double`) in binary format.
+Because of this architectural design, certain simple decimal fractions like `0.1` cannot be represented
+perfectly in binary. They are infinitely repeating, much like how the fraction `1/3` cannot be written
+perfectly in decimal (`0.33333...`).
+
+When you repeatedly add `0.1f` to a variable, those microscopic rounding inaccuracies start to add up.
+This phenomenon is known as an **accumulation error**.
+
+A Classic Example:
+- If you run `0.1f + 0.1f + 0.1f` in Kotlin (or almost any other language),
+the computer won't see exactly `0.3f`. Instead, it calculates something like `0.30000001f`.
+- If your app relies on a strict condition like `if (progress <= 0.9f)`,
+it might suddenly stop working because the accumulated value is actually `0.9000001f`,
+causing the condition to return false.
+
+The Golden Rule for State:
+Always use exact data types (like `Int`) for your core logic and Source of Truth
+(e.g., `counting from 1 to 10`). Only divide it into a `Float` (like `3 / 10f`)
+at the very last moment when the UI needs to render a progress bar!
+:::
+
+## 2. Breakdown and Explanation: The 4W2H Model
+Before Gargamel starts writing complex capture algorithms, we must understand how the processor and
+RAM handle the trap's data. Let's analyze our code using the 6 fundamental questions of the 4W2H model.
+
+### 0. The Domain: WHAT are we processing?
+Our core progress is now represented by a precise whole number (an Int from 0 to 10) tracking
+the captured Smurfs. This is known as "The Sticky Note" (Primitives).
+It represents short, simple, and exact information.
+We do not need a complex blueprint like "The Organized Binder" (Complex Objects) just to store
+a single counter, and keeping it as an integer protects us from floating-point accumulation errors.
+
+### 1. State & Storage: WHERE does the data live?
+The `capturedSmurfs` variable is declared strictly inside the `GargamelsTrapTracker` function.
+This approach is called "The Pocket" (Local Variables).
+The chef keeps the recipe in his apron pocket, meaning he is the only one with access to it,
+and the data vanishes when his shift ends.
+
+### 2. Evaluation Strategies: WHEN do we cook?
+Jetpack Compose generally operates on "The Eager Paradigm" (The All-You-Can-Eat Buffet).
+When the state changes, the computer immediately recalculates the captureProgress fraction
+(`capturedSmurfs / 10f`). However, by using a lambda for the progress indicator
+(`progress = { captureProgress }`), we introduce a clever "Made-to-Order" trick (Deferred Reading)
+ — we only hand that fraction over to the drawing phase at the very last second,
+saving the UI engine unnecessary recomposition work!
+
+### 3. Data Flow: WHO sets the pace?
+Our trap mechanism relies on the "Push Model" (The Sushi Conveyor Belt).
+The application does not constantly ask the button if it was clicked.
+Instead, it sets a listener and waits asynchronously.
+When you click "Lure a Smurf!", the outside world pushes the new information (`capturedSmurfs++`)
+whenever it wants.
+
+### 4. Reactivity: HOW does the UI know?
+This is the core magic! We utilize `mutableIntStateOf`, which acts as "The PA System" (State).
+When the Smurf count updates, the chef yells through the speaker, and the application's interface
+immediately and automatically replaces the item on the screens of all customers.
+If we used a standard variable, it would be a "Silent Ledger," requiring us to manually check
+and refresh the UI.
+
+### 5. Lifecycle: HOW LONG does it survive?
+The remember block provides only "Short-term Memory" (Volatile).
+It is like an order that a waiter keeps solely in his head.
+Rotating the phone screen acts exactly like the waiter tripping—the data is lost forever,
+which is why Azrael's clumsiness resets the trap back to 0 caught Smurfs.
+
+
+## 3. Kotlin + XML vs. Jetpack Compose
+To truly appreciate the power of modern frameworks, let's look at how Gargamel used to build traps
+in the era of imperative Android development (Kotlin + XML).
+
+**The XML Era** (Imperative Micromanagement):
+- In the old days, Gargamel would have to forge a `<ProgressBar>` in an `.xml` layout file.
+- He would then use the `findViewById` spell to locate it in the `Activity`.
+- After finding the `Button`, he would attach an `OnClickListener`.
+- Inside that listener, he had to manually update the progress bar (`progressBar.progress = newValue`)
+and explicitly command the `TextView` to change its text (`textView.text = "Progress: $newValue"`).
+- This was a pure "Silent Ledger" approach. The UI did nothing on its own;
+you had to manually go to the kitchen, ask for the data, and manually paint it on the screen.
+
+**The Compose Era** (Declarative Magic):
+With Jetpack Compose, we simply hook up "The PA System" (State).
+Gargamel declares what the UI should look like based on the state.
+When the button pushes a new value to the state, the PA system broadcasts the change,
+and the `CircularProgressIndicator` and `Text` naturally redraw themselves.
+
+## 4. Knowledge Check
+Are you ready to build your own evil logistical systems?
+Answer these three questions to prove your mastery:
+1. According to the 4W2H model, why do we categorize the `captureProgress` variable as "The Sticky Note"
+rather than "The Organized Binder"?
+2. Explain the difference between "The PA System" and "The Silent Ledger" when a user clicks
+the "Lure a Smurf!" button.
+3. How does the concept of the "Waiter tripping" (Short-term memory) apply to
+the remember function during a device screen rotation?
+
+
+
+
+
+
+
+
