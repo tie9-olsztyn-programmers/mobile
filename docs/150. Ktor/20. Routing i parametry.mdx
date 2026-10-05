@@ -1,0 +1,212 @@
+---
+title: Routing i Parametry
+---
+
+
+
+## Routing i Parametry: Jak Ktor kieruje ruchem?
+
+Motyw przewodni tej lekcji to **API dla szkolnej stołówki**
+
+---
+
+### 🍔 Metafora: Pani Halinka z okienka
+
+Wyobraź sobie szkolną stołówkę podczas długiej przerwy. Uczniowie ustawiają się w kolejce do okienka.
+Pani Halinka (nasz **Router**) stoi na wydawce i słucha, z czym przychodzą uczniowie (zapytania HTTP).
+
+* Jeśli uczeń mówi: *"Poproszę dzisiejsze menu"* (żądanie `GET /menu`), Pani Halinka podaje mu kartkę z listą dań.
+* Jeśli uczeń mówi: *"Odbieram obiad numer 42"* (żądanie `GET /meals/42`),  Pani Halinka sprawdza w systemie
+(bazie danych) numerek 42 i wydaje talerz z pomidorową.
+* Jeśli uczeń rzuca na blat odliczone monety i mówi: *"Zamawiam schabowego na jutro"* (żądanie `POST /orders`),
+Pani Halinka przyjmuje dane, zapisuje w zeszycie i wydaje potwierdzenie.
+
+Gdyby uczeń podszedł i poprosił o wymianę opony w samochodzie (`GET /mechanic`), Pani Halinka rzuciłaby tylko chłodne:
+`404 Not Found`. Złe okienko, zły adres.
+
+---
+
+## 🤓 Technicznie rzecz biorąc: Drzewo Routingu
+
+W aplikacjach webowych **Routing** to mechanizm, który decyduje, jak serwer powinien odpowiedzieć na żądanie klienta.
+Składa się z dwóch głównych elementów:
+1. **Ścieżki (Path/URI)** – np. `/meals`, `/users/123`.
+2. **Metody HTTP** – np. `GET` (pobierz), `POST` (utwórz), `PUT` (zaktualizuj), `DELETE` (usuń).
+
+W Ktorze routing to struktura drzewiasta definiowana za pomocą potężnego DSL-a (Domain-Specific Language).
+Zamiast płaskiej listy ścieżek, budujemy zagnieżdżone bloki, co sprawia, że kod wygląda niemal jak struktura folderów.
+Dodatkowo często musimy wyciągnąć zmienne ze ścieżki (*Path Parameters*) lub po znaku zapytania (*Query Parameters*).
+
+
+### Dwa rodzaje parametrów
+Są to dwa różne rodzaje parametrów adresu URL:
+- `:id`, a w Ktorze zapisywane jako `{id}`, to **parametr ścieżki**, czyli *path parameter*.
+- `?name=Jan` to *parametr zapytania*, czyli *query parameter*.
+
+
+#### Parametr ścieżki: Path Parameter
+
+
+##### Zapis w Ktorze
+```kotlin
+get("/users/{id}") {
+    val id = call.parameters["id"]
+    call.respondText("Identyfikator użytkownika: $id")
+}
+````
+
+##### Wywołasnie w konsoli:
+`curl http://localhost:8080/users/42`
+
+Tu do zmiennej `id` zostanie przypisana wartość `42`.
+
+##### Odebranie danych w Ktorze
+```kotlin
+val id = call.parameters["id"]
+````
+
+:::tip Parametr ścieżki - do czego służy?
+Najczęściej wskazuje konkretny zasób
+```
+/users/42
+/products/15
+/meals/8
+/orders/2026
+```
+
+:::
+
+#### Parametr zapytania: Query Parameter
+
+Parametry zapytania umieszcza się po znaku `?`: `/users?name=Jan`
+
+##### Odczyt w Ktorze
+```kotlin
+get("/users") {
+    val name = call.request.queryParameters["name"]
+
+    call.respondText("Wyszukiwana osoba $name")
+
+```
+
+##### Wywołanie w konsoli
+`curl "http://localhost:8080/users?name=Jan"`
+
+Ktor odczytuje parametry po `?` przez `call.request.queryParameters`
+
+
+:::tip Do czego służy
+Najczęściej służy do:
+- filtrowania wyników (`/meals?type=vege`),
+- wyszukiwania (`/users?name=Jan`),
+- sortowania (`/products?sort=price`),
+- ...
+:::
+
+##### Kilka parametrów zapytania
+Pierwszy parametr poprzedzamy znakiem ?, a następne znakiem &:
+`/products?category=books&sort=price&page=2`
+
+
+:::tip Uwaga na typy danych
+
+Obie metody zwracają String?, czyli tekst lub null:
+```kotlin
+val id: String? = call.parameters["id"]
+val page: String? = call.request.queryParameters["page"]
+```
+
+---
+
+## 🥊 Express.js vs Ktor: Kierowanie ruchem
+
+W Express.js routing opiera się na łańcuchach wywołań na obiekcie aplikacji lub routera.
+Wyciąganie parametrów to odpytywanie obiektu `req`.
+W Ktorze używamy funkcji zagnieżdżonych, a dostęp do danych uzyskujemy przez kontekst `call`.
+
+### Wersja Express.js (Szkolna stołówka w JS)
+
+```javascript title="canteen.js"
+const express = require('express');
+const app = express();
+app.use(express.json()); // Middleware do parsowania JSON z body
+
+// Pobieranie konkretnego posiłku (Path parameter)
+app.get('/meals/:id', (req, res) => {
+    const mealId = req.params.id;
+    res.send(`Oto twój posiłek numer: ${mealId}`);
+});
+
+// Wyszukiwanie posiłków (Query parameter: /meals?type=vege)
+app.get('/meals', (req, res) => {
+    const dietType = req.query.type;
+    if (dietType) {
+        res.send(`Menu dla diety: ${dietType}`);
+    } else {
+        res.send('Pełne menu na dziś.');
+    }
+});
+```
+
+### Wersja Ktor (Stołówka w Kotlinie)
+Zwróć uwagę, jak Ktor grupuje ścieżki.
+Słowo kluczowe `route` tworzy gałąź drzewa, pod którą możemy podpinać różne metody HTTP.
+
+```kotlin
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
+fun Application.configureRouting() {
+    routing {
+        // Grupowanie wszystkich zapytań pod /meals
+        route("/meals") {
+            // Obsługa ścieżki głównej z parametrem Query (np. /meals?type=vege)
+            get {
+                // W Ktorze wyciągamy to z call.request.queryParameters
+                val dietType = call.request.queryParameters["type"]
+
+                if (dietType != null) {
+                    call.respondText("Menu dla diety: $dietType")
+                } else {
+                    call.respondText("Pełne menu na dziś.")
+                }
+            }
+
+            // Obsługa konkretnego ID (Path parameter, np. /meals/42)
+            get("{id}") {
+                // W Ktorze wyciągamy to prosto z call.parameters
+                val mealId = call.parameters["id"]
+
+                if (mealId == null) {
+                    call.respondText("Brakujący numer posiłku!", status = HttpStatusCode.BadRequest)
+                    return@get
+                }
+
+                call.respondText("Oto twój posiłek numer: $mealId")
+            }
+        }
+    }
+}
+```
+
+Najważniejsze różnice, na które należy zwrócić uwagę:
+- Definiowanie zmiennych w ścieżce:
+    - W Expressie piszesz `:id`.
+    - W Ktorze pakujesz to w nawiasy klamrowe: `{id}`.
+- Dostęp do parametrów:
+    - Express: `req.params.id` (*Path*) oraz `req.query.type` (*Query*).
+    - Ktor: `call.parameters["id"]` (*Path*) oraz `call.request.queryParameters["type"]` (*Query*).
+
+Typowanie:
+- W Ktorze pobrany parametr zawsze jest `String?` (może być `nullem`).
+- Jeśli oczekujesz liczby, musisz go zrzutować sam (np. `mealId.toIntOrNull()`), co chroni przed rzucaniem wyjątków
+w głąb aplikacji, jeśli ktoś wpisze `/meals/schabowy` zamiast `/meals/42`.
+
+Bezpieczeństwo typów w Kotlinie wymusza na nas obsłużenie sytuacji, w której parametru po prostu nie ma.
+Kompilator nie pozwoli nam użyć zmiennej, dopóki nie upewnimy się, że nie jest nullem!
+
+
+
+
+

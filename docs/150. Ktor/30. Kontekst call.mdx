@@ -1,0 +1,305 @@
+---
+title: Obiekt Call
+---
+
+# Obiekt Call: Serce każdej rozmowy serwera z klientem
+
+## 📞 Metafora rozmowy telefonicznej
+
+Wyobraź sobie, że dzwonisz na infolinię swojego banku. Od momentu, gdy rozpoczyna się połączenie (konsultant
+podnosi słuchawkę i pyta *"W czym mogę pomóc?"*), aż do chwili, gdy się rozłączasz (mówisz *"Dziękuję,
+do widzenia"* i odkładasz słuchawkę) – trwa dokładnie jedna, nierozerwalna **rozmowa**.
+
+
+Podczas tej rozmowy to Ty przekazujesz informacje (kim jesteś, w jakiej sprawie dzwonisz),
+a konsultant na bieżąco analizuje sytuację, wykonuje akcje i od razu udziela Ci odpowiedzi w ramach
+tego samego połączenia.
+
+W świecie programowania backendowego, framework Express.js we wręczaniu narzędzi jest nieco dziwny –
+wręcza Ci do rąk osobno "ucho" do słuchania klienta i osobno "usta" do mówienia.
+Ktor, jako narzędzie eleganckie, wręcza Ci po prostu cały telefon.
+Tym telefonem jest właśnie obiekt **`call`**.
+
+---
+
+## 🤓 Technicznie rzecz biorąc: Czym jest `call`?
+
+W Ktorze `call` (a precyzyjniej obiekt oparty na interfejsie `ApplicationCall` ) reprezentuje
+**pojedynczą transakcję HTTP**. Jest to logiczny kontener, który łączy w sobie absolutnie wszystko,
+co dotyczy bieżącego zapytania od klienta oraz odpowiedzi, którą serwer ma mu zwrócić.
+
+Zawsze, gdy klient (np. przeglądarka lub aplikacja mobilna) uderza w Twój endpoint,
+Ktor tworzy obiekt `call`. Daje on natychmiastowy dostęp do dwóch kluczowych właściwości:
+1. **`call.request`** reprezentuje to, *z czym* przyszedł klient
+    - adres IP,
+    - nagłówki,
+    - parametry w URL,
+    - ciało zapytania tzw. *body*.
+2. **`call.response`** reprezentuje to, *co* zamierzasz klientowi odesłać:
+    - ustawienie statusu HTTP,
+    - ciasteczek,
+    - nagłówki odpowiedzi,
+    - no i sama treści).
+
+:::tip Funkcje rozszerzając
+Warto zwrócić uwagę na **funkcje rozszerzające (extension functions)**.
+Twórcy Ktora wiedzieli, że pisanie `call.response.status(200)` i potem `call.response.sendText("OK")`
+byłoby nudne. Dlatego `call` posiada mnóstwo wygodnych skrótów.
+Wystarczy wpisać `call.respondText("OK")`, a Ktor sam pod maską obsłuży resztę papierkowej roboty!
+
+:::
+
+---
+
+## 🥊 Pojedynek wagi piórkowej: `(req, res)` vs `call`
+
+W Express.js każda funkcja obsługująca routing zawsze musi przyjmować co najmniej dwa argumenty:
+- obiekt żądania (`request`) i
+- obiekt odpowiedzi (`response`).
+
+W Ktorze wchodzimy do bloku routingu, a obiekt `call` jest w nim magicznie i domyślnie dostępny
+(dzięki strukturze tzw. lambd z odbiornikiem).
+
+
+### Wersja Express.js (Ucho i usta osobno)
+
+W JavaScripcie musimy jawnie deklarować w parametrach funkcji nasze `req` oraz `res`.
+Rozbija to kontekst na dwa osobne byty.
+
+```javascript title="express_login.js"
+app.post('/api/login', (req, res) => {
+    // Z "ucha" (req) wyciągamy dane przysłane przez użytkownika
+    const username = req.body.username;
+    const userAgent = req.headers['user-agent'];
+
+    console.log(`Próba logowania z urządzenia: ${userAgent}`);
+
+    // Przez "usta" (res) wysyłamy odpowiedź do klienta
+    if (username === 'admin') {
+        res.status(200).send('Zalogowano pomyślnie!');
+    } else {
+        res.status(401).send('Brak dostępu.');
+    }
+});
+```
+
+### Wersja Ktor (Wszystko w jednym telefonie)
+W Kotlinie nie musisz podawać parametrów wejściowych w każdym bloku.
+Słówko `call` po prostu na Ciebie czeka.
+
+```kotlin
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+
+fun Route.loginRouting() {
+    post("/api/login") {
+        // Z obiektu call wyciągamy dane wysłane przez klienta
+        // receive<T>() automatycznie mapuje JSON-a na obiekt
+        //(dzięki wtyczce ContentNegotiation)
+        val loginData = call.receive<LoginRequest>()
+        val userAgent = call.request.headers["User-Agent"]
+
+        println("Próba logowania z urządzenia: $userAgent")
+
+        // Za pomocą TEGO SAMEGO obiektu call wysyłamy odpowiedź
+        if (loginData.username == "admin") {
+            call.respond(HttpStatusCode.OK, "Zalogowano pomyślnie!")
+        } else {
+            call.respond(HttpStatusCode.Unauthorized, "Brak dostępu.")
+        }
+    }
+}
+
+// Prosta klasa danych (DTO) reprezentująca oczekiwanego JSON-a
+@Serializable
+data class LoginRequest(val username: String)
+
+```
+
+---
+
+## Uruchamiamy `loginRouting`
+
+### Kod i konfiguracja
+Dopiszmy do naszego projektu nowy plik `LoginRouting` i wypełnijmy go powyższym kodem.
+
+:::tip Gdzie wywołać `loginRouting`?
+Ponieważ `loginRouting()` jest funkcją rozszerzającą klasę `Route`,
+wywołujesz ją wewnątrz bloku `routing {}`.
+Nie wywołujesz jej bezpośrednio w `embeddedServer {}` tak jak `configureRouting()`,
+ponieważ odbiorcą tej funkcji nie jest `Application`, tylko `Route`.
+
+:::
+
+Wprowadźmy zmiany w funkcji `main`:
+
+```kotlin
+fun main(args: Array<String>) {
+      embeddedServer(Netty, port = 8081){
+         // Potrzebne, aby call.receive<LoginRequest>()
+         // potrafiło zamienić JSON na obiekt Kotlinowy.
+         install(ContentNegotiation) {
+            json()
+         }
+
+         configureRouting()
+
+         routing{
+            get("/"){
+               call.respondText("Witaj w ktorze")
+            }
+
+            loginRouting()
+         }
+   }.start(wait = true)
+}
+
+```
+
+:::note Brak odpowiednich zależności
+Z powodu braku odpowiednich zależności, aplikacja nie uruchomi się:
+1. Do pliku `.toml` dodajemy:
+```toml
+[versions]
+...
+ktor = "3.3.0" // nowe
+
+[libraries]
+...
+// NOWE
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+//----------
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}
+```
+2. W pliku `build.gradle.kts`:
+```kotlin
+plugins {
+    ...
+    alias(libs.plugins.kotlin.serialization)
+}
+
+
+dependencies {
+    ...
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+}
+```
+Całość synchronizujemy i teraz możemy doimportować brakujące zależności `ContentNegotiation` oraz `  json()`.
+:::
+
+
+:::tip Czym jest kod `install ...`
+Wyobraź sobie, że Twój serwer Ktor jest pracownikiem szkolnej stołówki,
+a aplikacja mobilna jest uczniem składającym zamówienie.
+
+Uczeń przynosi kartkę napisaną w języku JSON:
+```json
+{
+  "username": "admin"
+}
+```
+Jednak serwer pracuje na obiektach Kotlinowych — np:
+```kotlin
+LoginRequest(username = "admin")
+```
+Potrzebny tłumacz!
+- `install(ContentNegotiation)` zatrudnij w aplikacji tłumacza, który będzie zamieniał DTO na obiekty Kotlinowe
+i odwrotnie
+
+:::info `ContentNegotiation`
+Wtyczka Ktora odpowiedzialna za:
+- rozpoznawanie formatu danych,
+- deserializację danych przychodzących,
+- serializację danych wychodzących,
+- współpracę z nagłówkami `Content-Type` i `Accept`.
+
+:::
+
+- `json()` tłumacz dowiaduje się, że będzie używać języka JSON
+
+:::
+
+
+### Testowanie
+
+#### GET
+
+##### W projekcie otwórz terminal:
+- sprawdzamy metodę `get`:
+    - albo: `curl http://localhost:8080/`
+    - albo: z jawnie podaną metodą `curl -X GET http://localhost:8080/`
+
+:::tip `curl`
+- `curl` to program terminalowy służący do wysyłania żądań HTTP.
+- Dzięki niemu możesz przetestować serwer Ktor bez tworzenia aplikacji mobilnej,
+desktopowej ani strony internetowej.
+
+:::
+
+##### Wyjaśnienie curl http://localhost:8080/`
+1. łączy się z Twoim komputerem przez localhost,
+2. używa portu 8080,
+3. wysyła żądanie GET pod ścieżkę /,
+4. wyświetla odpowiedź serwera w terminalu.
+
+
+##### GET z parametrami
+
+`curl -X GET http://localhost:8081/meals/44`
+
+Dopiszmy w
+
+
+
+#### POST
+
+W terminalu wpis:
+```
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin"}'
+```
+
+- `-X POST` opcja -X wskazuje metodę HTTP: `POST`
+- -`H "Content-Type: application/json"` opcja `-H` dodaje nagłówek HTTP.
+- `Content-Type: application/json` nagłówek: wysyłane dane w treści żądania, są zapisane jako JSON.
+- `-d '{"username":"admin"}'` opcja `-d`, czyli data, określa treść żądania.
+- `{"username":"admin"}` wysłana treść (JSON)
+
+Ktor zamienia go na obiekt:
+
+```kotlni
+LoginRequest(
+    username = "admin"
+)
+```
+**Jak Ktor przetwarza całe żądanie**:
+
+1. `curl` wysyła `POST /api/login`
+2. Ktor znajduje `post("/api/login")`
+3. `call.receive<LoginRequest>()` odczytuje treść żądania
+4. JSON zostaje zamieniony na `LoginRequest`
+5. `loginData.username` ma wartość `"admin"`
+6. warunek `loginData.username == "admin"` jest prawdziwy
+7. serwer zwraca status `200 OK`
+8.`curl` wyświetla `"Zalogowano pomyślnie!"`
+
+
+
+
+
+

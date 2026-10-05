@@ -1,0 +1,185 @@
+---
+title: Wprowadzenie
+---
+
+
+
+
+
+## Czym jest Ktor?
+
+### Zaczynamy przygodę z backendem w Kotlinie
+
+Wyobraź sobie, że budujesz dom. Pisanie backendu w czystym, niskopoziomowym kodzie jest jak kopanie
+fundamentów łyżeczką, wypalanie własnych cegieł i kucie własnych gwoździ.
+Z kolei frameworki takie jak Spring (w świecie Javy) są jak kupienie gotowego, ogromnego wieżowca z
+basenem i lądowiskiem dla helikopterów, kiedy Ty potrzebowałeś tylko altanki na działkę.
+
+**Express.js**, którego pewnie świetnie znasz ze świata JavaScriptu, to taki zestaw z IKEI –
+lekki, elastyczny, kupujesz ramy, a ściany i meble dobierasz sam z tysięcy dostępnych paczek (middleware'ów).
+
+
+A **Ktor**? Ktor to najnowocześniejsze, magnetyczne klocki Lego stworzone dokładnie przez tych samych inżynierów,
+którzy wymyślili sam plastik, z którego te klocki są zrobione. Wszystko klika ze sobą idealnie,
+bierzesz tylko to, czego potrzebujesz, a Twój dom jest niesamowicie szybki, bezpieczny i stabilny.
+
+---
+
+### 🤓 Technicznie rzecz biorąc: Czym jest Ktor?
+
+https://ktor.io
+
+**Ktor** to lekki, asynchroniczny framework do tworzenia połączonych aplikacji
+(mikroserwisów, aplikacji webowych oraz klientów HTTP).
+Został napisany w 100% w Kotlinie i od samego fundamentu opiera się na **Krutynach (Coroutines)**.
+Oznacza to, że z natury jest nieblokujący (*non-blocking*) i pozwala na obsługę ogromnej liczby
+jednoczesnych połączeń przy minimalnym zużyciu zasobów.
+
+Co ważne, Ktor to narzędzie o dwóch twarzach:
+1. **Ktor Server** – służy do budowy backendu (odpowiednik Express.js).
+2. **Ktor Client** – potężny, wieloplatformowy klient HTTP (odpowiednik np.
+biblioteki `axios` w JS, ale działający na każdej platformie od iOS po Windowsa).
+
+:::tip Mikroserwisy
+**Architektura mikroserwisów** to podejście polegające na budowaniu aplikacji jako zestawu małych,
+niezależnych od siebie usług. Zamiast tworzyć jeden wielki, połączony kod (tzw. monolit),
+system dzieli się na mniejsze, wyspecjalizowane klocki.
+
+**Pojedyncza odpowiedzialność**: Każdy mikroserwis robi tylko jedną rzecz
+(np. jeden odpowiada wyłącznie za logowanie, inny za obsługę koszyka, a kolejny za generowanie faktur).
+
+
+**Niezależność**: Zazwyczaj posiadają własne bazy danych i mogą być aktualizowane, wdrażane lub skalowane
+bez wpływu na resztę systemu.
+
+**Technologiczna swoboda**: Różne zespoły mogą pisać różne mikroserwisy w innych
+językach programowania (np. moduł analityczny w Pythonie, a system rezerwacji w Javie).
+
+:::
+
+:::info Klienci HTTP (HTTP Clients)
+To biblioteki programistyczne lub narzędzia, które potrafią nawiązać połączenie przez sieć,
+wysłać żądanie (request) do serwera i odebrać od niego odpowiedź (response).
+
+
+Wyróżniamy dwa główne typy:
+1. Biblioteki w kodzie:
+Programiści używają ich wewnątrz swoich aplikacji, aby pobierać lub wysyłać dane do zewnętrznych usług
+(np. fetch lub axios w JavaScript, requests w Pythonie, HttpClient w C#).
+
+2. Narzędzia i aplikacje:
+Używane do ręcznego testowania API i sprawdzania, jak odpowiada serwer
+(np. Postman, Insomnia, program cURL w terminalu). Zwykła przeglądarka internetowa to również zaawansowany
+klient HTTP.
+
+
+:::
+
+
+### Kto go zrobił i kiedy powstał?
+Ktor to oficjalne dziecko firmy **JetBrains** – dokładnie tej samej ekipy, która stworzyła język Kotlin
+oraz środowisko IntelliJ IDEA. Pierwsze pomysły i wersje alpha pojawiały się wokół 2017 roku,
+a stabilna wersja 1.0 ujrzała światło dzienne pod koniec 2018 roku.
+Ponieważ tworzą go autorzy samego języka, Ktor wykorzystuje wszystkie najnowsze "bajery" Kotlina,
+takie jak DSL (Domain-Specific Language), co sprawia, że kod wygląda niemal jak konfiguracja czy
+zwykły tekst, a nie skomplikowana logika.
+
+### Kto tego używa i jaka jest przyszłość?
+Ktor jest używany przez potężnych graczy: Adobe, N26 (bank), mYngle, no i oczywiście sam JetBrains.
+
+**Jaka jest jego przyszłość?**
+W dobie ekspansji **Kotlin Multiplatform (KMP)** Ktor staje się absolutnym standardem.
+Dlaczego? Bo ten sam klient Ktorowy pozwala Ci pisać kod sieciowy, który bez żadnych modyfikacji skompiluje się
+natywnie na Androida, iOS, aplikację desktopową na macOS/Windows,
+a nawet do WebAssembly w przeglądarce. Jeśli chcesz pisać nowocześnie w ekosystemie Kotlina,
+Ktor jest narzędziem, którego po prostu musisz się nauczyć.
+
+---
+
+## 🥊 Pojedynek wagi piórkowej: Ktor vs Express.js
+
+Obydwa frameworki należą do kategorii "unopinionated" (nie narzucają Ci jednego,
+słusznego sposobu strukturyzacji projektu) i obydwa są niezwykle lekkie na starcie.
+
+| Cecha | Express.js (JavaScript/Node.js) | Ktor (Kotlin) |
+|---|---|---|
+| **Podejście do asynchroniczności** | Callbacks, Promises, `async/await` | **Coroutines** (lekkie wątki, potężna wydajność) |
+| **Rozszerzanie funkcjonalności** | Middleware (np. `app.use()`) | **Plugins** (kiedyś zwane Features, np. `install(ContentNegotiation)`) |
+| **Bezpieczeństwo typów** | Brak (chyba że użyjesz TypeScriptu) | **Silne typowanie** (Kompilator bije po łapkach przed uruchomieniem) |
+| **Konfiguracja Routingu** | Obiekty Routera przekazywane do aplikacji | **Elegancki DSL** (blok `routing { ... }`) |
+
+---
+
+## 💻 Show me the code! (Hello World)
+Oto minimalny serwer odsyłający "Hello World!".
+
+### Wersja Express.js (Znajome terytorium)
+
+W Node.js odpalamy serwer dość prosto:
+- importujemy moduł,
+- konfigurujemy port
+- definiujemy jeden endpoint (tzw. route):
+
+```javascript title="index.js"
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Definicja routingu
+app.get('/', (req, res) => {
+  res.send('Hello World! Kłania się Express.');
+});
+
+// Uruchomienie serwera
+app.listen(port, () => {
+  console.log(`Serwer Express działa na porcie ${port}`);
+});
+```
+### Wersja Ktor
+
+W Ktorze robimy to za pomocą dedykowanego, osadzonego serwera (tzw. embeddedServer), używając silnika np. Netty.
+Zauważ, jak Kotlin używa lambd, aby stworzyć czytelną, hierarchiczną strukturę (Routing DSL).
+
+:::note Routing DSL
+*Domain-Specific Language* do routingu to wyspecjalizowana składnia lub interfejs wbudowany w framework,
+który pozwala programistom definiować trasy zapytań w sposób
+- zwięzły,
+- deklaratywny,
+- przypominający naturalny opis ścieżek.
+
+Zamiast pisać ręczne instrukcje warunkowe (`if` / `else` lub `switch`) analizujące adresy URL i metody HTTP,
+programista korzysta z interfejsu (tzw. wewnętrznego DSL), który wykorzystuje zaawansowane mechanizmy głównego
+języka programowania (np. lambdy, domknięcia, funkcje rozszerzające),
+aby symulować dedykowany "mini-język" przeznaczony wyłącznie do kierowania ruchem.
+
+:::
+
+
+```kotlin
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
+fun main() {
+    // Odpalamy osadzony serwer na silniku Netty (bardzo szybki silnik asynchroniczny z Javy)
+    embeddedServer(Netty, port = 8080) {
+
+        // Definicja routingu - nasz Ktorowy odpowiednik app.get()
+        routing {
+            get("/") {
+                // call reprezentuje pojedyncze zapytanie (request) i odpowiedź (response)
+                call.respondText("Hello World! Kłania się Ktor.")
+            }
+        }
+
+    }.start(wait = true) // Uruchom i czekaj (nie pozwól aplikacji się zamknąć)
+}
+```
+
+**Co tu się zadziało?**
+W Expressie używałeś pary obiektów `req` (request) i `res` (response).
+W Ktorze wszystko jest spakowane w kontekst nazwany `call` (czyli jedno wywołanie sieciowe).
+Aby odpowiedzieć tekstem, używamy prostej funkcji `call.respondText()`.
+Cała reszta to po prostu piękny mechanizm funkcji wyższego rzędu Kotlina.
