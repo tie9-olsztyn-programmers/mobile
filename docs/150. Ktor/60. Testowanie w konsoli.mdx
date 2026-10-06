@@ -1,0 +1,77 @@
+---
+title: Żądania w konsoli
+---
+
+Naszą aplikację z poprzedniej lekcji "odpytamy" w konsoli.
+
+
+## GET
+
+### W projekcie otwórz terminal:
+- sprawdzamy metodę `get`:
+  - albo: `curl http://localhost:8080/`
+  - albo: z jawnie podaną metodą `curl -X GET http://localhost:8080/`
+
+:::tip `curl`
+- `curl` to program terminalowy służący do wysyłania żądań HTTP.
+- Dzięki niemu możesz przetestować serwer Ktor bez tworzenia aplikacji mobilnej,
+desktopowej ani strony internetowej.
+
+:::
+
+### Wyjaśnienie curl http://localhost:8080/`
+1. łączy się z Twoim komputerem przez localhost,
+2. używa portu 8080,
+3. wysyła żądanie GET pod ścieżkę /,
+4. wyświetla odpowiedź serwera w terminalu.
+
+
+### GET z parametrami
+
+`curl -X GET http://localhost:8081/meals/44`
+
+Dopiszmy w
+
+
+
+#### POST
+
+W terminalu wpis:
+```
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin"}'
+```
+
+- `-X POST` opcja -X wskazuje metodę HTTP: `POST`
+- -`H "Content-Type: application/json"` opcja `-H` dodaje nagłówek HTTP.
+- `Content-Type: application/json` nagłówek: wysyłane dane w treści żądania, są zapisane jako JSON.
+- `-d '{"username":"admin"}'` opcja `-d`, czyli data, określa treść żądania.
+- `{"username":"admin"}` wysłana treść (JSON)
+
+Ktor zamienia go na obiekt:
+
+```kotlni
+LoginRequest(
+    username = "admin"
+)
+```
+**Jak Ktor przetwarza całe żądanie**:
+
+1. `curl` wysyła `POST /api/login`
+2. Ktor znajduje `post("/api/login")`
+3. `call.receive<LoginRequest>()` odczytuje treść żądania
+4. JSON zostaje zamieniony na `LoginRequest`
+5. `loginData.username` ma wartość `"admin"`
+6. warunek `loginData.username == "admin"` jest prawdziwy
+7. serwer zwraca status `200 OK`
+8.`curl` wyświetla `"Zalogowano pomyślnie!"`
+
+
+
+
+
+
+
+
+

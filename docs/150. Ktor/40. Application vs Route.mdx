@@ -1,0 +1,176 @@
+---
+title: Application vs Route
+---
+
+# Application vs Route: Kto tu rządzi, a kto wykonuje polecenia?
+
+Zanim uruchomimy naszą aplikację, musimy zrozumieć różnicę między `Application` a `Route`
+
+
+Wyobraź sobie nowoczesny budynek zespołu szkół, w którym odbywają się egzaminy zawodowe z kwalifikacji INF.04.
+
+**Application (Aplikacja)** to cały ten potężny budynek.
+Obejmuje fundamenty, mury, główny zasilacz, system kamer na korytarzach (logowanie zapytań) i portiernię,
+która decyduje, kto w ogóle ma prawo wejść do środka (uwierzytelnianie).
+Budynek trwa, dopóki szkoła funkcjonuje. Nie interesuje go jednak, jak dokładnie podłącza się kable
+w pracowni numer 116.
+
+
+**Route (Trasa/Ścieżka)** to z kolei konkretne skrzydło budynku, piętro, a
+nawet pojedyncza sala lekcyjna. Kiedy uczeń wchodzi do szkoły, portiernia (`Application`) kieruje go
+w odpowiednie miejsce. Uczeń trafia do pracowni informatycznej (`Route` `/network`),
+gdzie nauczyciel oczekuje od niego wykonania konkretnego zadania w określony sposób (np. metoda `POST`).
+`Route` zajmuje się wyłącznie obsługą ruchu na swoim małym terytorium.
+
+---
+
+## 🤓 Technicznie rzecz biorąc: Główny węzeł i jego gałęzie
+
+W ekosystemie Ktora **`Application`** i **`Route`** to dwa zupełnie różne typy, z których każdy
+ma swoje unikalne obowiązki, choć ściśle ze sobą współpracują.
+
+1. **`Application`** reprezentuje instancję Twojego serwera.
+To tutaj definiujesz cykl życia aplikacji i instalujesz wtyczki (*Plugins*), które wpływają
+na całe żądania – np. serializację JSON (`ContentNegotiation`), obsługę nagłówków CORS, czy logowanie.
+Funkcja konfigurująca (często nazywana `module`) jest tzw. funkcją rozszerzającą (*extension function*)
+na typie `Application`.
+2. **`Route`** to węzeł w drzewie routingu. Kiedy wewnątrz `Application` wywołujesz blok
+`routing { ... }`, pod maską tworzony jest główny obiekt `Route`. Od tego momentu każda zagnieżdżona
+funkcja (jak `get()`, `post()`) operuje już na kontekście typu `Route`. To pozwala na bardzo
+łatwe dzielenie kodu na mniejsze pliki i moduły.
+
+Dzięki takiemu podziałowi, w Kotlinie nie musisz wrzucać wszystkich ścieżek do jednego gigantycznego pliku.
+Możesz stworzyć dziesiątki małych funkcji rozszerzających na typie `Route` i poskładać
+je w swojej `Application` jak z klocków Lego.
+
+---
+
+## 🥊 Pojedynek wagi piórkowej: Konfiguracja serwera
+
+W Express.js również występuje ten podział, choć jest zrealizowany bardziej w
+stylu programowania zorientowanego na zdarzenia i obiekty, z których budujemy łańcuchy (middlewares).
+
+W JavaScripcie `Application` to po prostu obiekt zwracany przez wywołanie `express()`,
+a `Route` to obiekt tworzony przez `express.Router()`.
+
+
+### Wersja Express.js (Wszystko jako Middleware)
+
+W Node.js tworzymy router, a następnie "doklejamy" go do głównej aplikacji za pomocą metody `app.use()`.
+
+```javascript title="app.js"
+const express = require('express');
+
+// To jest nasza Application (budynek)
+const app = express();
+app.use(express.json()); // Globalna wtyczka działająca w całym budynku
+
+// To jest nasz Route (skrzydło budynku)
+const studentsRouter = express.Router();
+
+// Obsługa konkretnej sali
+studentsRouter.get('/grades', (req, res) => {
+    res.json({ subject: 'INF.04', grade: 5 });
+});
+
+// Podłączamy skrzydło do głównego budynku
+app.use('/students', studentsRouter);
+
+app.listen(3000, () => console.log('Szkoła otwarta!'));
+
+```
+
+### Wersja Ktor (Czysta delegacja i Extension Functions)
+W Ktorze podział ten wygląda dużo bardziej naturalnie. Zamiast tworzyć obiekty i przekazywać
+je jako argumenty, rozszerzamy możliwości klasy `Route`.
+
+Zwróć uwagę na to, w jakim zasięgu (*scope*) się znajdujemy.
+Blok routing przenosi nas z przestrzeni Application do przestrzeni Route.
+
+```kotlin
+// To jest Application (budynek) - tu wchodzimy przy starcie serwera
+fun Application.module() {
+
+    // Instalujemy "portiernię" i inne systemy ogólnobudynkowe
+    install(ContentNegotiation) {
+        json()
+    }
+
+    // Blok routing tworzy główny węzeł Route
+    routing {
+        // Tu jesteśmy w kontekście Route (this: Route)
+
+        get("/") {
+            call.respondText("Witaj w głównym holu!")
+        }
+
+        // Wywołujemy naszą zewnętrzną funkcję, dołączając skrzydło
+        studentRoutes()
+    }
+}
+
+// To jest rozszerzenie na typie Route (nasze skrzydło budynku)
+// Zwróć uwagę, że ta funkcja NIE MA dostępu do instalowania globalnych wtyczek aplikacji!
+fun Route.studentRoutes() {
+    route("/students") {
+        get("/grades") {
+            // Zakładamy, że mamy skonfigurowaną odpowiednią klasę data class
+            call.respondText("Ocena: 5 z INF.04")
+        }
+    }
+}
+```
+
+
+
+**Dlaczego Route nie jest Application?**
+Wyobraź sobie, co by się stało, gdyby uczeń w sali od sieci (*Route*) mógł zrestartować cały budynek
+albo zmienić zasady wpuszczania przez portiernię. To byłby chaos! Ktor dba o to, by w bloku odpowiadającym
+za obsługę konkretnego zapytania (`Route`) nie było możliwości przypadkowego odinstalowania wtyczek,
+zmiany portu, czy konfiguracji silnika, które należą wyłącznie do zakresu `Application`.
+
+Dzięki temu kod staje się bezpieczniejszy i odporny na błędy "zwykłego zmęczenia" programisty!
+
+
+---
+
+:::note `Application` vs `Route` - podsumowanie
+- `Application.configureRouting()` poziom aplikacji
+  - można czytać jako "Dodaj do całej aplikacji metodę `configureRouting`,
+  - dodano `routing {}`, aby stworzyć główne drzewo tras.
+  - `Application` to główny obiekt Ktora reprezentujący uruchomiony serwer
+  - metafora: to jak cała szkoła
+- `Route.loginRouting()`
+  - można czytać jako "Dodaj do dowolnej trasy możliwość zarejestrowania endpointów logowania."
+  - Taka funkcja nie tworzy `routing {}`, bo zakłada, że już jesteś w jakiejś trasie.
+  - metafora: pojedynczy korytarz lub sala
+
+:::info Przykładowa struktura projektu
+```kotlin
+fun Application.configureRouting() {
+    routing {
+        loginRouting()
+        mealsRouting()
+        usersRouting()
+    }
+}
+```
+
+```kotlin
+fun Route.loginRouting() {
+    route("/api") {
+        post("/login") {
+            call.respondText("Login")
+        }
+    }
+}
+
+```
+
+:::
+
+
+
+
+
+

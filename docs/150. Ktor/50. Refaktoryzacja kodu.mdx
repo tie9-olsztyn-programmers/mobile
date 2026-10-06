@@ -1,0 +1,116 @@
+---
+title: Refaktoryzacja
+---
+
+
+1. Główny punkt wejścia (Application.kt)
+Funkcja main powinna służyć wyłącznie do uruchomienia serwera. Całą konfigurację przenosimy do funkcji rozszerzającej Application.module().
+
+```kotlin
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+
+fun main() {
+    // Wskazujemy moduł główny aplikacji, unikamy logiki w tym miejscu
+    embeddedServer(Netty, port = 8081, module = Application::module).start(wait = true)
+}
+```
+
+2. Tworzymy nowy plik
+
+```ktolin
+// Główny moduł, który rejestruje wtyczki i routing
+fun Application.module() {
+    configureSerialization()
+    configureRouting()
+}
+```
+
+2. Konfiguracja wtyczek (plugins/Serialization.kt)
+Instalację pluginów (np. do obsługi JSON) warto wydzielić do osobnego pliku, aby zachować porządek, gdy aplikacja urośnie.
+
+```kotlin
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.plugins.contentnegotiation.*
+
+fun Application.configureSerialization() {
+    install(ContentNegotiation) {
+        json()
+    }
+}
+```
+
+3. Centralny rejestr tras (plugins/Routing.kt)
+Zamiast otwierać blok routing {} w kilku miejscach (tak jak robiłeś to w main i configureRouting), tworzymy jedno miejsce, które agreguje wszystkie podrzędne trasy.
+
+
+```
+import io.ktor.server.application.*
+import io.ktor.server.routing.*
+
+fun Application.configureRouting() {
+    routing {
+        // Wywołujemy funkcje rozszerzające Route
+        coreRouting()
+        loginRouting()
+        mealsRouting()
+    }
+}
+```
+
+4. Podział tras na domeny (katalog routes/)
+Wszystkie endpointy grupujemy tematycznie jako funkcje rozszerzające Route.
+
+Trasy podstawowe (routes/CoreRoutes.kt):
+
+```
+fun Route.coreRouting() {
+get("/") {
+call.respondText("Witaj w Ktorze")
+}
+
+    get("/hello") {
+        // Dobra praktyka: zabezpieczenie na wypadek braku parametru (tzw. Elvis operator)
+        val name = call.request.queryParameters["name"] ?: "Nieznajomy"
+        call.respondText("Witaj $name")
+    }
+}
+```
+
+Trasy posiłków (routes/MealsRoutes.kt):
+Tutaj zmieniliśmy Twoje Application.configureRouting na Route.mealsRouting, aby pasowało do nowego wzorca.
+
+```
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
+fun Route.mealsRouting() {
+    route("/meals") {
+        get {
+            val dietType = call.request.queryParameters["type"]
+            if (dietType != null) {
+                call.respondText("Menu dla diety: $dietType")
+            } else {
+                call.respondText("Pełne menu na dziś.")
+            }
+        }
+
+        get("{id}") {
+            val mealId = call.parameters["id"]
+            if (mealId == null) {
+                call.respondText("Brakujący numer posiłku!", status = HttpStatusCode.BadRequest)
+                return@get
+            }
+            call.respondText("Oto twój posiłek numer: $mealId")
+        }
+    }
+}
+
+```
+
+
+

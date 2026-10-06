@@ -86,6 +86,7 @@ app.post('/api/login', (req, res) => {
 ### Wersja Ktor (Wszystko w jednym telefonie)
 W Kotlinie nie musisz podawać parametrów wejściowych w każdym bloku.
 Słówko `call` po prostu na Ciebie czeka.
+Utwórzmy nowy plik `LoginRouting.kt`:
 
 ```kotlin
 import io.ktor.server.application.*
@@ -121,47 +122,11 @@ data class LoginRequest(val username: String)
 
 ---
 
-## Uruchamiamy `loginRouting`
+## Brakujące zależności
+Zanim przejdziemy dalej, doinstalujmy brakujące zależności.
 
-### Kod i konfiguracja
-Dopiszmy do naszego projektu nowy plik `LoginRouting` i wypełnijmy go powyższym kodem.
+### Plik `.tomlz
 
-:::tip Gdzie wywołać `loginRouting`?
-Ponieważ `loginRouting()` jest funkcją rozszerzającą klasę `Route`,
-wywołujesz ją wewnątrz bloku `routing {}`.
-Nie wywołujesz jej bezpośrednio w `embeddedServer {}` tak jak `configureRouting()`,
-ponieważ odbiorcą tej funkcji nie jest `Application`, tylko `Route`.
-
-:::
-
-Wprowadźmy zmiany w funkcji `main`:
-
-```kotlin
-fun main(args: Array<String>) {
-      embeddedServer(Netty, port = 8081){
-         // Potrzebne, aby call.receive<LoginRequest>()
-         // potrafiło zamienić JSON na obiekt Kotlinowy.
-         install(ContentNegotiation) {
-            json()
-         }
-
-         configureRouting()
-
-         routing{
-            get("/"){
-               call.respondText("Witaj w ktorze")
-            }
-
-            loginRouting()
-         }
-   }.start(wait = true)
-}
-
-```
-
-:::note Brak odpowiednich zależności
-Z powodu braku odpowiednich zależności, aplikacja nie uruchomi się:
-1. Do pliku `.toml` dodajemy:
 ```toml
 [versions]
 ...
@@ -181,7 +146,7 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin"}
 ```
-2. W pliku `build.gradle.kts`:
+### W pliku `build.gradle.kts`:
 ```kotlin
 plugins {
     ...
@@ -198,108 +163,50 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
 }
 ```
-Całość synchronizujemy i teraz możemy doimportować brakujące zależności `ContentNegotiation` oraz `  json()`.
-:::
 
 
-:::tip Czym jest kod `install ...`
+### Po co te zależności
+Dzięki nim - po synchronizacji - będziemy mogli zaimportować:
+-  `ContentNegotiation`
+- `  json()`
+
+Potrzebujemy tych elementów, ponieważ później dopiszemy:
+```kotlin
+  install(ContentNegotiation) {
+            json()
+         }
+```
+
+
+####  `install ...`
 Wyobraź sobie, że Twój serwer Ktor jest pracownikiem szkolnej stołówki,
 a aplikacja mobilna jest uczniem składającym zamówienie.
 
-Uczeń przynosi kartkę napisaną w języku JSON:
+- Uczeń przynosi kartkę napisaną w języku JSON:
 ```json
 {
   "username": "admin"
 }
 ```
-Jednak serwer pracuje na obiektach Kotlinowych — np:
+- Jednak serwer pracuje na obiektach Kotlinowych — np:
 ```kotlin
 LoginRequest(username = "admin")
 ```
-Potrzebny tłumacz!
-- `install(ContentNegotiation)` zatrudnij w aplikacji tłumacza, który będzie zamieniał DTO na obiekty Kotlinowe
-i odwrotnie
 
-:::info `ContentNegotiation`
+- Potrzebny tłumacz! `install(ContentNegotiation)` zatrudnij w aplikacji tłumacza, który będzie
+zamieniał DTO na obiekty Kotlinowe i odwrotnie
+
+
+#### info `ContentNegotiation`
 Wtyczka Ktora odpowiedzialna za:
 - rozpoznawanie formatu danych,
 - deserializację danych przychodzących,
 - serializację danych wychodzących,
 - współpracę z nagłówkami `Content-Type` i `Accept`.
 
-:::
 
-- `json()` tłumacz dowiaduje się, że będzie używać języka JSON
+#### `json()`
+Tłumacz dowiaduje się, że będzie używać języka JSON.
 
-:::
-
-
-### Testowanie
-
-#### GET
-
-##### W projekcie otwórz terminal:
-- sprawdzamy metodę `get`:
-    - albo: `curl http://localhost:8080/`
-    - albo: z jawnie podaną metodą `curl -X GET http://localhost:8080/`
-
-:::tip `curl`
-- `curl` to program terminalowy służący do wysyłania żądań HTTP.
-- Dzięki niemu możesz przetestować serwer Ktor bez tworzenia aplikacji mobilnej,
-desktopowej ani strony internetowej.
-
-:::
-
-##### Wyjaśnienie curl http://localhost:8080/`
-1. łączy się z Twoim komputerem przez localhost,
-2. używa portu 8080,
-3. wysyła żądanie GET pod ścieżkę /,
-4. wyświetla odpowiedź serwera w terminalu.
-
-
-##### GET z parametrami
-
-`curl -X GET http://localhost:8081/meals/44`
-
-Dopiszmy w
-
-
-
-#### POST
-
-W terminalu wpis:
-```
-curl -X POST http://localhost:8080/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin"}'
-```
-
-- `-X POST` opcja -X wskazuje metodę HTTP: `POST`
-- -`H "Content-Type: application/json"` opcja `-H` dodaje nagłówek HTTP.
-- `Content-Type: application/json` nagłówek: wysyłane dane w treści żądania, są zapisane jako JSON.
-- `-d '{"username":"admin"}'` opcja `-d`, czyli data, określa treść żądania.
-- `{"username":"admin"}` wysłana treść (JSON)
-
-Ktor zamienia go na obiekt:
-
-```kotlni
-LoginRequest(
-    username = "admin"
-)
-```
-**Jak Ktor przetwarza całe żądanie**:
-
-1. `curl` wysyła `POST /api/login`
-2. Ktor znajduje `post("/api/login")`
-3. `call.receive<LoginRequest>()` odczytuje treść żądania
-4. JSON zostaje zamieniony na `LoginRequest`
-5. `loginData.username` ma wartość `"admin"`
-6. warunek `loginData.username == "admin"` jest prawdziwy
-7. serwer zwraca status `200 OK`
-8.`curl` wyświetla `"Zalogowano pomyślnie!"`
-
-
-
-
-
+Zanim przejdziemy do uruchamienia aplikacji musimy wyjaśnić różnicę między `Application` a `Route`
 
