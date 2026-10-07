@@ -1,0 +1,227 @@
+---
+title: DatePicker and TimePicker
+----
+
+# 👨‍🚀 Houston, When is the Launch? 📅 Date & Time Pickers in Compose 💻
+
+Building a robust time-selection interface in Jetpack Compose requires orchestrating state across multiple dialogs. Below is a fully functional Mars Mission Control application that guides the user through selecting a date, a time, and confirming the launch sequence.
+
+
+```kotlin
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MarsMissionControlApp() {
+    var scheduledLaunch by remember { mutableStateOf<String?>(null) }
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    var tempDateMillis by remember { mutableStateOf<Long?>(null) }
+    var tempHour by remember { mutableStateOf(0) }
+    var tempMinute by remember { mutableStateOf(0) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Centrum Lotów na Marsa") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showDatePicker = true }) {
+                Icon(Icons.Default.Add, contentDescription = "Zaplanuj start")
+            }
+        }
+    ) { padding ->
+        MissionDashboard(
+            modifier = Modifier.padding(padding),
+            launchDate = scheduledLaunch
+        )
+
+        if (showDatePicker) {
+            LaunchDatePickerDialog(
+                onDateSelected = { millis ->
+                    tempDateMillis = millis
+                    showDatePicker = false
+                    showTimePicker = true
+                },
+                onDismiss = { showDatePicker = false }
+            )
+        }
+
+        if (showTimePicker) {
+            LaunchTimePickerDialog(
+                onTimeSelected = { hour, minute ->
+                    tempHour = hour
+                    tempMinute = minute
+                    showTimePicker = false
+                    showConfirmDialog = true
+                },
+                onDismiss = { showTimePicker = false }
+            )
+        }
+
+        if (showConfirmDialog && tempDateMillis != null) {
+            val formattedDateTime = formatDateTime(tempDateMillis!!, tempHour, tempMinute)
+
+            ConfirmLaunchDialog(
+                dateTimeText = formattedDateTime,
+                onConfirm = {
+                    scheduledLaunch = formattedDateTime
+                    showConfirmDialog = false
+                },
+                onDismiss = { showConfirmDialog = false }
+            )
+        }
+    }
+}
+
+@Composable
+fun MissionDashboard(modifier: Modifier = Modifier, launchDate: String?) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Status Następnej Misji:",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = launchDate ?: "Brak zaplanowanych lotów",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = if (launchDate != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LaunchDatePickerDialog(
+    onDateSelected: (Long) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { onDateSelected(it) }
+                }
+            ) {
+                Text("Dalej")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Przerwij") }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LaunchTimePickerDialog(
+    onTimeSelected: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val timePickerState = rememberTimePickerState()
+
+    // TimePicker w Material 3 nie ma gotowego "TimePickerDialog",
+    // więc standardową praktyką jest opakowanie go w AlertDialog
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Wybierz godzinę zapłonu") },
+        text = {
+            // Kontener centrujący TimePicker
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                TimePicker(state = timePickerState)
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onTimeSelected(timePickerState.hour, timePickerState.minute) }
+            ) {
+                Text("Dalej")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cofnij") }
+        }
+    )
+}
+
+@Composable
+fun ConfirmLaunchDialog(
+    dateTimeText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Potwierdź Sekwencję Zapłonu") },
+        text = { Text("Czy na pewno chcesz zaplanować start na:\n\n$dateTimeText?") },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text("Potwierdź Start")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Anuluj")
+            }
+        }
+    )
+}
+
+fun formatDateTime(millis: Long, hour: Int, minute: Int): String {
+    val date = Date(millis)
+    val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    val formattedDate = dateFormat.format(date)
+
+    // %02d gwarantuje, że jednocyfrowe godziny/minuty będą miały wiodące zero (np. 09:05 zamiast 9:5)
+    val formattedTime = String.format("%02d:%02d", hour, minute)
+
+    return "$formattedDate o godzinie $formattedTime"
+}
+```
+:::warning
+Thought Provocation: How does the application remember the selected date while the user is busy spinning the time dial, considering both the Date and Time dialog components are completely stateless?
+:::
+
+
+Dissecting the Code: The 4W2H ModelTo understand how our DatePicker and TimePicker cooperate without collapsing into a black hole of missing data, we will analyze the architecture according to our 4W2H model.The Domain (WHAT): We are processing information in the form of The Sticky Note (Primitives). The user's selections are just short, simple pieces of information. We capture a Long for the date in milliseconds and Int values for the hour and minute before formatting them into a final String.   State & Storage (WHERE): The data lives in The Pocket (Local Variables). The MarsMissionControlApp component acts as our master chef, keeping variables like tempDateMillis and showTimePicker safely in its apron pocket. The child components (the dialogs) are entirely stateless and only report back up to the parent when an action occurs.   Evaluation Strategies (WHEN): The application relies on The Lazy Paradigm (The Drive-Thru) for rendering the UI. The heavy components, like LaunchTimePickerDialog, do nothing until the application explicitly asks for them. The system waits for showTimePicker = true to "fry" that specific UI element on demand, saving memory.   Data Flow (WHO): The UI interaction is driven by the Push Model (The Sushi Conveyor Belt). The application sets up asynchronous listeners (like onDateSelected) and waits. When the user confirms a date, the external world "pushes" that new event to the parent component.   Reactivity (HOW): The UI knows about changes via The PA System (State / Public Address System). We wrap our variables in mutableStateOf. When scheduledLaunch is assigned a new formatted date, the chef shouts through the loudspeaker, and the application's interface instantly and automatically replaces the item on the menu across the screen.   Lifecycle (HOW LONG): Currently, our mission variables use Short-term Memory (Volatile memory). They are like an order the waiter keeps only in their head. Because we used standard remember, if the tablet is rotated horizontally during the time selection process, the activity restarts, the waiter trips, and the selected date is lost forever.   Compose vs. XML: A Leap in EvolutionIn the older Android paradigm using Kotlin and XML, implementing a sequential Date and Time picker was a notoriously fragile process. You had to instantiate a DatePickerDialog, implement a rigid OnDateSetListener, and inside that listener, manually trigger a completely separate TimePickerDialog with its own OnTimeSetListener. You were forced to manipulate Java Calendar objects at every step, and finally, manually push the result to a layout using findViewById(R.id.textView).text = ....In Jetpack Compose, the UI is purely a reflection of state. Instead of chaining callbacks that manually open dialogs, we simply flip boolean switches (showDatePicker = true, showTimePicker = true). The declarative nature of Compose reads exactly like a standard if/else flowchart, making complex UI logic vastly easier to trace and debug.Mission CheckWhy are DatePicker and TimePicker wrapped inside if statements checking boolean state variables rather than being instantiated directly like standard UI buttons?According to the 4w2h model, how would you upgrade the tempDateMillis variable from "Short-term Memory" so it survives a device rotation?What is the role of state hoisting (passing onDateSelected lambdas up to the parent) in preventing the child dialogs from managing their own data?How do you envision implementing a rollback feature if the user decides to cancel their time selection and return to the date picker?
+
+
+
+
+
+
+
+

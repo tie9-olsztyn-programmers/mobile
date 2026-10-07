@@ -3,6 +3,139 @@ title: 06. Dialog and AlertDialog
 ---
 
 
+# Dialog & AlertDialog w Jetpack Compose: Dylematy Wiedźmina
+
+Welcome to the Path! Today we will tackle dialog windows (Dialog and AlertDialog)
+in Jetpack Compose. In the world of mobile applications, dialogs are decision-making
+moments—they resemble a situation where Geralt of Rivia stands before a notice board
+and has to make a choice: whether to accept a monster contract or haggle
+for more orens.
+
+## 1. Top-Down: Pełny Kod Zlecenia
+
+Here is the working code for the notice board at the "Seven Cats Inn".
+We have two types of dialogs here: the system AlertDialog for confirming the contract,
+and a custom Dialog for our own monster stats view.
+
+```kotlin
+@Composable
+fun WitcherContractScreen() {
+    // Stan naszych dialogów
+    var showAcceptContract by remember { mutableStateOf(false) }
+    var showMonsterStats by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Zlecenie: Strzyga w Wyzimie", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(onClick = { showAcceptContract = true }) {
+            Text("Akceptuj Kontrakt")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = { showMonsterStats = true }) {
+            Text("Sprawdź Bestiariusz (Strzyga)")
+        }
+    }
+
+    // 1. AlertDialog - Szybka decyzja systemowa
+    if (showAcceptContract) {
+        AlertDialog(
+            onDismissRequest = { showAcceptContract = false },
+            title = { Text(text = "Nowy Kontrakt") },
+            text = { Text(text = "Czy zgadzasz się zabić Strzygę za 3000 orenów?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        /* Logika przyjęcia zlecenia */
+                        showAcceptContract = false
+                    }
+                ) {
+                    Text("Toss a coin (Biorę)")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAcceptContract = false }) {
+                    Text("Odrzuć")
+                }
+            }
+        )
+    }
+
+    // 2. Custom Dialog - Pełna kontrola nad UI
+    if (showMonsterStats) {
+        Dialog(onDismissRequest = { showMonsterStats = false }) {
+            Card(
+                modifier = Modifier.fillMaxWidth().height(250.dp).padding(16.dp),
+                shape = MaterialTheme.shapes.medium,
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Statystyki: Strzyga", style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Słabości: Srebrny miecz, Znak Yrden")
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(onClick = { showMonsterStats = false }) {
+                        Text("Zamknij Bestiariusz")
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+:::question Pytanie do przemyślenia 🧠:
+Jak to się dzieje, że Geralt widzi na ekranie nowe okno zlecenia,
+skoro w kodzie nie ma ani jednej linijki typu `dialog.show()`?
+
+## Breakdown and Explanation (4W2H Data Logistics)
+
+To understand this mechanism, let's look at how a massive restaurant or a logistics center operates. In programming, we must answer 6 fundamental questions, known as the 4W2H model: What?, Where?, When?, Who?, How?, and How Long? Here is how the model relates to our Dialogs:
+
+0. WHAT (What controls the dialog?)
+The Sticky Note (Primitives): The showAcceptContract variable is a short, simple piece of information, e.g., true/false. It is fleeting and easy to handle. In Jetpack Compose, it is precisely this simplest state (primitive) that acts as the "remote control" turning our dialog on or off on the screen.
+
+1. WHERE (Where do we store the information about opening the window?)
+The Pocket (Local Variables): Our state lives directly inside the @Composable function. The chef keeps the recipe in their apron pocket. Only they have access to it, and the data disappears when their shift ends.
+
+2. WHEN (When does the application draw the Dialog on the screen?)
+The Lazy Paradigm (The Drive-Thru): The code in the if (showAcceptContract) block waits for our command. The computer does nothing until the application explicitly asks for the next element. When the user clicks the "Accept" button, the chef fries exactly one burger—meaning Compose calculates and draws the AlertDialog strictly on demand.
+
+3. WHO (Who orders the window to open?)
+Push Model (The Sushi Conveyor Belt): Here, we react to asynchronous user events. The application sets up a "listener" and waits asynchronously. That mouse or finger click is the moment when the external world "pushes" new information whenever it wants, forcing the interface to show the contract.
+
+4. HOW (How does the interface know we changed the state?)
+The PA System (State / Public Address System): The application's interface instantly, automatically, and independently replaces the item on the screens. Thanks to using mutableStateOf, Compose acts like a chef shouting through a loudspeaker. When you set the state to false, the window will disappear from the screen.
+
+5. HOW LONG (How long will we remember this window?)
+Short-term Memory (Volatile memory): Our dialog state lives only as long as the screen. Rotating the phone screen (or restarting the application) is like a waiter tripping—the data is lost forever. If you rotate the phone, the open dialog for the Striga contract will be reset.
+
+## Comparison: Compose vs. The Old XML World
+
+Let's look at the evolution of solutions. Do you remember how Geralt had to look for a campfire in the first parts of the game to meditate and consume potions? Creating dialogs in the old XML system was similarly exhausting.
+
+Kotlin + XML (Imperative): You had to use an instance of AlertDialog.Builder. The commands were imperative: create an object, add a title to it, set listeners for onClick, and then manually tell it to show by calling dialog.show(). When you wanted to close it, you had to keep a reference to it to use dialog.dismiss(). Forgetting to close the dialog before the screen was destroyed caused the famous WindowLeaked error.
+
+Jetpack Compose (Declarative): You simply declare what should happen under given conditions. if (showDialog) then turn it on, when false turn it off. Compose manages the removal of the window itself, taking the risk of memory leaks off your shoulders.
+
+## Summary
+In Jetpack Compose, we have two basic overlay windows: AlertDialog, dedicated to quick, system-level questions ("Yes/No") with an imposed structure (Title, Text, ConfirmButton), and the base, pure Dialog, inside of which you can create any UI just like on a blank canvas. The logistics of rendering them always comes down to managing a simple Boolean logic state.
+
+Test your knowledge:
+
+Which of the paradigms ("Eager" or "Lazy") best describes how Compose decides when to render the AlertDialog component on the screen?
+
+What are the main differences in configuration parameters between AlertDialog and the standard Dialog?
+
+What will happen to the open Striga contract window if our state is controlled only by a basic remember, and the user suddenly rotates their phone screen, and why does this happen?
 
 
 

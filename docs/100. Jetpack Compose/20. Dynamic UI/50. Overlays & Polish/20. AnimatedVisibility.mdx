@@ -1,3 +1,136 @@
 ---
-title: Abu
+title: AnimatedVisibility
 ---
+
+
+# AnimatedVisibility: Drawing the Silver Sword 🐺⚔️
+
+Welcome to the Path, Witcher! Today we are not hunting drowners, but rather tackling a powerful form of UI magic in Jetpack Compose: AnimatedVisibility.
+
+Monsters rarely wait for you to get ready, but your UI elements shouldn't just instantly teleport onto the screen like Roach spawning on a roof. Let's see how to draw a sword smoothly without losing our heads.
+
+
+
+## 1. Top-Down: The Code on the Table
+
+Here is the complete code where Geralt decides to draw his silver sword. Analyze it, and then we will break this magic down into its core components.
+
+```kotlin
+@Composable
+fun WitcherCombatScreen() {
+    // 1. WHAT: Nasz prosty stan (The Sticky Note). Domyślnie miecz jest schowany (false).
+    var isSilverSwordDrawn by remember { mutableStateOf(false) }
+
+    Column {
+        // Przycisk zmieniający stan (wyciąganie/chowanie miecza)
+        Button(onClick = { isSilverSwordDrawn = !isSilverSwordDrawn }) {
+            Text(if (isSilverSwordDrawn) "Schowaj miecz" else "Wyciągnij srebrny miecz")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 2. HOW: AnimatedVisibility nasłuchuje stanu i automatycznie generuje przejścia
+        AnimatedVisibility(
+            visible = isSilverSwordDrawn,
+            // Łączenie animacji operatorem `+`: zanikanie ORAZ wysuwanie z dołu
+            enter = fadeIn() + slideInVertically(initialOffsetY = { fullHeight -> fullHeight / 2 }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { fullHeight -> fullHeight / 2 })
+        ) {
+            Text(
+                text = "🗡️ Silver Sword is ready for monsters!",
+                style = MaterialTheme.typography.headlineMedium
+            )
+        }
+    }
+}
+
+```
+:::into 🧙‍♂️ Witcher's Riddle (Think about it)
+
+How does the UI know the button was clicked? And what actually happens to our text when the sword is sheathed? Does it just become transparent, or does it completely vanish from the time-space continuum of our app?
+
+:::
+
+:::warnind Definition: AnimatedVisibility
+
+Metaphorical Definition: It is a Witcher's Illusion Sign. Instead of making objects brutally "pop" out of thin air, this Sign allows items to gracefully materialize and dematerialize in the world, combining different visual effects (like emerging from the mist and fluid movement) like a beautiful dance with a blade.
+
+Technical Definition: A Composable function in Jetpack Compose that automatically manages the attachment and detachment of its children from the UI composition tree based on a provided boolean visible flag. It seamlessly plays defined entry (enter) and exit (exit) animations during these transitions.
+
+:::
+
+## 2. Breakdown and Explanation: The 4W2H Model
+Before we move on to writing code for large collections or complex animations,
+we must understand data flow architecture.
+Let's analyze Geralt's combat stance using the 6 fundamental questions
+from the 4W2H model.
+
+### 0. WHAT are we processing? (The Domain)
+Before we cook anything, we need to know what ingredient we are working with.
+- The Sticky Note (Primitives): Short, simple information, e.g., true/false.
+Volatile and easy to handle.
+- In our code: The variable `isSilverSwordDrawn`
+is exactly this Sticky Note. It is a primitive boolean flag (`true`/`false`)
+dictating the visibility.
+
+### 1. WHERE does the data live? (State & Storage)
+Before you start cooking, you must store the ingredients.
+- The Pocket (Local Variables): The chef keeps the recipe in their apron
+pocket. Only they have access to it.
+- In our code: The remember `{ mutableStateOf(...) }`
+acts as a hidden pocket in Geralt's armor.
+The state belongs strictly to the local scope of the `WitcherCombatScreen`
+function.
+
+### 2. WHEN do we cook? (Evaluation Strategies)
+This defines when the CPU actually does the work.
+- The Lazy Paradigm
+(The Drive-Thru): The computer generates data strictly on demand.
+It saves a ton of table space (low RAM usage).
+- In our code: `AnimatedVisibility` utilizes the Lazy Paradigm!
+When the sword is sheathed (false), the `Text` component is not just
+made transparent; it is completely removed from the composition tree.
+Compose doesn't waste resources keeping hidden views alive.
+### 3. The Great Comparison: New Magic vs. The Old Order (Kotlin + XML)
+Pipelines can be driven in different ways depending on who controls
+the flow.
+- Push Model (The Sushi Conveyor Belt): The application sets up
+a "listener" and waits asynchronously. The external world "pushes"
+new information whenever it wants (e.g., reacting to user clicks).
+
+- In our code: The onClick lambda is our conveyor belt.
+The user "pushes" a state change by tapping the button, and the UI
+asynchronously reacts to this event.
+
+### 4. HOW does the UI know? (Reactivity)
+
+When the kitchen runs out of salmon, how does the dining room find out?
+- The PA System (State / Public Address System): The chef shouts through the loudspeaker. The application's interface instantly, automatically, and independently updates.
+- In our code: mutableStateOf acts as the PA System. It holds our "Sticky Note," and the moment it is overwritten, it automatically shouts out to AnimatedVisibility: "The state changed! Start the transition animation!"
+
+
+### 5. HOW LONG does it survive? (Lifecycle)
+- Short-term Memory (Volatile memory): An order the waiter only keeps in their head. Rotating the phone screen is like the waiter tripping—the data is lost forever.
+- In our code: Because we used standard remember (and not a "Safe" like rememberSaveable), this is Short-term Memory. If the player rotates their phone during combat, the Activity is recreated, the "waiter trips," and the Witcher forgets he ever drew his sword!
+
+
+### 3. The Great Comparison: New Magic vs. The Old Order (Kotlin + XML)
+In the dark ages when true architectural monsters roamed the earth (XML), adding animations was a nightmare:FeatureThe Old Order (Kotlin + XML) 🏚️The New Path (Jetpack Compose) ⚡NotificationThe Silent Ledger: You had to go to the kitchen yourself. The interface wouldn't update until you manually refreshed it.The PA System: The UI updates instantly and automatically when the state changes.State ManagementManual view hunting (findViewById) and mutating: view.visibility = View.VISIBLE or View.GONE.A clean, declarative flag: visible = isSilverSwordDrawn.Creating AnimationsRequired an ObjectAnimator for movement and a separate one for fading (alpha), often chained together with terrible listener callbacks to handle View.GONE.Just simple math: fadeIn() + slideInVertically()! Compose handles the tree unmounting automatically.
+
+
+## 4. Summary
+
+Thanks to AnimatedVisibility, drawing a Witcher's weapon in the UI is elegant. As we learned from wiedza.txt, it relies on the Lazy Paradigm, freeing up system resources when the element is off-screen. The magic is driven by a "PA System" that automatically broadcasts state changes, completely eliminating the need to manually manipulate the view tree.
+
+⚔️ The Trial of Grasses: Knowledge Check
+
+According to the wiedza.txt file concepts, why does removing a view from the composition tree using AnimatedVisibility represent the Lazy Paradigm (The Drive-Thru) rather than the Eager Paradigm (The All-You-Can-Eat Buffet)?
+
+Based on the 4W2H model, to which Lifecycle category does the remember block in our code belong, and what happens to the sword's state when the "waiter trips" (the screen is rotated)?
+
+Look at the provided code snippet: how does the AnimatedVisibility block mathematically combine the effect of fading in with sliding up from the bottom of its bounds?
+
+
+
+
+
