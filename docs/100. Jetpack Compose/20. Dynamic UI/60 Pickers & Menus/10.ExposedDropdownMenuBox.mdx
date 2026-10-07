@@ -1,64 +1,29 @@
 ---
-id: exposed-dropdown-moon
 title: "ExposedDropdownMenuBox: Booking Your Lunar Flight"
-sidebar_label: ExposedDropdownMenuBox
 ---
 
 # ExposedDropdownMenuBox: Booking Your Lunar Flight 🚀🌕
 
-Welcome to the Apollo Intergalactic Terminal, Cadet! Today, your mission is to build the ticketing console for passengers traveling to the Moon.
+Welcome to the Apollo Intergalactic Terminal, Cadet! Today, your mission is to build
+the ticketing console for passengers traveling to the Moon.
 
-While simple switches and checkboxes are fine for toggling the "Zero-Gravity VIP Lounge," selecting a specific lunar crater requires a more sophisticated instrument. We need a dropdown menu. In Jetpack Compose, we achieve this elegant, space-saving UI using the `ExposedDropdownMenuBox`.
+While simple switches and checkboxes are fine for toggling the "Zero-Gravity VIP Lounge,"
+selecting a specific lunar crater requires a more sophisticated instrument.
+We need a dropdown menu. In Jetpack Compose, we achieve this elegant, space-saving UI using
+the `ExposedDropdownMenuBox`.
 
 ## 1. Top-Down: The Console Code First
 
-Let's look at a fully functional ticketing terminal. This code uses an advanced pattern called **State Hoisting** (lifting the state up).
+Let's look at a fully functional ticketing terminal. This code uses an advanced pattern
+called **State Hoisting** (lifting the state up).
 
 Analyze the code below. Notice how the application is divided into three distinct components:
 
+
+### `TicketingForm.kt`:
+
 ```kotlin
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-
-val lunarBases = listOf("Tycho Base", "Sea of Tranquility", "Copernicus Crater")
-
-// 1. THE PARENT COMPONENT (Stateful)
-@Composable
-fun LunarTicketingApp() {
-    // State is "hoisted" up so multiple child components can share it
-    var selectedBase by remember { mutableStateOf(lunarBases[0]) }
-    var vipAccess by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier.padding(24.dp).fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Wybierz cel podróży", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Passing state (down) and event-reacting lambdas (up)
-        TicketingForm(
-            currentBase = selectedBase,
-            onBaseSelected = { newBase -> selectedBase = newBase }, // Updates parent's state
-            isVip = vipAccess,
-            onVipChanged = { newVipStatus -> vipAccess = newVipStatus } // Updates parent's state
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // This component only receives data to display (Stateless)
-        BookingSummary(
-            destination = selectedBase,
-            isVip = vipAccess
-        )
-    }
-}
-
-// 2. THE FORM COMPONENT - Reports changes to the parent via lambdas
+// THE FORM COMPONENT - Reports changes to the parent via lambdas
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketingForm(
@@ -110,10 +75,17 @@ fun TicketingForm(
         }
     }
 }
+```
 
-// 3. THE SUMMARY COMPONENT (Stateless) - Only displays received data
+
+### `BookingSummary.kt`:
+```kotlin
+//  THE SUMMARY COMPONENT (Stateless) - Only displays received data
 @Composable
-fun BookingSummary(destination: String, isVip: Boolean) {
+fun BookingSummary(
+    destination: String,
+    isVip: Boolean
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
@@ -131,59 +103,126 @@ fun BookingSummary(destination: String, isVip: Boolean) {
 }
 ```
 
+### `LunarTicketingApp.kt`:
+
+```kotlin
+val lunarBases = listOf("Tycho Base", "Sea of Tranquility", "Copernicus Crater")
+
+//  THE PARENT COMPONENT (Stateful)
+@Composable
+fun LunarTicketingApp() {
+    // State is "hoisted" up so multiple child components can share it
+    var selectedBase by remember { mutableStateOf(lunarBases[0]) }
+    var vipAccess by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.padding(24.dp).fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Wybierz cel podróży", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Passing state (down) and event-reacting lambdas (up)
+        TicketingForm(
+            currentBase = selectedBase,
+            onBaseSelected = { newBase -> selectedBase = newBase }, // Updates parent's state
+            isVip = vipAccess,
+            onVipChanged = { newVipStatus -> vipAccess = newVipStatus } // Updates parent's state
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // This component only receives data to display (Stateless)
+        BookingSummary(
+            destination = selectedBase,
+            isVip = vipAccess
+        )
+    }
+}
+```
+
+
+
 **👨‍🚀 Astronaut's Dilemma (Think about it):**
-*Why does `TicketingForm` remember if the menu is open (`expanded`), but it absolutely refuses to remember which base
-was actually selected? Why did we force the parent `LunarTicketingApp` to hold the `selectedBase`?*
+- *Why does `TicketingForm` remember if the menu is open (`expanded`), but it absolutely refuses
+to remember which base
+was actually selected?
+- Why did we force the parent `LunarTicketingApp` to hold the `selectedBase`?*
 
 ---
 
 ## 2. Anatomy of the ExposedDropdownMenuBox
 
-Before we analyze the data flow, let's look at how the dropdown itself is physically constructed. It consists of four intertwined pieces working together to create the illusion of a dropdown:
+Before we analyze the data flow, let's look at how the dropdown itself is physically constructed.
+It consists of four intertwined pieces working together to create the illusion of a dropdown:
 
-1. **`ExposedDropdownMenuBox` (The Container):** The orchestrator. It manages the coordinate system so the popup knows exactly
-where to appear on the screen.
+1. **`ExposedDropdownMenuBox` (The Container):** The orchestrator.
+It manages the coordinate system so the popup knows exactly where to appear on the screen.
 2. **`OutlinedTextField` (The Anchor):** This is what the user actually sees before clicking.
- * We set `readOnly = true` so the virtual keyboard doesn't pop up (we don't want passengers manually typing "Mars" here).
- * **CRITICAL:** It must have the `Modifier.menuAnchor()` applied. This acts as a docking station, telling the popup menu exactly
-which UI element to attach itself to.
-3. **`ExposedDropdownMenu` (The Floating Window):** The actual popup container that appears when `expanded = true`.
-4. **`DropdownMenuItem` (The Options):** The individual clickable rows inside the popup generated for each lunar base.
+    - We set `readOnly = true` so the virtual keyboard doesn't pop up
+   (we don't want passengers manually typing "Mars" here).
+    - **CRITICAL:** It must have the `Modifier.menuAnchor()` applied.
+   This acts as a docking station, telling the popup menu exactly which UI element to attach itself to.
+3. **`ExposedDropdownMenu` (The Floating Window):** The actual popup container that appears
+when `expanded = true`.
+4. **`DropdownMenuItem` (The Options):** The individual clickable rows inside the popup
+generated for each lunar base.
 
 ---
 
 ## 3. The Breakdown: The 4W2H Model
 
-As outlined in our engineering manual, **wiedza.txt**, before we manage data, we must understand data flow architecture. Let's dissect our lunar application using the 6 fundamental dimensions.
+As outlined in our engineering manual (the 4W2H model), before we manage data,
+we must understand data flow architecture. Let's dissect our lunar application using
+the 6 fundamental dimensions.
 
 ### 0. WHAT are we processing? (The Domain)
 Before we cook anything, we need to know what ingredient we are working with.
-* **The Sticky Note (Primitives):** Our `expanded` state (true/false) is a simple Sticky Note. It's volatile and easy to handle.
-* **The Organized Binder (Complex Objects):** The `lunarBases` list is our binder containing all the established routes.
+* **The Sticky Note (Primitives):** Our `expanded` state (true/false) is a simple Sticky Note.
+It's volatile and easy to handle.
+* **The Organized Binder (Complex Objects):** The `lunarBases` list is our binder containing all
+the established routes.
 
 ### 1. WHERE does the data live? (State & Storage)
-This dimension defines how and where data is physically organized. Here we see the true power of **State Hoisting**:
-* **The Office (Parent State):** The `selectedBase` and `vipAccess` live in `LunarTicketingApp`. This is like the corkboard in the manager's office. Both the Form (chefs) and the Summary (waiters) need access to this information, so it must be kept centrally.
-* **The Pocket (Local Variables):** The `expanded` variable lives directly inside `TicketingForm`. Only the form cares whether the dropdown is visually open or closed. The Summary component doesn't care, so we keep this sticky note in the chef's apron pocket.
+This dimension defines how and where data is physically organized.
+Here we see the true power of **State Hoisting**:
+* **The Office (Parent State):** The `selectedBase` and `vipAccess` live in `LunarTicketingApp`.
+This is like the corkboard in the manager's office. Both the Form (chefs) and the Summary (waiters)
+need access to this information, so it must be kept centrally.
+* **The Pocket (Local Variables):** The `expanded` variable lives directly inside `TicketingForm`.
+Only the form cares whether the dropdown is visually open or closed.
+The Summary component doesn't care, so we keep this sticky note in the chef's apron pocket.
 
 ### 2. WHEN do we cook? (Evaluation Strategies)
-* **The Eager Paradigm (The All-You-Can-Eat Buffet):** Look at `lunarBases.forEach` inside the menu. The computer loads and creates all menu items at once. Because our list is small (3 bases), this is perfectly fine. If we had 10,000 asteroids to choose from, this buffet approach would crash the UI, and we would need a Lazy approach.
+* **The Eager Paradigm (The All-You-Can-Eat Buffet):** Look at `lunarBases.forEach` inside the menu.
+The computer loads and creates all menu items at once. Because our list is small (3 bases),
+this is perfectly fine. If we had 10,000 asteroids to choose from, this buffet approach would crash
+the UI, and we would need a Lazy approach.
 
 ### 3. WHO sets the pace? (Data Flow)
 Pipelines can be driven in two different ways.
-* **Push Model (The Sushi Conveyor Belt):** The application does not control when data will arrive. It sets up a "listener" and waits asynchronously. When a user clicks a `DropdownMenuItem`, the `onClick` event *pushes* the new destination up to the parent using the `onBaseSelected` lambda. The external world drives the interaction.
+* **Push Model (The Sushi Conveyor Belt):** The application does not control when data will arrive.
+It sets up a "listener" and waits asynchronously. When a user clicks a `DropdownMenuItem`,
+the `onClick` event *pushes* the new destination up to the parent using the `onBaseSelected` lambda.
+The external world drives the interaction.
 
 ### 4. HOW does the UI know? (Reactivity)
-* **The PA System (State / Public Address System):** When the parent updates `selectedBase`, how does the `BookingSummary` know to redraw? Because we used `mutableStateOf`, it acts as a PA system. The state shouts through the loudspeaker: "Destination changed!". The interface instantly, automatically, and independently updates the ticket summary.
+* **The PA System (State / Public Address System):** When the parent updates `selectedBase`,
+how does the `BookingSummary` know to redraw? Because we used `mutableStateOf`, it acts as a PA system.
+The state shouts through the loudspeaker: "Destination changed!". The interface instantly,
+automatically, and independently updates the ticket summary.
 
 ### 5. HOW LONG does it survive? (Lifecycle)
-* **Short-term Memory (Volatile memory):** We used `remember`. This is an order the waiter only keeps in their head. Rotating the terminal screen is like the waiter tripping—the data is lost, and the passenger's selection resets to "Tycho Base".
+* **Short-term Memory (Volatile memory):** We used `remember`. This is an order the waiter only keeps
+in their head. Rotating the terminal screen is like the waiter tripping—the data is lost,
+and the passenger's selection resets to "Tycho Base".
 
 ---
 
 ## 4. Legacy Tech Comparison: XML Spinner vs Compose
 
-How did the first Apollo missions handle dropdowns using Kotlin and XML? They used a component called `Spinner`.
+How did the first Apollo missions handle dropdowns using Kotlin and XML?
+They used a component called `Spinner`.
 
 | Feature | The Old Way (XML `Spinner`) 🦕 | The New Way (Compose `ExposedDropdownMenuBox`) 🚀 |
 | ----- | ----- | ----- |
@@ -195,6 +234,9 @@ How did the first Apollo missions handle dropdowns using Kotlin and XML? They us
 
 ## 🌕 Moon Base Quiz: Test Your Knowledge
 
-1. According to the `wiedza.txt` model, why did we place the `expanded` variable in the "Pocket" (local state) of `TicketingForm`, but we placed `selectedBase` in the "Office" (hoisted to `LunarTicketingApp`)?
-2. What specific modifier must be applied to the `OutlinedTextField` inside the `ExposedDropdownMenuBox`, and what is its exact purpose?
-3. In terms of *Data Flow* (WHO sets the pace), does clicking a `DropdownMenuItem` represent the *Pull Model (The Waiter)* or the *Push Model (The Sushi Conveyor Belt)*, and why?
+1. According to the 4W2H model, why did we place the `expanded` variable in the "Pocket" (local state)
+of `TicketingForm`, but we placed `selectedBase` in the "Office" (hoisted to `LunarTicketingApp`)?
+2. What specific modifier must be applied to the `OutlinedTextField` inside the `ExposedDropdownMenuBox`,
+and what is its exact purpose?
+3. In terms of *Data Flow* (WHO sets the pace), does clicking a `DropdownMenuItem` represent
+the *Pull Model (The Waiter)* or the *Push Model (The Sushi Conveyor Belt)*, and why?

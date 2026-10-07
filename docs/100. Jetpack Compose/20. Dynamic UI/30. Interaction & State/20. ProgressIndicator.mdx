@@ -10,7 +10,7 @@ Following our Top-Down methodology, let's start with a fully working solution.
 
 
 
-## 1. Top-Down: The Smurf Trap Blueprint
+## Top-Down: The Smurf Trap Blueprint
 Here is the complete, functional code for Gargamel's interface.
 
 ```kotlin
@@ -99,7 +99,7 @@ Always use exact data types (like `Int`) for your core logic and Source of Truth
 at the very last moment when the UI needs to render a progress bar!
 :::
 
-## 2. Breakdown and Explanation: The 4W2H Model
+##  Breakdown and Explanation: The 4W2H Model
 Before Gargamel starts writing complex capture algorithms, we must understand how the processor and
 RAM handle the trap's data. Let's analyze our code using the 6 fundamental questions of the 4W2H model.
 
@@ -175,8 +175,125 @@ the "Lure a Smurf!" button.
 the remember function during a device screen rotation?
 
 
+---
 
+## LinearProgressIndicator - GargamelSmurfTrap
 
+:::tip The `.coerceIn(min, max)` function in Kotlin acts as a mathematical range guard.
+It ensures that a number neither falls below a specified minimum nor exceeds the maximum.
+
+It operates based on three simple rules. For `.coerceIn(0f, 1f)`:
+- If the number is less than `0` (e.g., `-0.5f`), the function will "bump" it up and return `0f`.
+- If the number is greater than `1` (e.g., `1.2f`), the function will "trim" (or cap) it and return `1f`.
+- If the number is within the range (e.g., `0.6f`), the function will leave it alone and return `0.6f`.
+
+:::
+
+:::note The `animateFloatAsState` function
+```kotlin
+val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        label = "SmurfProgressAnimation"
+    )
+````
+The `animateFloatAsState` function in Jetpack Compose acts as a magical transition smoother.
+Thanks to it, the progress bar doesn't abruptly "jump" from place to place, but animates smoothly.
+
+Here is how it works, broken down by role:
+- `animateFloatAsState`: This is a built-in Compose mechanism that turns an instant value change
+(e.g., from `0.3f` to `0.5f`) into a fluid transition. Compose automatically calculates
+all the "in-between frames" in a fraction of a second.
+- `targetValue = targetProgress`: Here we are telling Compose:
+"We caught a Smurf, so our new destination (target) is the new fraction value".
+The function takes care of the rest of the work – "driving" to that target.
+Instead of the bar teleporting, we get smooth movement.
+- `by` (delegation): This allows us to treat the `animatedProgress` variable in the code just like
+a regular floating-point number (`Float`). Kotlin politely "unwraps" the value from the
+Compose state (`State<Float>`) for us, saving us from writing .value at the end.
+- `label = "SmurfProgressAnimation"`: This is simply a name tag for Android Studio.
+
+```kotlin
+
+@Composable
+fun GargamelSmurfTrap(modifier: Modifier = Modifier) {
+    // Stan: ile Smerfów złapał Gargamel
+    var smurfsCaught by remember { mutableIntStateOf(0) }
+    val requiredSmurfs = 6 // Gargamel potrzebuje 6 smerfów, aby zamienić je w złoto!
+
+    // Obliczenie postępu dla paska (musi być wartością Float od 0.0 do 1.0)
+    val targetProgress = (smurfsCaught.toFloat() / requiredSmurfs.toFloat()).coerceIn(0f, 1f)
+
+    //  płynna animacja paska postępu
+    val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        label = "SmurfProgressAnimation"
+    )
+
+    Card(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Kocioł Gargamela",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Tekst informacyjny
+            Text(
+                text = if (smurfsCaught < requiredSmurfs) {
+                    "Złapane Smerfy: $smurfsCaught z $requiredSmurfs"
+                } else {
+                    "Kocioł pełen! Czas na zaklęcie!"
+                },
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Główny bohater lekcji - LinearProgressIndicator
+            LinearProgressIndicator(
+                progress = { animatedProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(12.dp), // Pogrubiamy pasek, żeby był lepiej widoczny
+                color = Color(0xFF00BFFF), // Smerfny niebieski
+                trackColor = Color.DarkGray // Mroczny kocioł Gargamela
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Przycisk łapania
+                Button(
+                    onClick = { smurfsCaught++ },
+                    enabled = smurfsCaught < requiredSmurfs
+                ) {
+                    Text("Złap Smerfa!")
+                }
+
+                // Przycisk resetowania (Klapaś coś popsuł)
+                OutlinedButton(
+                    onClick = { smurfsCaught = 0 },
+                    enabled = smurfsCaught > 0
+                ) {
+                    Text("Klapaś! Uciekły!")
+                }
+            }
+        }
+    }
+}
+```
 
 
 
