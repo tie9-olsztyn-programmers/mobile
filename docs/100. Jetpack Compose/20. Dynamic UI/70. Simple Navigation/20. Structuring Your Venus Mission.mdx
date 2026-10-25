@@ -2,28 +2,58 @@
 title: Operation Clean Code - Structuring Your Venus Mission
 ---
 
-**Mission Briefing:**
+## Mission Briefing
 
-To successfully reach Venus without our codebase imploding, we need a solid architecture.
-Your task is to organize our raw code into a professional Android package structure. T
-his separates our "navigation logic" from our "visuals."
+To successfully reach Venus without our codebase imploding, we need a solid, modular architecture. Putting hundreds of lines of code into a single `MainActivity.kt` file is a recipe for disaster.
 
-```
+Your task is to organize our spacecraft's code into a professional Android package structure. This follows the **Separation of Concerns (SoC)** principle—strictly separating our *data models*, our *navigation logic*, and our *visuals*.
+
+### Target Package Structure
+
+Inside your main package (`com.example.venusmission`), recreate the following directory tree:
+
+```text
 com.example.venusmission
 │
-├── model/                     <-- PAKIET MODELU: Czyste dane, stany i logika biznesowa
-│   └── MissionPhase.kt        <-- (Nasz enum - dawniej MissionScreen)
+├── model/                      <-- MODEL PACKAGE: Pure data, states, and business logic
+│   └── MissionPhase.kt         <-- (Our enum - the flight plan)
 │
-├── navigation/                <-- PAKIET NAWIGACJI: Mechanizmy sterujące (Routery)
-│   └── VenusMissionControl.kt <-- (Główny zarządca stanu)
+├── navigation/                 <-- NAVIGATION PACKAGE: Steering mechanisms (Routers)
+│   └── VenusMissionControl.kt  <-- (Main state controller & BackHandler)
 │
-├── ui/
-│   └── screens/               <-- PAKIET WIDOKÓW: Tylko funkcje @Composable (UI)
-│       ├── LaunchpadScreen.kt
-│       ├── OrbitScreen.kt
-│       └── VenusSurfaceScreen.kt
+├── ui/                         <-- UI LAYER: Everything the astronaut sees
+│   ├── screens/                <-- VIEWS PACKAGE: Isolated @Composable screen functions
+│   │   ├── LaunchpadScreen.kt
+│   │   ├── OrbitScreen.kt
+│   │   └── VenusSurfaceScreen.kt
+│   │
+│   └── theme/                  <-- STYLING PACKAGE: Colors, typography, and shapes
+│       └── SciFiTheme.kt       <-- (Our custom cyberpunk MaterialTheme)
 │
-└── MainActivity.kt            <-- Punkt startowy aplikacji
+└── MainActivity.kt             <-- ENTRY POINT: The ignition button
 ```
+
+## 🛠️ Execution Steps (How to Build It)
+Follow this exact order to avoid missing imports and compiler errors as you assemble the spacecraft:
+
+Create the model package (`MissionPhase.kt`):
+Start with the foundation. Define your enum class `MissionPhase` here.
+Remember the Zero UI Rule: This file is pure Vanilla Kotlin. It must not contain a single `androidx.compose.*` import!
+
+Create the `ui.screens` package:
+Build your three isolated screen modules (`LaunchpadScreen.kt`, `OrbitScreen.kt`, `VenusSurfaceScreen.kt`).
+Each screen only cares about displaying data passed to it and firing lambda callbacks when buttons are clicked.
+
+Create the navigation package (`VenusMissionControl.kt`):
+Now that your MissionPhase enum and screens exist, build the router that connects them using
+`remember { mutableStateOf(...) } and the when expression`.
+
+Configure `ui.theme` and `MainActivity.kt:
+Wrap your `VenusMissionControl() `inside your custom `SciFiMissionTheme` and a root `Surface `to launch the mission!
+
+
+
+
+
 
 

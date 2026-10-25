@@ -1,16 +1,38 @@
 ---
-title: MainActivity
+title: Step 4 - Ground Control & Cyber-Styling (MainActivity & Theme)
 ---
 
+## Igniting the Engines (`MainActivity.kt`)
+
+### 💡 Metaphorical Tip: "The Launch Tower & The Spaceship Hull"
+`MainActivity` is the physical launch tower on Earth. It doesn't steer the rocket, and it doesn't know what Venus looks like. Its only job is to supply power (`setContent`), wrap the spacecraft in an outer protective hull (`Surface`), pump in the environmental lighting (`MaterialTheme`), and hand over complete control to Houston (`VenusMissionControl`).
+
+### ⚙️ Technical Tip: "Why Do We Need a `Surface`?"
+`MaterialTheme` is just a configuration file—a warehouse of paint colors and font rules. By itself, it doesn't actually draw a background on the screen! By wrapping `VenusMissionControl()` inside a **`Surface`** that fills the entire screen (`Modifier.fillMaxSize()`), we create a physical canvas that automatically reads `MaterialTheme.colorScheme.background` and paints the background of our app.
+
+---
+
+## 💻 Basic Implementation: `MainActivity.kt`
+
+First, let's wire up `MainActivity.kt` using the default `MaterialTheme` to test our navigation router:
+
 ```kotlin
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge() // Draws UI edge-to-edge behind system bars
+
         setContent {
             MaterialTheme {
-                VenusMissionControl()
+                // The physical background canvas of our app
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    VenusMissionControl()
+                }
             }
         }
     }

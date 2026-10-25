@@ -1,10 +1,27 @@
 ---
-title: Screens
+title: Step 2 - The Screens. Building the Spacecraft Modules
 ---
 
+## Designing Isolated Views
 
-## LaunchpadScreen
+### 💡 Metaphorical Tip: "Blind Spacecraft Modules"
+Think of each screen in the `ui/screens` package as an isolated cabin inside your spacecraft. The cabin has display monitors (`Text`) and control buttons (`Button`), but **it has no steering wheel**.
+
+When the astronaut presses the "Launch" button inside the Launchpad cabin, the cabin doesn't ignite the engines itself. Instead, it sends an electrical signal up a wire (`onLaunchClick` lambda) to Mission Control. Because the screens are "blind" to the navigation system, you can test, redesign, or replace any cabin without breaking the rest of the ship.
+
+### ⚙️ Technical Tip: "Stateless UI & Lambda Callbacks"
+Notice what is **missing** from the imports in all three files below: **none of them import `MissionPhase`!**
+* Data flows **in** via standard function parameters (e.g., `commander: String`).
+* User actions flow **out** via lambda functions (e.g., `onLandClick: () -> Unit`).
+
+---
+
+## 1. `LaunchpadScreen.kt`
+
+Create `LaunchpadScreen.kt` inside your `ui/screens` package. Notice that this screen holds a local `inputName` state—Mission Control doesn't need to know about every single keystroke, only the final name sent through `onLaunchClick: (String) -> Unit` when the button is pressed.
+
 ```kotlin
+
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun LaunchpadScreen(onLaunchClick: (String) -> Unit) {
     var inputName by remember { mutableStateOf("") }
@@ -35,7 +51,10 @@ fun LaunchpadScreen(onLaunchClick: (String) -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Mission to Venus: Launchpad", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Mission to Venus: Launchpad",
+            style = MaterialTheme.typography.headlineSmall
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
@@ -55,14 +74,16 @@ fun LaunchpadScreen(onLaunchClick: (String) -> Unit) {
         }
     }
 }
+```
 
-````
-
-
-----
-## OribitScreen
+## 2. OrbitScreen.kt
+Create `OrbitScreen.kt` inside `ui/screens`.
+This is a purely stateless Composable. It receives the commander payload from above and exposes two simple
+trigger wires: `onLandClick` and `onAbortClick`.
 
 ```kotlin
+
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -78,7 +99,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun OrbitScreen(
     commander: String,
@@ -90,7 +110,10 @@ fun OrbitScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Approaching Venus Orbit...", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "Approaching Venus Orbit...",
+            style = MaterialTheme.typography.headlineSmall
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "Commander on board: $commander")
         Text(text = "External hull temperature: 462°C (A bit toasty)")
@@ -106,15 +129,15 @@ fun OrbitScreen(
     }
 }
 
-````
+```
 
+## 3. VenusSurfaceScreen.kt
+Create `VenusSurfaceScreen.kt` inside `ui/screens`.
+Just like the orbit screen, it displays the injected `commander` name and provides a single evacuation
+trigger (`onReturnHomeClick`).
 
-
-
-----
-
-## VenusSurfaceScreen
 ```kotlin
+
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -130,7 +153,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 fun VenusSurfaceScreen(
     commander: String,
@@ -141,7 +163,10 @@ fun VenusSurfaceScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Touchdown on Venus!", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "Touchdown on Venus!",
+            style = MaterialTheme.typography.headlineSmall
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "Congratulations, Commander $commander!")
         Text(text = "Your spaceship is slowly melting, so make it quick.")
@@ -153,3 +178,15 @@ fun VenusSurfaceScreen(
     }
 }
 ```
+
+
+
+
+
+
+
+
+
+
+
+

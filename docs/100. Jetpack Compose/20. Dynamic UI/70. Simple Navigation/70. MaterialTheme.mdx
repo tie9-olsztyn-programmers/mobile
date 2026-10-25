@@ -1,35 +1,34 @@
 ---
-title: 🚀 Final Phase: Cyber-Styling the Spacecraft with MaterialTheme
+title: Final Phase. Cyber-Styling the Spacecraft with MaterialTheme
 ---
 
-## What on Earth (or Venus) is MaterialTheme {}?
-### The Metaphorical Explanation:
-Imagine `MaterialTheme` as the central environmental control system of your spaceship.
-If you place a naked `Button` or `Text` on the screen without a theme, it looks like raw,
-unpainted metal. `MaterialTheme` is the system that pumps atmospheric lighting, paint colors, and
-dashboard font styles into every single cabin of the ship.
-Instead of painting every single button manually, you tell the central system:
-*"Make all primary controls neon blue,"* and every button on the ship instantly updates.
+## What on Earth (or Venus) is `MaterialTheme {}`?
 
-### The Technical Explanation:
-MaterialTheme is a special Composable function provided by Jetpack Compose that implements the Material Design system.
-It acts as an invisible wrapper that passes down three core design pillars to all its children
-(using a mechanism called `CompositionLocal`):
-- `Colors` (colorScheme): The palette for backgrounds, buttons, and text.
-- `Typography` (typography): The fonts, weights, and sizes for different text styles.
-- `Shapes` (shapes): The corner styling (rounded, cut, or square) for UI elements like cards and buttons.
+### 💡 The Metaphorical Explanation
+Imagine `MaterialTheme` as the central environmental control system of your spaceship. If you place a naked `Button` or `Text` on the screen without a theme, it looks like raw, unpainted metal. `MaterialTheme` is the system that pumps atmospheric lighting, paint colors, and dashboard font styles into every single cabin of the ship.
 
-When you use the default MaterialTheme {} block, you get standard Google Android styling (usually a friendly purple/pink vibe). For a Mission to Venus, that is far too boring. We need a dark, high-tech, futuristic UI.
+Instead of painting every single button manually, you tell the central system: *"Make all primary controls neon blue,"* and every button on the ship instantly updates.
 
+### ⚙️ The Technical Explanation
+`MaterialTheme` is a special Composable function provided by Jetpack Compose that implements the Material Design system. It acts as an invisible wrapper that passes down three core design pillars to all its children (using a mechanism called `CompositionLocal`):
+
+* **`Colors` (`colorScheme`)**: The palette for backgrounds, buttons, and text.
+* **`Typography` (`typography`)**: The fonts, weights, and sizes for different text styles.
+* **`Shapes` (`shapes`)**: The corner styling (rounded, cut, or square) for UI elements like cards and buttons.
+
+When you use the default `MaterialTheme {}` block, you get standard Google Android styling (usually a friendly purple/pink vibe). For a Mission to Venus, that is far too boring. We need a dark, high-tech, futuristic UI.
+
+---
 
 ## 🛠️ Building a Futuristic Sci-Fi Theme
-To make your app look like a proper spacecraft terminal, we are going to customize the three pillars of MaterialTheme:
-Color, Typography, Shapes.
 
+To make your app look like a proper spacecraft terminal, we are going to customize the three pillars of `MaterialTheme`: **Color**, **Typography**, and **Shapes**.
 
-Make a file: `ui/theme/SciFiTheme`
+Create a new file inside your `ui/theme` package: **`ui/theme/SciFiTheme.kt`**
 
 ```kotlin
+package com.example.venusmission.ui.theme
+
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -43,10 +42,11 @@ import androidx.compose.ui.unit.sp
 // 1. NEON COLORS
 private val CyberpunkDarkColors = darkColorScheme(
     primary = Color(0xFF00E5FF),       // Neon Cyan for buttons
-    onPrimary = Color.Black,           // Black text on cyan buttons
-    background = Color(0xFF0D0D12),    // Deep space black/blue background
-    surface = Color(0xFF1A1A24),       // Slightly lighter black for cards/containers
+    onPrimary = Color.Black,           // Pure Black text on cyan buttons
+    background = Color(0xFF0D0D12),    // Deep space black background
     onBackground = Color(0xFFE0E0E0),  // Light gray text for readability
+    surface = Color(0xFF0D0D12),       // Deep space black for Surface containers
+    onSurface = Color(0xFFE0E0E0),     // Light gray text inside Surface containers
     error = Color(0xFFFF3D00)          // Hazard Orange for Venus warnings
 )
 
@@ -56,15 +56,13 @@ private val ConsoleTypography = Typography(
     headlineSmall = TextStyle(
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-
+        fontSize = 24.sp
     ),
     // Used for normal text
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-
+        fontSize = 16.sp
     ),
     // Used for button text
     labelLarge = TextStyle(
@@ -92,13 +90,11 @@ fun SciFiMissionTheme(content: @Composable () -> Unit) {
         content = content // This injects your screens inside the theme!
     )
 }
-
 ```
 
-## Applying the Theme in MainActivity
-Now, return to your MainActivity.kt. We will replace the default,
-boring MaterialTheme with our custom `SciFiMissionTheme`. We also keep your `enableEdgeToEdge()`
-so the dark space background stretches all the way behind the system status bars!
+
+## 🚀 Applying the Theme in MainActivity.kt
+Now, return to your MainActivity.kt. We will replace the default, boring MaterialTheme with our custom SciFiMissionTheme. We also keep your enableEdgeToEdge() so the dark space background stretches all the way behind the system status bars!
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -108,12 +104,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SciFiMissionTheme {
-                // We add a Surface to act
-                // as the background canvas!
+                // We add a Surface to act as the background canvas!
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    // Explicitly tell it
-                    // to use our deep space black from the theme
+                    // Explicitly tell it to use our deep space black from the theme
                     color = MaterialTheme.colorScheme.background
                 ) {
                     VenusMissionControl()
@@ -122,37 +116,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 ```
-
-
 :::tip[Decoding the Material 3 Color System: Containers vs. Content]
-In Material Design 3, colors always work in pairs: a Base color (the container or surface) and an
-"On" color (the text or icons sitting directly on top of that base). Think of the Base as the physical spaceship panel, and the "On" color as the glowing ink printed onto it.
 
-* primary & onPrimary:
-    - `primary (Color(0xFF00E5FF) — Neon Cyan)`: The star of the show. Used for high-emphasis interactive elements that demand immediate attention, such as main action Button backgrounds, active states, and key highlights.
-    - `onPrimary (Color.Black — Pure Black)`: The color of text and icons placed inside a primary element. Because neon cyan is bright, pure black provides sharp, readable contrast for the button labels.
+In Material Design 3, colors always work in **pairs**: a **Base** color (the container or surface) and an **"On"** color (the text or icons sitting directly *on top* of that base). Think of the Base as the physical spaceship panel, and the "On" color as the glowing ink printed onto it.
 
-* background & onBackground:
-    - `background (Color(0xFF0D0D12)` — Deep Space Black): The deepest layer of your app—the canvas sitting behind all scrollable content.
-    - `onBackground (Color(0xFFE0E0E0)` — Light Gray): The default color for text and icons drawn directly over the main background.
+* **`primary` & `onPrimary`**:
+* **`primary`** (`Color(0xFF00E5FF)` — Neon Cyan): The star of the show. Used for high-emphasis interactive elements that demand immediate attention, such as main action `Button` backgrounds, active states, and key highlights.
+* **`onPrimary`** (`Color.Black` — Pure Black): The color of text and icons placed *inside* a `primary` element. Because neon cyan is bright, pure black provides sharp, readable contrast for the button labels.
+* **`background` & `onBackground`**:
+* **`background`** (`Color(0xFF0D0D12)` — Deep Space Black): The deepest layer of your app—the canvas sitting behind all scrollable content.
+* **`onBackground`** (`Color(0xFFE0E0E0)` — Light Gray): The default color for text and icons drawn directly over the main background.
+* **`surface` & `onSurface`**:
+* **`surface`** (`Color(0xFF0D0D12)` — Deep Space Black): The color of physical component "sheets" placed over the background, such as `Surface` containers, `Card` elements, bottom sheets, and navigation bars. *(In our theme, `surface` matches `background` for a seamless void look, though you can make it slightly lighter, like `0xFF1A1A24`, to create visual depth).*
+* **`onSurface`** (`Color(0xFFE0E0E0)` — Light Gray): The color of text, icons, and outlines rendered inside any `Surface` or `Card`. Because our `MainActivity` wraps the whole app in a root `Surface`, most of your screen text automatically inherits this color!
 
-* surface & onSurface:
-    - `surface` (`Color(0xFF0D0D12)` — Deep Space Black): The color of physical component "sheets" placed over the
-  background, such as `Surface` containers,`Card` elements, bottom sheets, and navigation bars.
-  (In our theme, `surface` matches background for a seamless void look, though you can make it slightly
-  lighter to create visual depth).
-    - `onSurface` (`Color(0xFFE0E0E0)` — Light Gray): The color of text, icons, and outlines rendered inside any `Surface`
-  or `Card`. Because our `MainActivity` wraps the whole app in a root Surface, most of your screen text automatically
-  inherits this color!
-
-
-Golden Rule: Never hardcode colors inside your Typography styles! Leave text styles colorless
-so Compose can automatically swap between `onSurface` (light text on dark screens) and `onPrimary`
-(dark text on bright buttons) depending on where the Text is placed.
+**Golden Rule:** Never hardcode colors inside your `Typography` styles! Leave text styles colorless so Compose can automatically swap between `onSurface` (light text on dark screens) and `onPrimary` (dark text on bright buttons) depending on where the `Text` is placed.
 
 :::
-
-
-
