@@ -1,14 +1,16 @@
 ---
-sidebar_position: 2
-title: 2. ViewModel & StateFlow
-description: Fixing the screen rotation bug by moving state to the ViewModel.
+title: ViewModel & StateFlow
 ---
 
 # 2. The Vault: ViewModel & StateFlow
 
-In the previous lesson, our **Classroom Check-in** app hit a wall. It worked beautifully until we rotated the screen. Because we used `remember` (our "Short-term Memory"), the Android system destroyed the screen and rebuilt it, taking all our data down with it.
+In the previous lesson, our **Classroom Check-in** app hit a wall.
+It worked beautifully until we rotated the screen. Because we used `remember` (our "Short-term Memory"),
+the Android system destroyed the screen and rebuilt it, taking all our data down with it.
 
-Today, we fix this. We are moving our data out of the UI's fragile "Pocket" and into a robust "Vault" called a **ViewModel**. To transmit data safely from the Vault to the UI, we will use a reactive stream called **StateFlow**.
+Today, we fix this. We are moving our data out of the UI's fragile "Pocket" and into
+a robust "Vault" called a **ViewModel**. To transmit data safely from the Vault to the UI,
+we will use a reactive stream called **StateFlow**.
 
 :::info Gradle Dependencies
 If you get an error about API 37, remember to change `compileSdk = 37` in your Gradle file!*
@@ -16,7 +18,8 @@ If you get an error about API 37, remember to change `compileSdk = 37` in your G
 
 ## The Top-Down Code: The Refactored App
 
-Copy this updated code. Run it, and try the **Crash Test** again: add students and rotate the screen. The data survives!
+Copy this updated code. Run it, and try the **Crash Test** again: add students and rotate the screen.
+The data survives!
 
 ```kotlin
 import androidx.compose.foundation.layout.*
@@ -128,7 +131,8 @@ Let's look at how the logistics of our data flow have fundamentally changed comp
 ## 0. WHAT (What exactly are we processing?)
 In the code: We grouped our two variables into a single `data class ClassroomState`.
 
-Real-world Metaphor: *The Organized Binder*. Instead of carrying loose sheets of paper (a random String here, a List there),
+Real-world Metaphor: *The Organized Binder*. Instead of carrying loose sheets of paper
+(a random String here, a List there),
 we put everything into one neatly labeled binder.
 This is known as the **UI State pattern**.
 
@@ -149,7 +153,8 @@ In the code: The UI no longer modifies the data directly.
 It calls functions: `viewModel.updateName(it)` and `viewModel.checkInStudent()`.
 
 Real-world Metaphor: *The Waiter*.
-The UI takes the user's order (a click or a keyboard tap) and passes the request to the kitchen (the ViewModel).
+The UI takes the user's order (a click or a keyboard tap) and passes the request
+to the kitchen (the ViewModel).
 The UI does not cook the meal. The ViewModel handles all the logic.
 
 
@@ -159,7 +164,8 @@ In the code: `val state by viewModel.uiState.collectAsStateWithLifecycle()`
 Real-world Metaphor: *The Radio Receiver*.
 The `StateFlow` is a radio broadcast constantly transmitting the **latest** `ClassroomState`.
 By calling `collectAsStateWithLifecycle()`, our Composable tunes into this frequency.
-Whenever the ViewModel updates the state, the Composable hears the new broadcast and redraws itself automatically.
+Whenever the ViewModel updates the state, the Composable hears the new broadcast
+and redraws itself automatically.
 
 
 ## 5. HOW LONG (How long will it survive?)
@@ -169,13 +175,14 @@ Real-world Metaphor: *The Safe*.
 A ViewModel is explicitly designed by the Android system to outlive configuration changes.
 When you rotate the screen, the Activity is destroyed and the UI is blown away.
 However, the ViewModel stands perfectly still. When the UI rebuilds a millisecond later,
-it instantly reconnects to the ViewModel's radio broadcast and retrieves the exact data it had before the rotation.
+it instantly reconnects to the ViewModel's radio broadcast and retrieves the exact data
+it had before the rotation.
 
 :::tip The Golden Rule of Architecture
-State flows down, events flow up.
-The ViewModel pushes the uiState down to the Composable.
-The Composable sends user events (clicks, typing) up to the ViewModel.
-They never cross paths in the middle.
+- State flows down, events flow up.
+- The ViewModel pushes the uiState down to the Composable.
+- The Composable sends user events (clicks, typing) up to the ViewModel.
+- They never cross paths in the middle.
 :::
 
 

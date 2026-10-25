@@ -1,0 +1,68 @@
+---
+title: Navigation
+---
+
+## VenusMisiionControl
+
+
+```kotlin
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.lesontests.model.MissionPhase
+import com.example.lesontests.ui.screens.LaunchpadScreen
+import com.example.lesontests.ui.screens.OrbitScreen
+import com.example.lesontests.ui.screens.VenusSurfaceScreen
+
+
+@Composable
+fun VenusMissionControl() {
+    // 2. Mission Control State (Current Screen & Shared Payload Data)
+    var currentScreen by remember { mutableStateOf(MissionPhase.LAUNCHPAD) }
+    var astronautName by remember { mutableStateOf("") }
+
+    // 3. The Router (Switching screens based on state)
+    when (currentScreen) {
+        MissionPhase.LAUNCHPAD -> {
+            LaunchpadScreen(
+                onLaunchClick = { enteredName ->
+                    astronautName = enteredName // Saving the payload
+                    currentScreen = MissionPhase.ORBIT_TRANSIT // Changing the screen
+                }
+            )
+        }
+        MissionPhase.ORBIT_TRANSIT -> {
+            // Intercepting the physical system Back button
+            BackHandler {
+                currentScreen = MissionPhase.LAUNCHPAD
+            }
+            OrbitScreen(
+                commander = astronautName,
+                onLandClick = {
+                    currentScreen = MissionPhase.VENUS_SURFACE
+                },
+                onAbortClick = {
+                    currentScreen = MissionPhase.LAUNCHPAD
+                }
+            )
+        }
+        MissionPhase.VENUS_SURFACE -> {
+            BackHandler {
+                currentScreen = MissionPhase.ORBIT_TRANSIT
+            }
+            VenusSurfaceScreen(
+                commander = astronautName,
+                onReturnHomeClick = {
+                    astronautName = "" // Resetting payload
+                    currentScreen = MissionPhase.LAUNCHPAD
+                }
+            )
+        }
+    }
+}
+
+```

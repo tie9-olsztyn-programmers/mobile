@@ -1,0 +1,155 @@
+---
+title: Screens
+---
+
+
+## LaunchpadScreen
+```kotlin
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+
+@Composable
+fun LaunchpadScreen(onLaunchClick: (String) -> Unit) {
+    var inputName by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Mission to Venus: Launchpad", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = inputName,
+            onValueChange = { inputName = it },
+            label = { Text("Enter Commander Name") }
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                val finalName = inputName.ifBlank { "Anonymous Cosmonaut" }
+                onLaunchClick(finalName)
+            }
+        ) {
+            Text("Ignite Engines & Launch")
+        }
+    }
+}
+
+````
+
+
+----
+## OribitScreen
+
+```kotlin
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+
+@Composable
+fun OrbitScreen(
+    commander: String,
+    onLandClick: () -> Unit,
+    onAbortClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Approaching Venus Orbit...", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Commander on board: $commander")
+        Text(text = "External hull temperature: 462°C (A bit toasty)")
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(onClick = onLandClick) {
+            Text("Enter Acidic Atmosphere (Land)")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedButton(onClick = onAbortClick) {
+            Text("Abort Mission (Go Back)")
+        }
+    }
+}
+
+````
+
+
+
+
+----
+
+## VenusSurfaceScreen
+```kotlin
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+
+@Composable
+fun VenusSurfaceScreen(
+    commander: String,
+    onReturnHomeClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Touchdown on Venus!", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Congratulations, Commander $commander!")
+        Text(text = "Your spaceship is slowly melting, so make it quick.")
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(onClick = onReturnHomeClick) {
+            Text("Evacuate Back to Earth")
+        }
+    }
+}
+```

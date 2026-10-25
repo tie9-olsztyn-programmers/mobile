@@ -1,12 +1,11 @@
 ---
-sidebar_position: 3
-title: 3. Under the Hood of Flows
-description: Why standard variables fail, the Backing Property pattern, and how to collect state.
+title: Under the Hood of Flows
 ---
 
 # 3. Under the Hood: Why Flow?
 
-You survived the crash test. Your app's data is now safely stored in the **Vault** (the ViewModel) and survives screen rotations.
+You survived the crash test. Your app's data is now safely stored in the **Vault** (the ViewModel)
+and survives screen rotations.
 
 But if you look at the code from Lesson 2, you might have a burning question:
 *"Why do we need `MutableStateFlow`, `asStateFlow`, and `collectAsStateWithLifecycle`?
@@ -49,7 +48,8 @@ private val _uiState = MutableStateFlow(ClassroomState())
 val uiState = _uiState.asStateFlow()
 ```
 
-This is called **the Backing Property pattern**, and it is the golden standard in Kotlin architecture. We do this for security.
+This is called **the Backing Property pattern**, and it is the golden standard in Kotlin architecture.
+We do this for security.
 - `MutableStateFlow` (**The Microphone**): The word Mutable means "changeable".
 This allows us to use the `.update {}` function to change the data.
 It is marked as `private` because only the ViewModel should have the power to change the state.

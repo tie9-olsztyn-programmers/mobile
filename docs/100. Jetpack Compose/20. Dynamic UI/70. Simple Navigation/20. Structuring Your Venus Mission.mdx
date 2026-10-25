@@ -1,0 +1,29 @@
+---
+title: Operation Clean Code - Structuring Your Venus Mission
+---
+
+**Mission Briefing:**
+
+To successfully reach Venus without our codebase imploding, we need a solid architecture.
+Your task is to organize our raw code into a professional Android package structure. T
+his separates our "navigation logic" from our "visuals."
+
+```
+com.example.venusmission
+│
+├── model/                     <-- PAKIET MODELU: Czyste dane, stany i logika biznesowa
+│   └── MissionPhase.kt        <-- (Nasz enum - dawniej MissionScreen)
+│
+├── navigation/                <-- PAKIET NAWIGACJI: Mechanizmy sterujące (Routery)
+│   └── VenusMissionControl.kt <-- (Główny zarządca stanu)
+│
+├── ui/
+│   └── screens/               <-- PAKIET WIDOKÓW: Tylko funkcje @Composable (UI)
+│       ├── LaunchpadScreen.kt
+│       ├── OrbitScreen.kt
+│       └── VenusSurfaceScreen.kt
+│
+└── MainActivity.kt            <-- Punkt startowy aplikacji
+```
+
+

@@ -1,0 +1,205 @@
+---
+title: The Crime Investigation Unit (Advanced Higher-Order Functions)
+---
+
+
+## 1. Top-Down: The Criminal Investigation Terminal
+Imagine you are the Lead Forensic Programmer for the Central Criminal Police (Kryminalni).
+A major bank heist just happened, and headquarters is flooded with raw intelligence:
+witness names, threat levels, security camera timestamps, and suspect hideouts across the country.
+
+
+To catch the mastermind before they cross the border, you don't have time to write clunky,
+nested for loops. You need to sort through suspects, slice through security logs, pinpoint specific fugitives,
+and group syndicates by city—combining the power of `sortedBy`, `take`, `drop`, `find`, and `groupBy`
+with the `forEach` and `fold` tools you already mastered.
+
+Boot up your police terminal and examine the complete forensic analysis program below:
+
+```kotlin
+// The Organized Binder: A suspect's complete criminal file
+data class Suspect(
+    val alias: String,
+    val age: Int,
+    val role: String,
+    val hideoutCity: String,
+    val bounty: Int
+)
+
+fun main() {
+    // 1. SORTING: Organizing witness statements alphabetically
+    val witnesses = listOf("Zosia", "Adam", "Kasia")
+    val sortedWitnesses = witnesses.sortedBy { it }
+    val sortedDescWitnesses = witnesses.sortedDescending()
+
+    println("Witnesses (A-Z): $sortedWitnesses")     // [Adam, Kasia, Zosia]
+    println("Witnesses (Z-A): $sortedDescWitnesses") // [Zosia, Kasia, Adam]
+
+    // 2. SLICING (TAKE & DROP): Filtering security camera threat levels (1 = Low, 5 = Critical)
+    val threatLogs = listOf(1, 2, 3, 4, 5)
+    println("First 3 logs: ${threatLogs.take(3)}")      // [1, 2, 3]
+    println("Skip first 2: ${threatLogs.drop(2)}")      // [3, 4, 5]
+    println("Last 2 critical: ${threatLogs.takeLast(2)}") // [4, 5]
+    println("Ignore last 2: ${threatLogs.dropLast(2)}")   // [1, 2, 3]
+
+    // 3. FINDING: Searching the fugitive database
+    val fugitives = listOf("Anna", "Beata", "Celina")
+    val targetB = fugitives.find { it.startsWith("B") }
+    val longAlias = fugitives.firstOrNull { it.length > 15 }
+
+    println("Target 'B' located: $targetB")       // Beata
+    println("Long alias target: $longAlias")      // null (No crash!)
+
+    // 4. GROUPING & CHAINING: Full Syndicate Takedown Operation
+    val syndicate = listOf(
+        Suspect("Alice 'The Viper'", 28, "Hacker", "Warsaw", 50_000),
+        Suspect("Bob 'Bulldozer'", 42, "Safecracker", "Krakow", 35_000),
+        Suspect("Eve 'The Ghost'", 31, "Getaway Driver", "Warsaw", 60_000),
+        Suspect("Charlie 'Slick'", 24, "Forger", "Gdansk", 15_000)
+    )
+
+    // Grouping suspects by city and extracting just their aliases
+    val syndicateByCity = syndicate
+        .groupBy { it.hideoutCity }
+        .mapValues { entry -> entry.value.map { suspect -> suspect.alias } }
+
+    println("\n--- Police Raid Map ---")
+    println(syndicateByCity)
+    // Prints: {Warsaw=[Alice 'The Viper', Eve 'The Ghost'], Krakow=[Bob 'Bulldozer'], Gdansk=[Charlie 'Slick']}
+
+    // Bonus: Combining with previous lessons (sortedByDescending + take + fold + forEach)
+    println("\n--- Top 2 Most Wanted (Dispatching SWAT) ---")
+    val topTwoMostWanted = syndicate
+        .sortedByDescending { it.bounty }
+        .take(2)
+
+    topTwoMostWanted.forEach {
+        println("SWAT dispatched for: ${it.alias} in ${it.hideoutCity} (Bounty: $${it.bounty})")
+    }
+
+    // Calculating total reward budget for the Top 2 using fold()
+    val requiredBudget = topTwoMostWanted.fold(0) { acc, suspect -> acc + suspect.bounty }
+    println("Total SWAT Bounty Budget Required: $$requiredBudget") // $110,000
+}
+
+```
+Put down your coffee and badge for a second—let's investigate the crime scene in that code!
+- Look at Section 3 (`find` and `firstOrNull`). When searching for a fugitive with a name longer
+than 15 characters, the program printed `null` instead of crashing the entire police server.
+Why is that critical, and what is the difference between `find` and `filter`?
+- Look at Section 4 (`syndicateByCity`). We called `.groupBy { it.hideoutCity }`.
+How did a simple List of 4 suspects suddenly morph into a `Map` with curly braces `{Warsaw=[...], Krakow=[...]}`?`
+
+## 2. Forensic Toolkit: How These Functions Work
+
+Before we run this through our architectural framework, let's examine the four tactical gadgets
+in your detective belt:
+- **Sorting** (`sortedBy` / `sortedDescending`): Never modifies the original evidence list!
+Instead, it returns a brand-new, sorted list. While `sorted()` works on simple strings or numbers,
+`sortedBy { it.bounty }` lets you pass a lambda (an Automation Bot) to tell Kotlin which property
+of a complex object to compare.
+- **Slicing** (`take` / `drop` / `takeLast` / `dropLast`): Think of these as crime-scene tape.
+    - `take(3)` grabs the first 3 items and cordons off the rest.
+    - `drop(2)` skips the first 2 items and gives you whatever is left.
+- **Pinpointing** (`find` / `firstOrNull`): Unlike `filter` (which searches the entire list and returns
+a new list of all matches), `find` and `firstOrNull` (they are exact synonyms in Kotlin!) stop searching
+the exact millisecond they find the first suspect matching your lambda condition.
+If no suspect matches, they safely return null.
+- **Profiling** (`groupBy`): The ultimate detective board tool. It takes a `List<T>` and groups elements
+into buckets based on the key returned by your lambda, returning a `Map<Key, List<T>>`.
+We then chained `.mapValues` to transform each bucket of full Suspect objects into a simple
+list of string aliases!
+
+## 3. Breakdown and Explanation: The 4W2H Model
+
+One of the most common mistakes made by beginner programmers is confusing what form the data takes,
+where it lives, when it is processed, and how it travels. Let's step away from the police terminal
+for a moment and look at how a massive restaurant or logistics center operates—your CPU and RAM handle
+data in the exact same way. According to the 4W2H model, we must answer 6 fundamental questions:
+What?, Where?, When?, Who?, How?, and How Long?
+
+
+### 0. The Domain: WHAT are we processing?
+Before we cook anything (or arrest anyone), we need to know what ingredient we are working with,
+which determines the complexity level of our data:
+- The Sticky Note (Primitives): In threatLogs `(1, 2, 3, 4, 5)` and `witnesses`, we process short,
+simple information like a single number or string—volatile and easy to handle.
+- The Organized Binder (Complex Objects): Our Suspect data class is a complete criminal dossier
+containing an alias, age, role, city, and bounty—it is organized and follows a strict structure.
+- The Sealed Package (DTO - Data Transfer Object): If Interpol sent us this suspect list over
+the internet as encrypted JSON, it would arrive as a courier package with raw ingredients
+straight from a server/database that we must unpack (deserialize) before running groupBy.
+
+
+### 1. State & Storage: WHERE does the data live?
+
+Before you start cooking, you must store the ingredients, which defines how and where data is physically organized:
+
+- The Pocket (Local Variables): Variables like `sortedWitnesses`, `targetB`, and `syndicateByCity`
+live inside `main()`—just like a chef keeping a recipe in their apron pocket. Only `main()`
+has access to them, and the data disappears when the function's shift ends.
+- The Office (ViewModel / Global State): In a real police dispatch app, `syndicateByCity`
+would be pinned to a corkboard in the manager's office (ViewModel), where many screens and
+officers have access to it, and the data survives brief chaos in the dining room (like screen rotations).
+- The Archive (Database): The main underground police evidence vault (Room / SQLite)
+where criminal records remain even if the precinct loses power.
+
+### 2. Evaluation Strategies: WHEN do we cook?
+
+This defines when the CPU actually does the work of processing the data:
+- The Eager Paradigm (The All-You-Can-Eat Buffet): Standard collection functions like `sortedBy`, `take`,
+and `groupBy` act like chefs getting up at 4:00 AM to fry 100 scrambled eggs and 50 pancakes all
+at once before the first guest even wakes up.
+The computer calculates and loads all data at once—if you sort a list of 10,000 suspects,
+the processor handles all 10,000 before moving to the next line of code, requiring a lot of startup
+time and a giant table (high RAM usage).
+- The Lazy Paradigm (The Drive-Thru): Notice `find { it.startsWith("B") }`!
+While standard lists are eager, find has a built-in lazy instinct: like a drive-thru chef
+who waits for your order and fries strictly on demand, `find` inspects "Anna", then "Beata",
+and immediately stops! It never even looks at "Celina". Furthermore, if you chain `.asSequence()`
+before `.filter()` and `.take(2)` on a massive database of 10,000,000 criminals,
+Kotlin switches the entire pipeline to The Drive-Thru, saving a ton of RAM!
+
+### 3. Data Flow: WHO sets the pace?
+A stream is not a warehouse; it is a transport system driven by who controls the flow:
+- Pull Model (The Waiter): Our forensic script uses the Pull Model.
+You sit at the table in full control and say, "Sort the syndicate, bring me the top 2 (`take(2)`),
+and group them by city," synchronously pulling data from the source one by one.
+- Push Model (The Sushi Conveyor Belt): If police cruisers had live GPS trackers streaming
+suspect locations every second, we wouldn't use a static List. We would use a Kotlin Flow,
+where the application sets up a listener and waits asynchronously while the external
+world "pushes" new coordinates whenever it wants.
+
+
+### 4. Reactivity: HOW does the UI know?
+When a fugitive is captured (or the kitchen runs out of salmon), how does the command center display find out?
+- The Silent Ledger (Regular variable): Our val `syndicateByCity` is a standard variable—if
+a new suspect arrives in Warsaw, you have to go to the kitchen yourself and ask, because the interface
+will not update until you manually refresh it.
+- The PA System (State / Public Address System): By wrapping our grouped map inside a Jetpack Compose State
+or StateFlow, the chef shouts through the loudspeaker: "New suspect in Warsaw!", and the police map
+UI instantly, automatically, and independently updates across all officers' screens.
+
+### 5. Lifecycle: HOW LONG does it survive?
+- Short-term Memory (Volatile memory): All the sorted and grouped lists in our code are like an
+order a waiter keeps only in their head—restarting the app or rotating the phone screen without a ViewModel
+is like the waiter tripping, and the data is lost forever.
+- The Safe (Persistence): To make sure our arrest warrants survive a system reboot or swapping phones,
+we must save the final list onto a hard drive or in the cloud.
+
+-----
+
+## Summary & Verification
+With `sortedBy`, `take`/`drop`, `find`, and `groupBy`, your collection toolkit is complete.
+You can now slice, organize, search, and categorize any dataset using clean, declarative pipelines
+instead of tangled loops.
+
+Before we hand you your Detective Badge, answer these 3 forensic verification questions:
+1. What is the critical difference between calling `fugitives.filter { it.startsWith("B") }`
+and `fugitives.find { it.startsWith("B") }` in terms of both the return type and how much work the CPU does?
+2. According to the 4W2H model, why is chaining `.sortedByDescending { it.bounty }.take(2)`
+on a standard List of 1,000,000 suspects considered "The All-You-Can-Eat Buffet" (Eager),
+and what happens to RAM before `take(2)` even runs?
+3. When you run `syndicate.groupBy { it.hideoutCity }`, what is the exact data type of the returned result,
+and how does it help us avoid mutable HashMap boilerplate?
+

@@ -73,42 +73,7 @@ fun MatrixConstructScaffold() {
 }
 ```
 
-:::info 🧠Morpheus's Challenge:
-Look closely at the `FloatingActionButton` and the `coroutineScope.launch` block.
-What would happen if you tried to call `snackbarHostState.showSnackbar()` directly without
-wrapping it in a coroutine scope?
 
-Hint: "The Matrix compiler" will throw an error because showing a UI message that
-stays on screen for 3 seconds requires suspending the timeline,
-and you cannot freeze the main thread without causing a system crash!
-
-:::
-
-:::tip The Matrix Metaphor: `Coroutines` & `launch { }`
-Imagine your application's Main UI Thread as Neo inside the Matrix.
-His only job is to react instantly, dodge bullets, and keep the simulation rendering smoothly.
-If Neo stops moving to manually download a helicopter manual or to wait for a 3-second
-`Snackbar` to finish displaying, he gets caught by an Agent.
-The UI freezes, and the system crashes.
-
-`Coroutines` are like Tank, the Operator, sitting safely in the real world on the Nebuchadnezzar.
-He can execute complex, time-consuming scripts in the background without interrupting
-the active simulation.
-
-
-`coroutineScope` is the Hardline (Jack-in cable). It manages the lifecycle of the connection.
-If the physical connection is severed (e.g., the user navigates away from the screen),
-the scope is destroyed, and Tank instantly aborts all running background programs so
-they don't consume system resources as rogue processes.
-
-
-`.launch { }` is Neo tapping his earpiece and saying:
-"Tank, load the jump program." It is a non-blocking command. By writing
-`coroutineScope.launch { showSnackbar() }`, Neo delegates the time-consuming task to
-the Operator and immediately goes back to fighting Agents,
-keeping the UI perfectly fluid and responsive.
-
-:::
 
 
 
@@ -128,7 +93,7 @@ to keep the UI perfectly organized.
 
 
 ### 1. State & Storage: WHERE does the data live?
-The Pocket (Local Variables): Our states — `agentsDefeated`, `menuExpanded`, and `snackbarHostState` —
+The Pocket (Local Variables): Our states — `agentsDefeated`  —
 are kept exclusively in the apron pocket of this specific Composable function.
 Only this component has access to them, and when Neo unplugs and the screen closes, the data vanishes.
 
@@ -166,12 +131,12 @@ To build the exact same layout as our `Scaffold`, an Android developer had to:
 - Pin a `<com.google.android.material.floatingactionbutton.FloatingActionButton>`
 using complex anchor tags.
 - In the Kotlin code, use `findViewById` to locate the button, manually attach a listener,
-manually inflate the menu, and explicitly command a `Snackbar` to attach itself to the root view.
+manually inflate the menu.
 
 
 **With Jetpack Compose**, we utilize a declarative style.
 We simply declare: "I need a `Scaffold`. Put a `TopBar` here, a `FAB` there,
-and tie a `Snackbar` to my `CoroutineScope`."
+
 The framework calculates all the complex view arrangements automatically,
 freeing you to focus on the business logic.
 

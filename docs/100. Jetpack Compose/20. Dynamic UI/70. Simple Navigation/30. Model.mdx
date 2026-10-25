@@ -1,0 +1,53 @@
+---
+title: Model
+---
+
+## What is a model?
+### 💡 Metaphorical Tip: "The Flight Plan Carved in Stone"
+Imagine the Model as the official, stamped Flight Plan sitting on a desk at Houston Mission Control.
+
+The rocket itself (your screens in the ui package) is just a hunk of metal and fuel.
+It has no idea where it is flying; its only job is to render buttons and flash warning lights.
+Ground Control (your navigation package) gives the orders, but it must always read strictly from the Flight Plan.
+
+If your model (the `enum`) does not contain a phase called `MARS_LANDING`, the rocket is not going to Mars—no
+matter how many times the user violently taps the screen.
+The Model is the absolute source of truth. It defines the rules of the universe before anyone even ignites the engines.
+
+### ⚙️ Technical Tip: "The UI-Blindness Test (Zero UI Rule)"
+The golden rule of clean architecture is simple: **The Model must be completely blind to the user interface**.
+
+Open the model and look at the very top. There should not be a single import starting with `androidx.compose...`
+or `android.view....`
+
+Our `enum` must be pure, vanilla Kotlin (often referred to as a  P O K O: Plain Old Kotlin Object).
+The Model has absolutely no idea if it is being rendered on a smartphone, a smartwatch, or
+a 1980s green-screen text terminal. It just holds the data.
+
+:::tip Vanilla Kotlin
+In software development, the term "vanilla" refers to using a programming language in its purest, most basic form,
+without relying on any external libraries, third-party frameworks, or platform-specific tools.
+
+**The Ice Cream Metaphor**
+Think of standard vanilla ice cream. It has no chocolate chips, no sprinkles, and no caramel syrup. It is just the raw, foundational flavor. In programming, Vanilla Kotlin is that base layer. When you add Jetpack Compose, Retrofit, or the Android SDK, you are dumping sprinkles and syrup all over your code. It works perfectly for building a specific Android app, but it is no longer pure.
+
+**The Technical Reality**
+Writing "Vanilla Kotlin" means your code relies exclusively on the Kotlin Standard Library.
+If you look at the top of a file, you will only see native imports like kotlin.collections.* or kotlin.math.*,
+or perhaps no imports at all.
+
+If you see imports starting with `android.os...` or `androidx.compose...`, you are no longer
+writing Vanilla Kotlin—you have tied your code specifically to the Android operating system or the Compose UI framework.
+
+This is exactly why your model package must remain vanilla. Because Vanilla Kotlin is platform-agnostic,
+a pure enum class written this way has no idea what an Android phone is. It can be compiled and executed
+on a Linux server, an iOS device, or a desktop computer without modifying a single line of code.
+:::
+
+```kotlin
+enum class MissionPhase{
+    LAUNCHPAD,
+    ORBIT_TRANSIT,
+    VENUS_SURFACE
+}
+```
