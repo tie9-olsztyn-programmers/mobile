@@ -1,0 +1,183 @@
+---
+title: ćwieczenia
+---
+
+
+## Ćwiczenia z języka Kotlin: Funkcje, wyrażenia lambda i operacje na kolekcjach
+
+### Zadanie 1: Kalkulator ze strzałkami (Funkcje i lambdy)
+
+Napisz program, który pobiera od użytkownika dwie liczby zmiennoprzecinkowe (Double) z konsoli.
+
+Zdefiniuj trzy funkcje strzałkowe (przypisane do zmiennych),
+które przyjmują dwie liczby i zwracają wynik odpowiedniego działania: dodawania,
+mnożenia oraz odejmowania.
+
+Stwórz funkcję wyższego rzędu `wykonajDzialanie(a: Double, b: Double, operacja: (Double, Double) -> Double): Double`,
+która przyjmie pobrane liczby oraz wybraną funkcję strzałkową, a następnie zwróci jej wynik.
+
+Wyświetl na ekranie wyniki wszystkich trzech operacji dla podanych przez użytkownika liczb.
+
+### Zadanie 2: Selekcja i modyfikacja ocen (filter, map, forEach)
+
+Masz daną listę ocen cząstkowych ucznia z informatyki:
+
+`val oceny = listOf(2, 5, 3, 1, 4, 2, 6, 1, 3, 5)`
+
+
+Wykonaj poniższe kroki w jednym łańcuchu wywołań (tzw. chaining):
+
+Odfiltruj oceny niedostateczne (czyli 1), zostawiając tylko oceny pozytywne (`filter`).
+
+W nagrodę za aktywność podnieś każdą z pozostałych ocen o 1 stopień, ale pamiętaj,
+że maksymalna ocena w szkole to 6 – jeśli po dodaniu wyjdzie 7, zamień ją na 6 (`map`).
+
+Wypisz każdą nową ocenę w osobnej linii z dopiskiem "Nowa ocena: X" (`forEach`).
+
+### Zadanie 3: Podium w turnieju e-sportowym (sortedDescending, take, drop, takeLast, dropLast)
+
+W turnieju wzięło udział 8 graczy. Ich zdobyte punkty zapisano na liście:
+
+`val punkty = listOf(120, 450, 320, 890, 150, 600, 710, 290)`
+
+
+Posortuj listę punktów malejąco (`sortedDescending`).
+
+Z posortowanej listy wyciągnij wyniki 3 najlepszych graczy (podium) za pomocą take i
+wyświetl je.
+
+Z posortowanej listy wyciągnij wyniki 2 najsłabszych graczy za pomocą `takeLast` i wyświetl je.
+
+Oblicz "średnią uciętą": z posortowanej listy odrzuć 2 najwyższe wyniki (`drop`) oraz 2 najniższe wyniki (dropLast), a następnie wypisz pozostałych 4 "średnich" graczy.
+
+### Zadanie 4: Poszukiwacze słów (find, firstOrNull)
+
+Pobierz od użytkownika w konsoli jedną linię tekstu składającą się z kilku słów oddzielonych
+spacjami, a następnie podziel ją na listę słów (możesz użyć `.split(" ")`).
+
+Użyj funkcji `find`, aby znaleźć pierwsze słowo, które zaczyna się na literę `'a'` lub `'A'`.
+
+Użyj funkcji `firstOrNull`, aby znaleźć pierwsze słowo, które ma więcej niż 6 znaków.
+
+Wyświetl oba znalezione słowa. Jeśli takie słowo nie istnieje (wynikiem jest null),
+wyświetl przyjazny komunikat, np. "Brak słowa spełniającego kryteria".
+
+### Zadanie 5: Koszyk zakupowy i budżet (reduce, fold)
+
+Ceny produktów w Twoim wirtualnym koszyku prezentują się następująco:
+
+`val ceny = listOf(19.99, 5.50, 120.00, 45.30, 9.99)`
+
+
+Za pomocą funkcji `reduce` oblicz i wyświetl łączną kwotę do zapłaty za wszystkie produkty.
+
+Za pomocą funkcji `reduce` znajdź najdroższy produkt w koszyku (porównując ze sobą kolejne
+elementy).
+
+Masz kartę podarunkową o wartości 250.00 zł. Użyj funkcji `fold`
+(podając 250.0 jako wartość początkową), aby odjąć od niej ceny wszystkich produktów i
+sprawdzić, ile pieniędzy zostanie Ci na karcie po zakupach.
+
+### Zadanie 6: Ranking słów wg długości (sortedBy)
+
+Dana jest lista nazw języków programowania:
+
+`val jezyki = listOf("Kotlin", "Java", "C", "Python", "JavaScript", "Rust", "Go", "TypeScript")`
+
+
+Posortuj tę listę od najkrótszego do najdłuższego słowa za pomocą funkcji `sortedBy`
+i wyświetl wynik.
+
+Posortuj tę samą listę alfabetycznie, ale biorąc pod uwagę ostatnią literę każdego słowa (również użyj sortedBy). Wyświetl wynik.
+
+### Zadanie 7: Katalogowanie imion (`groupBy`, `mapValues`)
+
+Masz listę imion uczestników wycieczki:
+
+`val imiona = listOf("Anna", "Kamil", "Aleksandra", "Karol", "Bartosz", "Alicja", "Borys", "Kasia")`
+
+
+Pogrupuj imiona według ich pierwszej litery, korzystając z funkcji `groupBy`.
+Wyświetl powstałą mapę (słownik).
+
+Wykorzystaj stworzoną w punkcie 1 mapę oraz funkcję `mapValues`,
+aby przekształcić listy imion w informację o tym, ile imion zaczyna się na daną literę
+(zamiast listy imion pod kluczem 'A', ma się tam znaleźć liczba 3). Wyświetl nowy słownik.
+
+### Zadanie 8: Dziennik lekcyjny – średnie z przedmiotów (`groupBy`, `mapValues`, `fold`)
+
+W systemie szkolnym oceny zapisane są jako lista napisów w formacie "Przedmiot:Ocena":
+```kotlin
+val wpisaneOceny = listOf(
+"Matematyka:5", "Polski:4", "Informatyka:6",
+"Matematyka:3", "Informatyka:5", "Polski:3",
+"Matematyka:4", "Informatyka:6"
+)
+```
+
+Użyj `groupBy`, aby pogrupować wpisy według nazwy przedmiotu (wskazówka: użyj `.split(":")`
+wewnątrz lambdy, aby oddzielić nazwę przedmiotu od oceny).
+
+Użyj `mapValues`2, aby zamienić listy napisów (np. `["Matematyka:5", "Matematyka:3"])`
+na wyliczoną średnią ocen z danego przedmiotu. Do zsumowania ocen wewnątrz `mapValues`
+wykorzystaj map (zamiana na Double) oraz `fold` lub `reduce`.
+
+Wypisz na ekranie każdy przedmiot i jego średnią za pomocą forEach.
+
+### Zadanie 9: Analizator logów serwerowych (Kombinacja poznanych funkcji)
+
+Serwer wygenerował listę logów systemowych:
+```kotlin
+val logi = listOf(
+"INFO: Użytkownik zalogowany",
+"ERROR: Brak połączenia z bazą danych",
+"WARN: Mało miejsca na dysku",
+"ERROR: Nieprawidłowe hasło administratora",
+"INFO: Pobrano plik raport.pdf",
+"ERROR: Przekroczono czas oczekiwania (Timeout)",
+"ERROR: Awaria modułu płatności"
+)
+```
+
+Napisz łańcuch operacji, który:
+
+Zostawi tylko logi zaczynające się od "ERROR:" (`filter`).
+
+Usunie z każdego takiego wpisu prefiks "ERROR: ", zostawiając samą treść błędu (`map`).
+
+Posortuje komunikaty błędów od najdłuższego do najkrótszego (możesz połączyć `sortedBy`
+i odwrócenie, lub posortować po ujemnej długości tekstu).
+
+Pobierze tylko 2 najdłuższe komunikaty błędów (`take`).
+
+Połączy te 2 komunikaty w jeden długi napis, oddzielając je znakiem `" | "`
+za pomocą funkcji `reduce`. Wyświetl ostateczny wynik.
+
+
+### Zadanie 10: Wielkie wyzwanie – Kreator haseł (Wszystko w jednym)
+
+Użytkownik podaje w konsoli dowolne zdanie (minimum 5 słów).
+Twoim zadaniem jest wygenerowanie z tego zdania "bezpiecznego hasła" według ścisłego
+algorytmu, używając funkcji kolekcji:
+
+Podziel pobrane zdanie na pojedyncze słowa.
+
+Odrzuć pierwsze i ostatnie słowo ze zdania (drop oraz dropLast).
+
+Odfiltruj słowa, które są krótsze niż 3 znaki (filter).
+
+Przekształć każde pozostałe słowo tak, aby jego pierwsza litera była wielka,
+a pozostałe małe, a na koniec słowa dodaj długość tego słowa jako cyfrę,
+np. `"kot" -> "Kot3"`
+(`map`).
+
+Posortuj tak powstałe fragmenty malejąco według ich długości (`sortedBy` / `sortedDescending`).
+
+Sklej wszystkie fragmenty w jedno hasło, zaczynając od prefiksu "#Haslo:" za pomocą funkcji `fold`.
+
+Wyświetl wygenerowane hasło na ekranie.
+
+
+
+
+
